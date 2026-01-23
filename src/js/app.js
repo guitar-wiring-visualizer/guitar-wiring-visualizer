@@ -1,10 +1,9 @@
 const setupApp = () => {
-
-    setupDiagram();
-    setupLibrary();
+    const diagramLayer = createDiagramLayer();
+    enableDragDropComponents(diagramLayer);
 }
 
-function setupDiagram() {
+function createDiagramLayer() {
     const stage = new Konva.Stage({
         container: "diagram",
         width: 1000,
@@ -13,21 +12,25 @@ function setupDiagram() {
 
     const layer = new Konva.Layer();
     stage.add(layer);
+    return layer;
+}
 
-    let itemURL = '';
+function enableDragDropComponents(layer) {
+
+    let itemURL = "";
     document
-        .getElementById('library-items')
-        .addEventListener('dragstart', function (e) {
+        .getElementById("library-items")
+        .addEventListener("dragstart", function (e) {
             itemURL = e.target.src;
         });
-
+    const stage = layer.getParent();
     const container = stage.container();
 
-    container.addEventListener('dragover', function (e) {
+    container.addEventListener("dragover", function (e) {
         e.preventDefault();
     });
 
-    container.addEventListener('drop', function (e) {
+    container.addEventListener("drop", function (e) {
         e.preventDefault();
 
         stage.setPointersPositions(e);
@@ -39,10 +42,6 @@ function setupDiagram() {
         });
     });
 }
-
-function setupLibrary() {
-}
-
 
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("loader").hidden = true;
