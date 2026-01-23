@@ -42,7 +42,10 @@ function enableDragDropFromLibrary(layer) {
         stage.setPointersPositions(e);
 
         Konva.Image.fromURL(itemURL, function (componentNode) {
-            componentNode.position(stage.getPointerPosition());
+            const POINTER_COMP = 40;
+            const x = stage.getPointerPosition().x -POINTER_COMP;
+            const y = stage.getPointerPosition().y -POINTER_COMP;
+            componentNode.position({x, y});
             componentNode.draggable("true");
             layer.add(componentNode);
         });
