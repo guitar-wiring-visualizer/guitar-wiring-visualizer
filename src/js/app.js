@@ -1,7 +1,11 @@
 const setupApp = () => {
     const diagramLayer = createDiagramLayer();
+
     enableDragDropFromLibrary(diagramLayer);
-    enableSelectComponent(diagramLayer);
+
+    const transformer = enableSelectComponent(diagramLayer);
+
+    enableDeleteComponent(transformer);
 }
 
 function createDiagramLayer() {
@@ -61,9 +65,31 @@ function enableSelectComponent(layer) {
         if (!isAlreadySelected) {
             transformer.nodes([e.target]);
         }
+
+        console.log("selected node", transformer.nodes()[0]);
     });
 
+    return transformer;
+}
 
+function enableDeleteComponent(transformer) {
+    const layer = transformer.getParent();
+    const stage = layer.getParent();
+
+    stage.container().tabIndex = 1;
+    //stage.container().focus();
+
+    stage.container().addEventListener("keydown", (e) => {
+
+        if (transformer.nodes().length === 0)
+            return;
+
+        if (e.keyCode === 46 || e.keyCode === 8) {
+            const nodeToDelete = transformer.nodes()[0];
+            nodeToDelete.destroy();
+            transformer.nodes([]);
+        }
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
