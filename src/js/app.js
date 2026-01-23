@@ -1,56 +1,46 @@
 const setupApp = () => {
 
-    const diagramStage = setupDiagram();
-    const libraryStage = setupLibrary();
+    setupDiagram();
+    setupLibrary();
 }
 
 function setupDiagram() {
-    const diagramStage = new Konva.Stage({
+    const stage = new Konva.Stage({
         container: "diagram",
         width: 1000,
         height: 1000,
     });
 
-    const diagramLayer = new Konva.Layer();
+    const layer = new Konva.Layer();
+    stage.add(layer);
 
-    // // create our sample shape
-    // const circle = new Konva.Circle({
-    //     x: diagramStage.width() / 2,
-    //     y: diagramStage.height() / 2,
-    //     radius: 70,
-    //     fill: "red",
-    //     stroke: "black",
-    //     strokeWidth: 4,
-    // });
-    // circle.draggable("true");
-    // diagramLayer.add(circle);
+    let itemURL = '';
+    document
+        .getElementById('library-items')
+        .addEventListener('dragstart', function (e) {
+            itemURL = e.target.src;
+        });
 
-    diagramStage.add(diagramLayer);
+    const container = stage.container();
 
-    return diagramLayer;
+    container.addEventListener('dragover', function (e) {
+        e.preventDefault();
+    });
+
+    container.addEventListener('drop', function (e) {
+        e.preventDefault();
+
+        stage.setPointersPositions(e);
+
+        Konva.Image.fromURL(itemURL, function (componentNode) {
+            componentNode.position(stage.getPointerPosition());
+            componentNode.draggable("true");
+            layer.add(componentNode);
+        });
+    });
 }
 
 function setupLibrary() {
-    const libraryStage = new Konva.Stage({
-        container: "library",
-        width: 200,
-        height: 1000,
-    });
-
-    const libraryLayer = new Konva.Layer();
-
-    Konva.Image.fromURL("/img/pot.svg", function (potNode) {
-        potNode.setAttrs({
-            x: 100,
-            y: 100,
-        });
-        potNode.draggable("true")
-        libraryLayer.add(potNode);
-    });
-
-    libraryStage.add(libraryLayer);
-
-    return libraryStage;
 }
 
 
