@@ -29,7 +29,7 @@ function enableDragDropFromLibrary(layer) {
             itemURL = e.target.src;
         });
 
-    const stage = layer.getParent();
+    const stage = layer.getStage();
     const container = stage.container();
 
     container.addEventListener("dragover", function (e) {
@@ -56,7 +56,7 @@ function enableSelectComponent(layer) {
     const transformer = new Konva.Transformer();
     layer.add(transformer);
 
-    const stage = layer.getParent();
+    const stage = layer.getStage();
 
     stage.on("click tap", function (e) {
 
@@ -76,8 +76,7 @@ function enableSelectComponent(layer) {
 }
 
 function enableDeleteComponent(transformer) {
-    const layer = transformer.getParent();
-    const stage = layer.getParent();
+    const stage = transformer.getStage();
 
     stage.container().tabIndex = 1;
     //stage.container().focus();
