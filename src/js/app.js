@@ -1,11 +1,7 @@
-document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById("loader").hidden = true;
-    runDemo();
-});
 
 
 
-function runDemo() {
+const runDemo = () => {
 
     // first we need to create a stage
     var stage = new Konva.Stage({
@@ -35,3 +31,8 @@ function runDemo() {
     // add the layer to the stage
     stage.add(layer);
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById("loader").hidden = true;
+    runDemo();
+});
