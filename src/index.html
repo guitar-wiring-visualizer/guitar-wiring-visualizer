@@ -25,11 +25,20 @@
 <body>
     <h1> Guitar Wiring Visualizer</h1>
 
-    <div id="app-root" class="container-fluid m-2">
+    <div id="app-root" class="container-fluid">
         <div class="row">
-            <div class="col text-center">
-                <div class="btn-group m-2" role="group" aria-label="Controls">
-                    <button type="button" class="btn btn-primary" id="vis-button">Start Visualizer</button>
+            <div class="col ">
+
+                <button type="button" class="btn btn-primary m-3" id="vis-button">Start Visualizer</button>
+                
+
+            </div>
+            <div class="col">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="checkShowConnectors">
+                    <label class="form-check-label" for="checkShowConnectors">
+                        Show Component Connection Points
+                    </label>
                 </div>
             </div>
         </div>
@@ -38,13 +47,17 @@
                 <h4>Component Library</h4>
                 <hr>
                 <div id="library-items" style="height: 800px;">
-                    <div><h5>Potentiometers</h5></div>
+                    <div>
+                        <h5>Potentiometers</h5>
+                    </div>
                     <div>
                         <img src="/img/pot1.svg" draggable="true" data-class-name="Potentiometer" data-pins-x="25"
                             data-pins-y="110">
                         <p>Standard Pot</p>
                     </div>
-                    <div class="mt-5"><h5>Switches</h5></div>
+                    <div class="mt-5">
+                        <h5>Switches</h5>
+                    </div>
                     <div>
                         <img src="/img/dpdt-blue.svg" draggable="true" data-class-name="DPDTOnOn" data-pins-x="10"
                             data-pins-y="9">

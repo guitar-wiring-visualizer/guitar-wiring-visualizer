@@ -6,6 +6,21 @@ const setupApp = () => {
     const transformer = enableSelectComponent(diagramLayer);
 
     enableDeleteComponent(transformer);
+
+    enableConnectorVisibilityToggle(diagramLayer);
+}
+
+let showConnectors = false;
+
+function enableConnectorVisibilityToggle(layer) {
+    const checkbox = document.getElementById('checkShowConnectors');
+    checkbox.addEventListener('change', function (event) {
+        showConnectors = event.currentTarget.checked;
+        var newOpacity = showConnectors ? 1 : 0;
+        layer.find('Circle').forEach((node) => {
+            node.opacity(newOpacity);
+        });
+    });
 }
 
 function createDiagramLayer() {
@@ -100,7 +115,7 @@ class DPDTSwitch extends Component {
                     y: this._pinsStartAtY + (pr * 15),
                     radius: 6,
                     stroke: "red",
-                    opacity: 1,
+                    opacity: showConnectors ? 1 : 0,
                     strokeWidth: 2
                 });
                 pins[pr].push(pin);
@@ -163,6 +178,7 @@ class Potentiometer extends Component {
                 y: this._pinsStartAtY,
                 radius: 10,
                 stroke: "red",
+                opacity: showConnectors ? 1 : 0,
                 strokeWidth: 2
             });
             pins.push(pin);
