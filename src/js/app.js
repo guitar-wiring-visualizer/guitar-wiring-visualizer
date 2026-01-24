@@ -31,7 +31,8 @@ function enableDragDropFromLibrary(layer) {
             componentImageURL = e.target.src;
             componentDataset = e.target.dataset;
             componentClassName = componentDataset.className;
-            console.assert(componentClassName, "component data-class-name not set");
+            console.assert(componentClassName, "component data-class-name not set.");
+            console.assert(componentClassMap[componentClassName], "'%s' is not in the component class map.", componentClassName);
         });
 
     const stage = layer.getStage();
