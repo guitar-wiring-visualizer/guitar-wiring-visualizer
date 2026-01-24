@@ -41,15 +41,57 @@ function enableDragDropFromLibrary(layer) {
 
         stage.setPointersPositions(e);
 
-        Konva.Image.fromURL(itemURL, function (componentNode) {
-            const POINTER_COMP = 40;
-            const x = stage.getPointerPosition().x - POINTER_COMP;
-            const y = stage.getPointerPosition().y - POINTER_COMP;
-            componentNode.position({ x, y });
-            componentNode.draggable("true");
-            layer.add(componentNode);
-        });
+        const pointerPos = stage.getPointerPosition();
+
+        const POINTER_COMP = 40;
+        const x = pointerPos.x - POINTER_COMP;
+        const y = pointerPos.y - POINTER_COMP;
+        const creationPosition = { x, y };
+
+        const pot = new Potentiometer(itemURL);
+        pot.createOnLayer(layer, creationPosition);
     });
+}
+
+class Potentiometer {
+
+    constructor(imageURL) {
+
+        this._imageURL = imageURL;
+    }
+
+    createOnLayer(layer, position) {
+
+        const group = new Konva.Group({
+            x: position.x,
+            y: position.y,
+            draggable: true
+        });
+
+        const pinCount = 3;
+        const pins = [];
+
+        for (let p = 0; p < pinCount; p++) {
+            const pin = new Konva.Circle({
+                x: 25 + (p * 24),
+                y: 110,
+                radius: 10,
+                stroke: "red",
+                strokeWidth: 2
+            });
+            pins.push(pin);
+            group.add(pin);
+        }
+
+        Konva.Image.fromURL(this._imageURL, function (componentNode) {
+            group.add(componentNode);
+            pins.forEach((p) => {
+                p.zIndex(componentNode.zIndex());
+            })
+        });
+
+        layer.add(group);
+    }
 }
 
 function enableSelectComponent(layer) {
@@ -64,9 +106,12 @@ function enableSelectComponent(layer) {
             transformer.nodes([]);
             return;
         }
-        const isAlreadySelected = transformer.nodes().indexOf(e.target) >= 0;
+
+        const componentGroup = e.target.getParent();
+
+        const isAlreadySelected = transformer.nodes().indexOf(componentGroup) >= 0;
         if (!isAlreadySelected) {
-            transformer.nodes([e.target]);
+            transformer.nodes([componentGroup]);
         }
 
         console.log("selected node", transformer.nodes()[0]);
@@ -95,6 +140,9 @@ function enableDeleteComponent(transformer) {
         }
     });
 }
+
+
+
 
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("loader").hidden = true;
