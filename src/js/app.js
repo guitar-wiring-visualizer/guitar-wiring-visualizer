@@ -59,13 +59,25 @@ function enableDragDropFromLibrary(layer) {
     });
 }
 
-class Potentiometer {
-
+class Component {
     constructor(imageURL, dataset) {
         console.assert(imageURL);
+        this._imageURL = imageURL;
+    }
+
+    createOnLayer(layer, position) {
+        throw new Error('abstract "createOnLayer" method call');
+    }
+}
+
+class Potentiometer extends Component {
+
+    constructor(imageURL, dataset) {
+        super(imageURL, dataset);
+
         console.assert(dataset.pinsX, "data-pins-x not set");
         console.assert(dataset.pinsY, "data-pins-y not set");
-        this._imageURL = imageURL;
+
         this._pinsStartAtX = parseInt(dataset.pinsX, 10);
         this._pinsStartAtY = parseInt(dataset.pinsY, 10);
     }
@@ -103,7 +115,7 @@ class Potentiometer {
     }
 }
 
-const componentClassMap = {Potentiometer};
+const componentClassMap = { Potentiometer };
 
 function enableSelectComponent(layer) {
     const transformer = new Konva.Transformer();
