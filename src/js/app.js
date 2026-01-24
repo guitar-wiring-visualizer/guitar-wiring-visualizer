@@ -43,9 +43,9 @@ function enableDragDropFromLibrary(layer) {
 
         Konva.Image.fromURL(itemURL, function (componentNode) {
             const POINTER_COMP = 40;
-            const x = stage.getPointerPosition().x -POINTER_COMP;
-            const y = stage.getPointerPosition().y -POINTER_COMP;
-            componentNode.position({x, y});
+            const x = stage.getPointerPosition().x - POINTER_COMP;
+            const y = stage.getPointerPosition().y - POINTER_COMP;
+            componentNode.position({ x, y });
             componentNode.draggable("true");
             layer.add(componentNode);
         });
@@ -87,9 +87,11 @@ function enableDeleteComponent(transformer) {
             return;
 
         if (e.keyCode === 46 || e.keyCode === 8) {
-            const nodeToDelete = transformer.nodes()[0];
-            nodeToDelete.destroy();
-            transformer.nodes([]);
+            if (confirm("Delete selected component?")) {
+                const nodeToDelete = transformer.nodes()[0];
+                nodeToDelete.destroy();
+                transformer.nodes([]);
+            }
         }
     });
 }
