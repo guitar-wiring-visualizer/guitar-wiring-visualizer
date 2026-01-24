@@ -120,11 +120,25 @@ class DPDTSwitch extends Component {
             });
         });
 
+        this.addActuator(group);
+
         layer.add(group);
+    }
+
+    addActuator(group){
+
     }
 }
 
 class DPDTOnOn extends DPDTSwitch {
+
+    addActuator(group){
+        Konva.Image.fromURL("/img/bat-small-left.svg", function (componentNode) {
+            componentNode.position({x: 0, y: -32});
+            componentNode.name("switch-actuator");
+            group.add(componentNode);
+        });
+    }
 
 }
 
