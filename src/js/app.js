@@ -78,9 +78,21 @@ class DiagramState {
         DiagramState.instance = this;
     }
 
-    registerComponent(konvaNode) {
+    registerComponent(componentInstance, konvaNode) {
+        this._assignAutoIncrementIdentity(konvaNode);
+        this._addToComponentMap(konvaNode.id(), componentInstance);
+    }
+
+    getComponent(id) {
+        return this._componenetMap[id];
+    }
+
+    _assignAutoIncrementIdentity(konvaNode) {
         konvaNode.id((++this._lastIssuedId).toString());
-        this._componenetMap[konvaNode.id()] = konvaNode;
+    }
+
+    _addToComponentMap(id, componentInstance) {
+        this._componenetMap[id] = componentInstance;
     }
 }
 
@@ -94,7 +106,7 @@ class Component {
         const group = this._createShapeGroup(position);
         this._populateGroup(group);
         layer.add(group);
-        DiagramState.instance.registerComponent(group);
+        DiagramState.instance.registerComponent(this, group);
     }
 
     _createShapeGroup(position) {
@@ -106,12 +118,31 @@ class Component {
         });
     }
 
-    _populateGroup(group){
+    _populateGroup(group) {
         //abstract
     }
 }
 
-class DPDTSwitch extends Component {
+class Switch extends Component {
+
+    constructor(imageURL, dataset) {
+        super(imageURL, dataset);
+    }
+
+    flip(shapeGroup) {
+        this._flipActuator(shapeGroup);
+    }
+
+    _flipActuator() {
+        //abstract
+    }
+
+    _addActuator(group) {
+        //abstract
+    }
+}
+
+class DPDTSwitch extends Switch {
     constructor(imageURL, dataset) {
         super(imageURL, dataset);
 
@@ -143,7 +174,7 @@ class DPDTSwitch extends Component {
             }
         }
 
-        Konva.Image.fromURL(this._imageURL, function (componentNode) {
+        Konva.Image.fromURL(this._imageURL, (componentNode) => {
             group.add(componentNode);
             pins.forEach((pr) => {
                 pr.forEach((p) => {
@@ -152,22 +183,35 @@ class DPDTSwitch extends Component {
             });
         });
 
-        this.addActuator(group);
-    }
-
-    addActuator(group) {
-
+        this._addActuator(group);
     }
 }
 
 class DPDTOnOn extends DPDTSwitch {
 
-    addActuator(group) {
-        Konva.Image.fromURL("/img/bat-small-left.svg", function (componentNode) {
+    _addActuator(group) {
+        Konva.Image.fromURL("/img/bat-small-left.svg", (componentNode) => {
             componentNode.position({ x: 0, y: -32 });
             componentNode.name("switch-actuator");
             group.add(componentNode);
         });
+    }
+
+    _flipActuator(shapeGroup) {
+
+        const actuatorNode = shapeGroup.getChildren().filter(c => c.name() === "switch-actuator")[0];
+
+        const pos = actuatorNode.position();
+
+        actuatorNode.destroy();
+
+        Konva.Image.fromURL("/img/bat-small-right.svg", (componentNode) => {
+            componentNode.position(pos);
+            componentNode.name("switch-actuator");
+            shapeGroup.add(componentNode);
+        });
+
+        //TODO: Update pins state
     }
 
 }
@@ -209,7 +253,7 @@ class Potentiometer extends Component {
             group.add(pin);
         }
 
-        Konva.Image.fromURL(this._imageURL, function (componentNode) {
+        Konva.Image.fromURL(this._imageURL, (componentNode) => {
             group.add(componentNode);
             pins.forEach((p) => {
                 p.zIndex(componentNode.zIndex());
@@ -276,11 +320,21 @@ function clearSelection(transformer) {
 }
 
 function flipSelectedSwitch(switchGroup) {
-    const actuators = switchGroup.getChildren().filter(child => child.name() === "switch-actuator");
-    if (actuators.length === 0)
+
+    const switchComponent = DiagramState.instance.getComponent(switchGroup.id());
+
+    if (!switchComponent.flip)
         return;
-    const actuator = actuators[0];
-    console.log("flipping switch", switchGroup.id());
+
+    switchComponent.flip(switchGroup);
+
+    // const actuators = switchGroup.getChildren().filter(child => child.name() === "switch-actuator");
+    // if (actuators.length === 0)
+    //     return;
+    // const actuator = actuators[0];
+    // console.log("flipping switch", switchGroup.id());
+
+
 }
 
 function deleteSelectedComponent(nodeToDelete, transformer) {
