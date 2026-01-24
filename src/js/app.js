@@ -22,11 +22,16 @@ function createDiagramLayer() {
 
 function enableDragDropFromLibrary(layer) {
 
-    let itemURL = "";
+    let componentImageURL = "";
+    let componentClassName = "";
+    let componentDataset = {};
     document
         .getElementById("library-items")
         .addEventListener("dragstart", function (e) {
-            itemURL = e.target.src;
+            componentImageURL = e.target.src;
+            componentDataset = e.target.dataset;
+            componentClassName = componentDataset.className;
+            console.assert(componentClassName, "component data-class-name not set");
         });
 
     const stage = layer.getStage();
@@ -48,20 +53,23 @@ function enableDragDropFromLibrary(layer) {
         const y = pointerPos.y - POINTER_COMP;
         const creationPosition = { x, y };
 
-        const pot = new Potentiometer(itemURL);
-        pot.createOnLayer(layer, creationPosition);
+        const component = new componentClassMap[componentClassName](componentImageURL, componentDataset);
+        component.createOnLayer(layer, creationPosition);
     });
 }
 
 class Potentiometer {
 
-    constructor(imageURL) {
-
+    constructor(imageURL, dataset) {
+        console.assert(imageURL);
+        console.assert(dataset.pinsX, "data-pins-x not set");
+        console.assert(dataset.pinsY, "data-pins-y not set");
         this._imageURL = imageURL;
+        this._pinsStartAtX = parseInt(dataset.pinsX, 10);
+        this._pinsStartAtY = parseInt(dataset.pinsY, 10);
     }
 
     createOnLayer(layer, position) {
-
         const group = new Konva.Group({
             x: position.x,
             y: position.y,
@@ -73,8 +81,8 @@ class Potentiometer {
 
         for (let p = 0; p < pinCount; p++) {
             const pin = new Konva.Circle({
-                x: 25 + (p * 24),
-                y: 110,
+                x: this._pinsStartAtX + (p * 24),
+                y: this._pinsStartAtY,
                 radius: 10,
                 stroke: "red",
                 strokeWidth: 2
@@ -93,6 +101,8 @@ class Potentiometer {
         layer.add(group);
     }
 }
+
+const componentClassMap = {Potentiometer};
 
 function enableSelectComponent(layer) {
     const transformer = new Konva.Transformer();
