@@ -1,11 +1,14 @@
 const setupApp = () => {
+
+    new DiagramState();
+
     const diagramLayer = createDiagramLayer();
 
     enableDragDropFromLibrary(diagramLayer);
 
     const transformer = enableSelectComponent(diagramLayer);
 
-    enableDeleteComponent(transformer);
+    enableComponentKeyCommands(transformer);
     enableClearDiagram(diagramLayer);
 
     enableConnectorVisibilityToggle(diagramLayer);
@@ -62,6 +65,25 @@ function enableDragDropFromLibrary(layer) {
     });
 }
 
+class DiagramState {
+
+    constructor() {
+        if (DiagramState.instance) {
+            return DiagramState.instance;
+        }
+        this._lastIssuedId = 0;
+
+        this._componenetMap = {};
+
+        DiagramState.instance = this;
+    }
+
+    registerComponent(konvaNode) {
+        konvaNode.id((++this._lastIssuedId).toString());
+        this._componenetMap[konvaNode.id()] = konvaNode;
+    }
+}
+
 class Component {
     constructor(imageURL, dataset) {
         console.assert(imageURL);
@@ -69,7 +91,23 @@ class Component {
     }
 
     createOnLayer(layer, position) {
-        throw new Error('abstract "createOnLayer" method call');
+        const group = this._createShapeGroup(position);
+        this._populateGroup(group);
+        layer.add(group);
+        DiagramState.instance.registerComponent(group);
+    }
+
+    _createShapeGroup(position) {
+        return new Konva.Group({
+            x: position.x,
+            y: position.y,
+            draggable: true,
+            name: this.constructor.name
+        });
+    }
+
+    _populateGroup(group){
+        //abstract
     }
 }
 
@@ -84,13 +122,7 @@ class DPDTSwitch extends Component {
         this._pinsStartAtY = parseInt(dataset.pinsY, 10);
     }
 
-    createOnLayer(layer, position) {
-        const group = new Konva.Group({
-            x: position.x,
-            y: position.y,
-            draggable: true
-        });
-
+    _populateGroup(group) {
         const pinRows = 3;
         const pinCols = 2;
         const pins = [[]];
@@ -121,20 +153,18 @@ class DPDTSwitch extends Component {
         });
 
         this.addActuator(group);
-
-        layer.add(group);
     }
 
-    addActuator(group){
+    addActuator(group) {
 
     }
 }
 
 class DPDTOnOn extends DPDTSwitch {
 
-    addActuator(group){
+    addActuator(group) {
         Konva.Image.fromURL("/img/bat-small-left.svg", function (componentNode) {
-            componentNode.position({x: 0, y: -32});
+            componentNode.position({ x: 0, y: -32 });
             componentNode.name("switch-actuator");
             group.add(componentNode);
         });
@@ -162,13 +192,7 @@ class Potentiometer extends Component {
         this._pinsStartAtY = parseInt(dataset.pinsY, 10);
     }
 
-    createOnLayer(layer, position) {
-        const group = new Konva.Group({
-            x: position.x,
-            y: position.y,
-            draggable: true
-        });
-
+    _populateGroup(group) {
         const pinCount = 3;
         const pins = [];
 
@@ -191,8 +215,6 @@ class Potentiometer extends Component {
                 p.zIndex(componentNode.zIndex());
             })
         });
-
-        layer.add(group);
     }
 }
 
@@ -224,7 +246,7 @@ function enableSelectComponent(layer) {
     return transformer;
 }
 
-function enableDeleteComponent(transformer) {
+function enableComponentKeyCommands(transformer) {
     const stage = transformer.getStage();
 
     stage.container().tabIndex = 1;
@@ -232,17 +254,40 @@ function enableDeleteComponent(transformer) {
 
     stage.container().addEventListener("keydown", (e) => {
 
+        console.log(e.code);
+
         if (transformer.nodes().length === 0)
             return;
 
-        if (e.keyCode === 46 || e.keyCode === 8) {
-            if (confirm("Delete selected component?")) {
-                const nodeToDelete = transformer.nodes()[0];
-                nodeToDelete.destroy();
-                transformer.nodes([]);
-            }
+        const selectedNode = transformer.nodes()[0];
+
+        if (e.code === "Delete" || e.code === "Backspace") {
+            deleteSelectedComponent(selectedNode, transformer);
+        } else if (e.code === "KeyF") {
+            flipSelectedSwitch(selectedNode);
+        } else if (e.code === "Escape") {
+            clearSelection(transformer);
         }
     });
+}
+
+function clearSelection(transformer) {
+    transformer.nodes([]);
+}
+
+function flipSelectedSwitch(switchGroup) {
+    const actuators = switchGroup.getChildren().filter(child => child.name() === "switch-actuator");
+    if (actuators.length === 0)
+        return;
+    const actuator = actuators[0];
+    console.log("flipping switch", switchGroup.id());
+}
+
+function deleteSelectedComponent(nodeToDelete, transformer) {
+    if (confirm("Delete selected component?")) {
+        nodeToDelete.destroy();
+        clearSelection(transformer);
+    }
 }
 
 function enableClearDiagram(layer) {
