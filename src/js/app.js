@@ -1,6 +1,6 @@
 const setupApp = () => {
 
-    new DiagramState();
+    window.GWVDiagramState = new DiagramState();
 
     const diagramLayer = createDiagramLayer();
 
