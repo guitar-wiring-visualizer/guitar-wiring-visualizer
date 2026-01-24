@@ -6,21 +6,9 @@ const setupApp = () => {
     const transformer = enableSelectComponent(diagramLayer);
 
     enableDeleteComponent(transformer);
+    enableClearDiagram(diagramLayer);
 
     enableConnectorVisibilityToggle(diagramLayer);
-}
-
-let showConnectors = false;
-
-function enableConnectorVisibilityToggle(layer) {
-    const checkbox = document.getElementById('checkShowConnectors');
-    checkbox.addEventListener('change', function (event) {
-        showConnectors = event.currentTarget.checked;
-        var newOpacity = showConnectors ? 1 : 0;
-        layer.find('Circle').forEach((node) => {
-            node.opacity(newOpacity);
-        });
-    });
 }
 
 function createDiagramLayer() {
@@ -148,8 +136,6 @@ class DPDTOnOnOn extends DPDTSwitch {
 
 }
 
-
-
 class Potentiometer extends Component {
 
     constructor(imageURL, dataset) {
@@ -245,8 +231,26 @@ function enableDeleteComponent(transformer) {
     });
 }
 
+function enableClearDiagram(layer) {
+    document.getElementById('clear-button').onclick = function () {
+        if (confirm("Clear the diagram? Are you sure?  This cannot be undone!")) {
+            layer.destroyChildren();
+        }
+    };
+}
 
+let showConnectors = false;
 
+function enableConnectorVisibilityToggle(layer) {
+    const checkbox = document.getElementById('checkShowConnectors');
+    checkbox.addEventListener('change', function (event) {
+        showConnectors = event.currentTarget.checked;
+        var newOpacity = showConnectors ? 1 : 0;
+        layer.find('Circle').forEach((node) => {
+            node.opacity(newOpacity);
+        });
+    });
+}
 
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("loader").hidden = true;
