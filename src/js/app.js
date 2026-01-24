@@ -125,6 +125,16 @@ class DPDTOnOn extends DPDTSwitch {
 
 }
 
+class DPDTOnOffOn extends DPDTSwitch {
+
+}
+
+class DPDTOnOnOn extends DPDTSwitch {
+
+}
+
+
+
 class Potentiometer extends Component {
 
     constructor(imageURL, dataset) {
@@ -170,7 +180,7 @@ class Potentiometer extends Component {
     }
 }
 
-const componentClassMap = { Potentiometer, DPDTOnOn };
+const componentClassMap = { Potentiometer, DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn };
 
 function enableSelectComponent(layer) {
     const transformer = new Konva.Transformer();
