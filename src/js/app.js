@@ -70,6 +70,61 @@ class Component {
     }
 }
 
+class DPDTSwitch extends Component {
+    constructor(imageURL, dataset) {
+        super(imageURL, dataset);
+
+        console.assert(dataset.pinsX, "data-pins-x not set");
+        console.assert(dataset.pinsY, "data-pins-y not set");
+
+        this._pinsStartAtX = parseInt(dataset.pinsX, 10);
+        this._pinsStartAtY = parseInt(dataset.pinsY, 10);
+    }
+
+    createOnLayer(layer, position) {
+        const group = new Konva.Group({
+            x: position.x,
+            y: position.y,
+            draggable: true
+        });
+
+        const pinRows = 3;
+        const pinCols = 2;
+        const pins = [[]];
+
+        for (let pr = 0; pr < pinRows; pr++) {
+            pins.push([]);
+            for (let pc = 0; pc < pinCols; pc++) {
+                const pin = new Konva.Circle({
+                    x: this._pinsStartAtX + (pc * 22),
+                    y: this._pinsStartAtY + (pr * 15),
+                    radius: 6,
+                    stroke: "red",
+                    opacity: 1,
+                    strokeWidth: 2
+                });
+                pins[pr].push(pin);
+                group.add(pin);
+            }
+        }
+
+        Konva.Image.fromURL(this._imageURL, function (componentNode) {
+            group.add(componentNode);
+            pins.forEach((pr) => {
+                pr.forEach((p) => {
+                    p.zIndex(componentNode.zIndex());
+                });
+            });
+        });
+
+        layer.add(group);
+    }
+}
+
+class DPDTOnOn extends DPDTSwitch {
+
+}
+
 class Potentiometer extends Component {
 
     constructor(imageURL, dataset) {
@@ -115,7 +170,7 @@ class Potentiometer extends Component {
     }
 }
 
-const componentClassMap = { Potentiometer };
+const componentClassMap = { Potentiometer, DPDTOnOn };
 
 function enableSelectComponent(layer) {
     const transformer = new Konva.Transformer();
