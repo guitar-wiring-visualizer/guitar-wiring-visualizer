@@ -234,7 +234,9 @@ function enableDeleteComponent(transformer) {
 function enableClearDiagram(layer) {
     document.getElementById('clear-button').onclick = function () {
         if (confirm("Clear the diagram? Are you sure?  This cannot be undone!")) {
-            layer.destroyChildren();
+            layer.getChildren()
+                .filter(child => child.getClassName() !== "Transformer")
+                .forEach(child => child.destroy());
         }
     };
 }
