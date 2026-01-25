@@ -109,15 +109,11 @@ function createDiagramLayer() {
 
 function enableDragDropFromLibrary(layer) {
 
-    let componentImageURL = "";
     let componentClassName = "";
-    let componentDataset = {};
     document
         .getElementById("library-items")
         .addEventListener("dragstart", function (e) {
-            componentImageURL = e.target.src;
-            componentDataset = e.target.dataset;
-            componentClassName = componentDataset.className;
+            componentClassName = e.target.dataset.className;
             console.assert(componentClassName, "component data-class-name not set.");
             console.assert(componentClassMap[componentClassName], "'%s' is not in the component class map.", componentClassName);
         });
@@ -141,7 +137,9 @@ function enableDragDropFromLibrary(layer) {
         const y = pointerPos.y - POINTER_COMP;
         const creationPosition = { x, y };
 
-        const component = new componentClassMap[componentClassName](componentImageURL, componentDataset);
+        const state = {};
+
+        const component = new componentClassMap[componentClassName](state);
         component.createOnLayer(layer, creationPosition);
     });
 }

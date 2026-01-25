@@ -1,9 +1,8 @@
 import { DiagramState, TOOL_MODE_WIRE } from "./diagram.js";
 
 export class Component {
-    constructor(imageURL, dataset) {
-        console.assert(imageURL);
-        this._imageURL = imageURL;
+    constructor(state = {}) {
+        console.assert(state);
     }
 
     createOnLayer(layer, position) {
@@ -19,11 +18,9 @@ export class Component {
         });
     }
 
-    _applyShadow(node) {
-        node.shadowColor("black");
-        node.shadowBlur(6);
-        node.shadowOffset({ x: 3, y: 3 });
-        node.shadowOpacity(0.4);
+    _getImageURL() {
+        console.assert(this.constructor.imageURL);
+        return this.constructor.imageURL;
     }
 
     _createShapeGroup(position) {
@@ -38,12 +35,19 @@ export class Component {
     _populateGroup(group) {
         //abstract
     }
+
+    _applyGlobalStyling(node) {
+        node.shadowColor("black");
+        node.shadowBlur(6);
+        node.shadowOffset({ x: 3, y: 3 });
+        node.shadowOpacity(0.4);
+    }
 }
 
 export class Switch extends Component {
 
-    constructor(imageURL, dataset) {
-        super(imageURL, dataset);
+    constructor(state) {
+        super(state);
     }
 
     flip(shapeGroup) {
@@ -51,23 +55,21 @@ export class Switch extends Component {
     }
 
     _flipActuator() {
-        //abstract
+        throw new Error("abstract method call");
     }
 
     _addActuator(group) {
-        //abstract
+        console.warn("_addActuator not implemented");
     }
 }
 
 export class DPDTSwitch extends Switch {
-    constructor(imageURL, dataset) {
-        super(imageURL, dataset);
 
-        console.assert(dataset.pinsX, "data-pins-x not set");
-        console.assert(dataset.pinsY, "data-pins-y not set");
+    constructor(state) {
+        super(state);
 
-        this._pinsStartAtX = parseInt(dataset.pinsX, 10);
-        this._pinsStartAtY = parseInt(dataset.pinsY, 10);
+        DPDTSwitch._pinsStartAtX = 10;
+        DPDTSwitch._pinsStartAtY = 9;
     }
 
     _populateGroup(group) {
@@ -79,8 +81,8 @@ export class DPDTSwitch extends Switch {
             pins.push([]);
             for (let pc = 0; pc < pinCols; pc++) {
                 const pin = new Konva.Circle({
-                    x: this._pinsStartAtX + (pc * 22),
-                    y: this._pinsStartAtY + (pr * 15),
+                    x: DPDTSwitch._pinsStartAtX + (pc * 22),
+                    y: DPDTSwitch._pinsStartAtY + (pr * 15),
                     radius: 6,
                     stroke: "red",
                     opacity: DiagramState.instance.showConnectors ? 1 : 0,
@@ -91,8 +93,8 @@ export class DPDTSwitch extends Switch {
             }
         }
 
-        Konva.Image.fromURL(this._imageURL, (componentNode) => {
-            this._applyShadow(componentNode);
+        Konva.Image.fromURL(this._getImageURL(), (componentNode) => {
+            this._applyGlobalStyling(componentNode);
             group.add(componentNode);
             pins.forEach((pr) => {
                 pr.forEach((p) => {
@@ -107,21 +109,23 @@ export class DPDTSwitch extends Switch {
 
 export class DPDTOnOn extends DPDTSwitch {
 
-    constructor(imageURL, dataset) {
-        super(imageURL, dataset);
+    constructor(state) {
+        super(state);
 
         this._actuatorState = 0;
+
+        DPDTOnOn.imageURL = "/img/dpdt-blue.svg";
     }
 
-    _getImageURLForState() {
+    _getActuatorImageURLForState() {
         return this._actuatorState === 0 ? "/img/bat-small-left.svg" : "/img/bat-small-right.svg";
     }
 
     _addActuator(group) {
-        Konva.Image.fromURL(this._getImageURLForState(), (componentNode) => {
+        Konva.Image.fromURL(this._getActuatorImageURLForState(), (componentNode) => {
             componentNode.position({ x: 0, y: -35 });
             componentNode.name("switch-actuator");
-            this._applyShadow(componentNode);
+            this._applyGlobalStyling(componentNode);
             group.add(componentNode);
         });
     }
@@ -136,9 +140,9 @@ export class DPDTOnOn extends DPDTSwitch {
 
         actuatorNode.destroy();
 
-        Konva.Image.fromURL(this._getImageURLForState(), (componentNode) => {
+        Konva.Image.fromURL(this._getActuatorImageURLForState(), (componentNode) => {
             componentNode.position(pos);
-            this._applyShadow(componentNode);
+            this._applyGlobalStyling(componentNode);
             componentNode.name("switch-actuator");
             shapeGroup.add(componentNode);
         });
@@ -149,23 +153,33 @@ export class DPDTOnOn extends DPDTSwitch {
 }
 
 export class DPDTOnOffOn extends DPDTSwitch {
+    constructor(state) {
+        super(state);
 
+        this._actuatorState = 0;
+
+        DPDTOnOffOn.imageURL = "/img/dpdt-purple.svg";
+    }
 }
 
 export class DPDTOnOnOn extends DPDTSwitch {
+    constructor(state) {
+        super(state);
 
+        this._actuatorState = 0;
+
+        DPDTOnOffOn.imageURL = "/img/dpdt-red.svg";
+    }
 }
 
 export class Potentiometer extends Component {
 
-    constructor(imageURL, dataset) {
-        super(imageURL, dataset);
+    constructor(state) {
+        super(state);
 
-        console.assert(dataset.pinsX, "data-pins-x not set");
-        console.assert(dataset.pinsY, "data-pins-y not set");
-
-        this._pinsStartAtX = parseInt(dataset.pinsX, 10);
-        this._pinsStartAtY = parseInt(dataset.pinsY, 10);
+        Potentiometer.imageURL = "/img/pot1.svg"
+        Potentiometer._pinsStartAtX = 25;
+        Potentiometer._pinsStartAtY = 110;
     }
 
     _populateGroup(group) {
@@ -174,8 +188,8 @@ export class Potentiometer extends Component {
 
         for (let p = 0; p < pinCount; p++) {
             const pin = new Konva.Circle({
-                x: this._pinsStartAtX + (p * 24),
-                y: this._pinsStartAtY,
+                x: Potentiometer._pinsStartAtX + (p * 24),
+                y: Potentiometer._pinsStartAtY,
                 radius: 10,
                 stroke: "red",
                 opacity: DiagramState.instance.showConnectors ? 1 : 0,
@@ -185,8 +199,8 @@ export class Potentiometer extends Component {
             group.add(pin);
         }
 
-        Konva.Image.fromURL(this._imageURL, (componentNode) => {
-            this._applyShadow(componentNode);
+        Konva.Image.fromURL(this._getImageURL(), (componentNode) => {
+            this._applyGlobalStyling(componentNode);
             group.add(componentNode);
             pins.forEach((p) => {
                 p.zIndex(componentNode.zIndex());
