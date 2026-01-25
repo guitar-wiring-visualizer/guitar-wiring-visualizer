@@ -1,3 +1,8 @@
+import { DiagramState, TOOL_MODE_SELECT, TOOL_MODE_WIRE } from "./diagram.js"
+import { DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Potentiometer } from "./components.js";
+
+const componentClassMap = { Potentiometer, DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn };
+
 const setupApp = () => {
 
     window.GWVDiagramState = new DiagramState();
@@ -15,8 +20,6 @@ const setupApp = () => {
     enableDrawWire(diagramLayer);
 }
 
-let toolMode = "select";
-
 function enableToolbar(transformer) {
     const defaultCursor = document.getElementById("diagram").style.cursor;
 
@@ -24,12 +27,12 @@ function enableToolbar(transformer) {
     const wireButton = document.getElementById("wire-tool");
 
     selectButton.addEventListener("click", (e) => {
-        toolMode = "select";
+        DiagramState.instance.toolMode = TOOL_MODE_SELECT;
         document.getElementById("diagram").style.cursor = defaultCursor;
     });
 
     wireButton.addEventListener("click", (e) => {
-        toolMode = "wire";
+        DiagramState.instance.toolMode = TOOL_MODE_WIRE;
         document.getElementById("diagram").style.cursor = "crosshair";
         clearSelection(transformer);
     });
@@ -52,9 +55,9 @@ function enableDrawWire(layer) {
 
     stage.on("mousedown touchstart", (e) => {
 
-        if (toolMode === "select") {
+        if (DiagramState.instance.toolMode === TOOL_MODE_SELECT) {
             return;
-        }        
+        }
         isPaint = true;
         const pos = stage.getPointerPosition();
         lastLine = new Konva.Line({
@@ -75,7 +78,7 @@ function enableDrawWire(layer) {
 
     stage.on('mousemove touchmove', function (e) {
 
-        if (toolMode === "select") {
+        if (DiagramState.instance.toolMode === TOOL_MODE_SELECT) {
             return;
         }
 
@@ -143,234 +146,6 @@ function enableDragDropFromLibrary(layer) {
     });
 }
 
-class DiagramState {
-
-    constructor() {
-        if (DiagramState.instance) {
-            return DiagramState.instance;
-        }
-        this._lastIssuedId = 0;
-
-        this._componenetMap = {};
-
-        DiagramState.instance = this;
-    }
-
-    registerComponent(componentInstance, konvaNode) {
-        this._assignAutoIncrementIdentity(konvaNode);
-        this._addToComponentMap(konvaNode.id(), componentInstance);
-    }
-
-    getComponent(id) {
-        return this._componenetMap[id];
-    }
-
-    _assignAutoIncrementIdentity(konvaNode) {
-        konvaNode.id((++this._lastIssuedId).toString());
-    }
-
-    _addToComponentMap(id, componentInstance) {
-        this._componenetMap[id] = componentInstance;
-    }
-}
-
-class Component {
-    constructor(imageURL, dataset) {
-        console.assert(imageURL);
-        this._imageURL = imageURL;
-    }
-
-    createOnLayer(layer, position) {
-        const group = this._createShapeGroup(position);
-        this._populateGroup(group);
-        layer.add(group);
-        DiagramState.instance.registerComponent(this, group);
-
-        group.on("dragstart", (e) => {
-            if (toolMode === "wire") {
-                group.stopDrag();
-            }
-        });
-    }
-
-    _applyShadow(node) {
-        node.shadowColor("black");
-        node.shadowBlur(6);
-        node.shadowOffset({ x: 3, y: 3 });
-        node.shadowOpacity(0.4);
-    }
-
-    _createShapeGroup(position) {
-        return new Konva.Group({
-            x: position.x,
-            y: position.y,
-            draggable: true,
-            name: this.constructor.name
-        });
-    }
-
-    _populateGroup(group) {
-        //abstract
-    }
-}
-
-class Switch extends Component {
-
-    constructor(imageURL, dataset) {
-        super(imageURL, dataset);
-    }
-
-    flip(shapeGroup) {
-        this._flipActuator(shapeGroup);
-    }
-
-    _flipActuator() {
-        //abstract
-    }
-
-    _addActuator(group) {
-        //abstract
-    }
-}
-
-class DPDTSwitch extends Switch {
-    constructor(imageURL, dataset) {
-        super(imageURL, dataset);
-
-        console.assert(dataset.pinsX, "data-pins-x not set");
-        console.assert(dataset.pinsY, "data-pins-y not set");
-
-        this._pinsStartAtX = parseInt(dataset.pinsX, 10);
-        this._pinsStartAtY = parseInt(dataset.pinsY, 10);
-    }
-
-    _populateGroup(group) {
-        const pinRows = 3;
-        const pinCols = 2;
-        const pins = [[]];
-
-        for (let pr = 0; pr < pinRows; pr++) {
-            pins.push([]);
-            for (let pc = 0; pc < pinCols; pc++) {
-                const pin = new Konva.Circle({
-                    x: this._pinsStartAtX + (pc * 22),
-                    y: this._pinsStartAtY + (pr * 15),
-                    radius: 6,
-                    stroke: "red",
-                    opacity: showConnectors ? 1 : 0,
-                    strokeWidth: 2
-                });
-                pins[pr].push(pin);
-                group.add(pin);
-            }
-        }
-
-        Konva.Image.fromURL(this._imageURL, (componentNode) => {
-            this._applyShadow(componentNode);
-            group.add(componentNode);
-            pins.forEach((pr) => {
-                pr.forEach((p) => {
-                    p.zIndex(componentNode.zIndex());
-                });
-            });
-        });
-
-        this._addActuator(group);
-    }
-}
-
-class DPDTOnOn extends DPDTSwitch {
-
-    constructor(imageURL, dataset) {
-        super(imageURL, dataset);
-
-        this._actuatorState = 0;
-    }
-
-    _getImageURLForState() {
-        return this._actuatorState === 0 ? "/img/bat-small-left.svg" : "/img/bat-small-right.svg";
-    }
-
-    _addActuator(group) {
-        Konva.Image.fromURL(this._getImageURLForState(), (componentNode) => {
-            componentNode.position({ x: 0, y: -35 });
-            componentNode.name("switch-actuator");
-            this._applyShadow(componentNode);
-            group.add(componentNode);
-        });
-    }
-
-    _flipActuator(shapeGroup) {
-
-        this._actuatorState = this._actuatorState === 0 ? 1 : 0;
-
-        const actuatorNode = shapeGroup.getChildren().filter(c => c.name() === "switch-actuator")[0];
-
-        const pos = actuatorNode.position();
-
-        actuatorNode.destroy();
-
-        Konva.Image.fromURL(this._getImageURLForState(), (componentNode) => {
-            componentNode.position(pos);
-            this._applyShadow(componentNode);
-            componentNode.name("switch-actuator");
-            shapeGroup.add(componentNode);
-        });
-
-        //TODO: Update pins state
-    }
-
-}
-
-class DPDTOnOffOn extends DPDTSwitch {
-
-}
-
-class DPDTOnOnOn extends DPDTSwitch {
-
-}
-
-class Potentiometer extends Component {
-
-    constructor(imageURL, dataset) {
-        super(imageURL, dataset);
-
-        console.assert(dataset.pinsX, "data-pins-x not set");
-        console.assert(dataset.pinsY, "data-pins-y not set");
-
-        this._pinsStartAtX = parseInt(dataset.pinsX, 10);
-        this._pinsStartAtY = parseInt(dataset.pinsY, 10);
-    }
-
-    _populateGroup(group) {
-        const pinCount = 3;
-        const pins = [];
-
-        for (let p = 0; p < pinCount; p++) {
-            const pin = new Konva.Circle({
-                x: this._pinsStartAtX + (p * 24),
-                y: this._pinsStartAtY,
-                radius: 10,
-                stroke: "red",
-                opacity: showConnectors ? 1 : 0,
-                strokeWidth: 2
-            });
-            pins.push(pin);
-            group.add(pin);
-        }
-
-        Konva.Image.fromURL(this._imageURL, (componentNode) => {
-            this._applyShadow(componentNode);
-            group.add(componentNode);
-            pins.forEach((p) => {
-                p.zIndex(componentNode.zIndex());
-            })
-        });
-    }
-}
-
-const componentClassMap = { Potentiometer, DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn };
-
 function enableSelectComponent(layer) {
     const transformer = new Konva.Transformer();
     layer.add(transformer);
@@ -379,7 +154,7 @@ function enableSelectComponent(layer) {
 
     stage.on("click tap", function (e) {
 
-        if (toolMode === "wire") {
+        if (DiagramState.instance.toolMode === TOOL_MODE_WIRE) {
             return;
         }
 
@@ -457,13 +232,11 @@ function enableClearDiagram(layer) {
     };
 }
 
-let showConnectors = false;
-
 function enableConnectorVisibilityToggle(layer) {
-    const checkbox = document.getElementById('checkShowConnectors');
-    checkbox.addEventListener('change', function (event) {
-        showConnectors = event.currentTarget.checked;
-        var newOpacity = showConnectors ? 1 : 0;
+    const checkbox = document.getElementById('check-show-connectors');
+    checkbox.addEventListener('change', (event) => {
+        DiagramState.instance.showConnectors = event.currentTarget.checked;
+        var newOpacity = DiagramState.instance.showConnectors ? 1 : 0;
         layer.find('Circle').forEach((node) => {
             node.opacity(newOpacity);
         });
