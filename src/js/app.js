@@ -11,8 +11,9 @@ const setupApp = () => {
 
     enableDragDropFromLibrary(diagramLayer);
 
-    const transformer = enableSelectComponent(diagramLayer);
+    const transformer = addTransformer(diagramLayer);
 
+    enableSelectComponent(transformer);
     enableComponentKeyCommands(transformer);
     enableClearDiagram(diagramLayer);
     enableConnectorVisibilityToggle(diagramLayer);
@@ -144,10 +145,15 @@ function enableDragDropFromLibrary(layer) {
     });
 }
 
-function enableSelectComponent(layer) {
+function addTransformer(layer){
     const transformer = new Konva.Transformer();
     layer.add(transformer);
+    return transformer;
+}
 
+function enableSelectComponent(transformer) {
+    
+    const layer = transformer.getLayer();
     const stage = layer.getStage();
 
     stage.on("click tap", function (e) {
@@ -170,8 +176,6 @@ function enableSelectComponent(layer) {
 
         console.log("selected node", transformer.nodes()[0]);
     });
-
-    return transformer;
 }
 
 function enableComponentKeyCommands(transformer) {
