@@ -118,7 +118,7 @@ export class Wire extends Component {
 
         this._startPoint = state._startPoint;
         this._endPoint = state._endPoint;
-        this._midPoint =  state._midPoint; 
+        this._midPoint = state._midPoint;
     }
 
     static get IsDraggable() { return false; }
@@ -129,7 +129,7 @@ export class Wire extends Component {
 
         console.log("wire creating", wirePoints);
 
-        return new Konva.Line({
+        const line = new Konva.Line({
             points: wirePoints,
             stroke: 'blue',
             strokeWidth: 5,
@@ -140,6 +140,10 @@ export class Wire extends Component {
             id: this.id.toString(),
             name: this.constructor.name,
         });
+
+        line.transformsEnabled("none");
+
+        return line;
     }
 
     _populateGroup(group) {
