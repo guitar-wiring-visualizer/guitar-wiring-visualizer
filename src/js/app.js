@@ -67,24 +67,95 @@ function enableDrawWire(layer) {
 
     const stage = layer.getStage();
 
+    /**
+     * begin drawing line
+     */
     stage.on("mousedown touchstart", (e) => {
-
         if (DiagramState.instance.toolMode === TOOL_MODE_SELECT) {
+            isPaint = false;
             return;
         }
         isPaint = true;
-        const pos = stage.getPointerPosition();
+        const drawStartPos = stage.getPointerPosition();
+
+        console.log("drawStartPos", drawStartPos);
+
+        // see if we are on or close to a pin
+        const startRect = new Konva.Rect({
+            x: drawStartPos.x - 5,
+            y: drawStartPos.y - 5,
+            width: 15,
+            height: 15,
+            strokeWidth: 1,
+            stroke: '#df4b26',
+        });
+
+        layer.add(startRect);
+
+        console.log("startRect", startRect.attrs.x, startRect.attrs.y);
+
+        const closePins = layer.find(".Pin").filter((pin) => {
+            const pinRectAttrs = pin.getClientRect();
+            const pinRect = new Konva.Rect({
+                x: pinRectAttrs.x,
+                y: pinRectAttrs.y,
+                width: pinRectAttrs.width,
+                height: pinRectAttrs.height
+            });
+            //console.log("pinRect", pinRect);
+            //console.log("pinRect", pinRect.x(), pinRect.y(), pinRect.width(), pinRect.height());
+            const intersects = rectanglesOverlap(startRect, pinRect);
+            //console.log("intersects", intersects);
+            return intersects;
+        });
+
+        //console.log("closePins", closePins);
+
+        if (closePins.length === 0) {
+            console.warn("no starting pin found");
+            isPaint = false;
+            return;
+        }
+
+        const startPinPos = closePins[0].getAbsolutePosition();
+
         lastLine = new Konva.Line({
             stroke: '#df4b26',
             strokeWidth: 5,
             globalCompositeOperation: 'source-over',
             lineCap: 'round',
             lineJoin: 'round',
-            points: [pos.x, pos.y],
+            points: [startPinPos.x, startPinPos.y],
         });
         layer.add(lastLine);
+
+        startRect.destroy();
     });
 
+    /**
+     * while drawing line, add points
+     */
+    stage.on('mousemove touchmove', function (e) {
+        if (DiagramState.instance.toolMode === TOOL_MODE_SELECT) {
+            isPaint = false;
+            return;
+        }
+
+        if (!isPaint) {
+            return;
+        }
+
+        // prevent scrolling on touch devices
+        e.evt.preventDefault();
+
+        const pos = stage.getPointerPosition();
+        const newPoints = lastLine.points().concat([pos.x, pos.y]);
+        lastLine.points(newPoints);
+    });
+
+    /**
+     * Done drawing line, convert to a wire
+     */
     stage.on('mouseup touchend', function () {
 
         if (!isPaint) {
@@ -112,28 +183,17 @@ function enableDrawWire(layer) {
             const wire = new Wire({ _startPoint: wireStart, _midPoint: wireMid, _endPoint: wireEnd });
             wire.createOnLayer(layer);
             lastLine.destroy();
-        }, 250);
+        }, 200);
 
         enterSelectMode();
     });
+}
 
-    stage.on('mousemove touchmove', function (e) {
-
-        if (DiagramState.instance.toolMode === TOOL_MODE_SELECT) {
-            return;
-        }
-
-        if (!isPaint) {
-            return;
-        }
-
-        // prevent scrolling on touch devices
-        e.evt.preventDefault();
-
-        const pos = stage.getPointerPosition();
-        const newPoints = lastLine.points().concat([pos.x, pos.y]);
-        lastLine.points(newPoints);
-    });
+function rectanglesOverlap(rect1, rect2) {
+    return rect1.x() < rect2.x() + rect2.width() &&
+        rect1.x() + rect1.width() > rect2.x() &&
+        rect1.y() < rect2.y() + rect2.height() &&
+        rect1.y() + rect1.height() > rect2.y();
 }
 
 function createDiagramLayer() {
