@@ -7,6 +7,8 @@ const setupApp = () => {
 
     window.GWVDiagramState = new DiagramState();
 
+    initializeComponentLibrary();
+
     const diagramLayer = createDiagramLayer();
 
     enableDragDropFromLibrary(diagramLayer);
@@ -19,6 +21,17 @@ const setupApp = () => {
     enableConnectorVisibilityToggle(diagramLayer);
     enableToolbar(transformer);
     enableDrawWire(diagramLayer);
+}
+
+function initializeComponentLibrary() {
+    document.querySelectorAll('[data-component-class]')
+        .forEach(element => {
+            const componentClassName = element.dataset.componentClass;
+            console.assert(componentClassName, "element data-component-class not set.");
+            console.assert(componentClassMap[componentClassName], "'%s' is not in the component class map.", componentClassName);
+            console.assert(componentClassMap[componentClassName].ImageURL, "%s has no ImageURL", componentClassName);
+            element.src = componentClassMap[componentClassName].ImageURL;
+        });
 }
 
 function enableToolbar(transformer) {
@@ -114,9 +127,7 @@ function enableDragDropFromLibrary(layer) {
     document
         .getElementById("library-items")
         .addEventListener("dragstart", function (e) {
-            componentClassName = e.target.dataset.className;
-            console.assert(componentClassName, "component data-class-name not set.");
-            console.assert(componentClassMap[componentClassName], "'%s' is not in the component class map.", componentClassName);
+            componentClassName = e.target.dataset.componentClass;
         });
 
     const stage = layer.getStage();
@@ -145,14 +156,14 @@ function enableDragDropFromLibrary(layer) {
     });
 }
 
-function addTransformer(layer){
+function addTransformer(layer) {
     const transformer = new Konva.Transformer();
     layer.add(transformer);
     return transformer;
 }
 
 function enableSelectComponent(transformer) {
-    
+
     const layer = transformer.getLayer();
     const stage = layer.getStage();
 

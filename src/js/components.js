@@ -5,6 +5,10 @@ export class Component {
         console.assert(state);
     }
 
+    static get ImageURL() {
+        throw new Error("abstract method call");
+    }
+
     createOnLayer(layer, position) {
         const group = this._createShapeGroup(position);
         this._populateGroup(group);
@@ -18,11 +22,6 @@ export class Component {
         });
     }
 
-    _getImageURL() {
-        console.assert(this.constructor.imageURL);
-        return this.constructor.imageURL;
-    }
-
     _createShapeGroup(position) {
         return new Konva.Group({
             x: position.x,
@@ -33,7 +32,7 @@ export class Component {
     }
 
     _populateGroup(group) {
-        //abstract
+        throw new Error("abstract method call");
     }
 
     _applyGlobalStyling(node) {
@@ -67,9 +66,14 @@ export class DPDTSwitch extends Switch {
 
     constructor(state) {
         super(state);
+    }
 
-        DPDTSwitch._pinsStartAtX = 10;
-        DPDTSwitch._pinsStartAtY = 9;
+    static get _pinsStartAtX() {
+        return 10;
+    }
+
+    static get _pinsStartAtY() {
+        return 9;
     }
 
     _populateGroup(group) {
@@ -93,7 +97,7 @@ export class DPDTSwitch extends Switch {
             }
         }
 
-        Konva.Image.fromURL(this._getImageURL(), (componentNode) => {
+        Konva.Image.fromURL(this.constructor.ImageURL, (componentNode) => {
             this._applyGlobalStyling(componentNode);
             group.add(componentNode);
             pins.forEach((pr) => {
@@ -113,8 +117,10 @@ export class DPDTOnOn extends DPDTSwitch {
         super(state);
 
         this._actuatorState = 0;
+    }
 
-        DPDTOnOn.imageURL = "/img/dpdt-blue.svg";
+    static get ImageURL() {
+        return "/img/dpdt-blue.svg";
     }
 
     _getActuatorImageURLForState() {
@@ -157,9 +163,12 @@ export class DPDTOnOffOn extends DPDTSwitch {
         super(state);
 
         this._actuatorState = 0;
-
-        DPDTOnOffOn.imageURL = "/img/dpdt-purple.svg";
     }
+
+    static get ImageURL() {
+        return "/img/dpdt-purple.svg";
+    }
+
 }
 
 export class DPDTOnOnOn extends DPDTSwitch {
@@ -167,8 +176,10 @@ export class DPDTOnOnOn extends DPDTSwitch {
         super(state);
 
         this._actuatorState = 0;
+    }
 
-        DPDTOnOffOn.imageURL = "/img/dpdt-red.svg";
+    static get ImageURL() {
+        return "/img/dpdt-red.svg";
     }
 }
 
@@ -176,13 +187,22 @@ export class Potentiometer extends Component {
 
     constructor(state) {
         super(state);
+    }
 
-        Potentiometer.imageURL = "/img/pot1.svg"
-        Potentiometer._pinsStartAtX = 25;
-        Potentiometer._pinsStartAtY = 110;
+    static get ImageURL() {
+        return "/img/pot1.svg";
+    }
+
+    static get _pinsStartAtX() {
+        return 25;
+    }
+
+    static get _pinsStartAtY() {
+        return 110;
     }
 
     _populateGroup(group) {
+
         const pinCount = 3;
         const pins = [];
 
@@ -199,7 +219,7 @@ export class Potentiometer extends Component {
             group.add(pin);
         }
 
-        Konva.Image.fromURL(this._getImageURL(), (componentNode) => {
+        Konva.Image.fromURL(Potentiometer.ImageURL, (componentNode) => {
             this._applyGlobalStyling(componentNode);
             group.add(componentNode);
             pins.forEach((p) => {
