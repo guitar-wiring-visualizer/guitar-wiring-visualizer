@@ -102,14 +102,11 @@ function enableDrawWire(layer) {
                 width: pinRectAttrs.width,
                 height: pinRectAttrs.height
             });
-            //console.log("pinRect", pinRect);
-            //console.log("pinRect", pinRect.x(), pinRect.y(), pinRect.width(), pinRect.height());
             const intersects = rectanglesOverlap(startRect, pinRect);
-            //console.log("intersects", intersects);
             return intersects;
         });
 
-        //console.log("closePins", closePins);
+        startRect.destroy();
 
         if (closePins.length === 0) {
             console.warn("no starting pin found");
@@ -128,8 +125,6 @@ function enableDrawWire(layer) {
             points: [startPinPos.x, startPinPos.y],
         });
         layer.add(lastLine);
-
-        startRect.destroy();
     });
 
     /**
@@ -165,6 +160,46 @@ function enableDrawWire(layer) {
         isPaint = false;
 
         const linePoints = lastLine.points();
+
+        // add nearest pin to lastLine points, or don't create wire
+
+        const endRect = new Konva.Rect({
+            x: linePoints.at(-2) - 5,
+            y: linePoints.at(-1) - 5,
+            width: 15,
+            height: 15,
+            strokeWidth: 1,
+            stroke: '#df4b26',
+        });
+
+        layer.add(endRect);
+
+        //console.log("endRect", endRect.attrs.x, endRect.attrs.y);
+
+        const closePins = layer.find(".Pin").filter((pin) => {
+            const pinRectAttrs = pin.getClientRect();
+            const pinRect = new Konva.Rect({
+                x: pinRectAttrs.x,
+                y: pinRectAttrs.y,
+                width: pinRectAttrs.width,
+                height: pinRectAttrs.height
+            });
+            const intersects = rectanglesOverlap(endRect, pinRect);
+            return intersects;
+        });
+
+        endRect.destroy();
+
+        if (closePins.length === 0) {
+            console.warn("no ending pin found");
+            isPaint = false;
+            lastLine.destroy();
+            return;
+        }
+
+        const endPinPos = closePins[0].getAbsolutePosition();
+        const newPoints = lastLine.points().concat([endPinPos.x, endPinPos.y]);
+        lastLine.points(newPoints);
 
         const wireStart = [linePoints.at(0), linePoints.at(1)];
         const wireEnd = [linePoints.at(-2), linePoints.at(-1)];
