@@ -33,4 +33,12 @@ export class DiagramState {
     _addToComponentMap(id, componentInstance) {
         this._componenetMap[id] = componentInstance;
     }
+
+    findComponents(predicate){
+        return Object.values(this._componenetMap).filter(predicate);
+    }
+
+    removeComponentById(componentId){
+        delete this._componenetMap[parseInt(componentId, 10)];
+    }
 }

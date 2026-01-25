@@ -67,6 +67,8 @@ function enableDrawWire(layer) {
 
     const stage = layer.getStage();
 
+    let startPin;
+
     /**
      * begin drawing line
      */
@@ -92,8 +94,6 @@ function enableDrawWire(layer) {
 
         layer.add(startRect);
 
-        //console.log("startRect", startRect.attrs.x, startRect.attrs.y);
-
         const closePins = findPinsInRect(layer, startRect);
 
         startRect.destroy();
@@ -104,7 +104,9 @@ function enableDrawWire(layer) {
             return;
         }
 
-        const startPinPos = closePins[0].getAbsolutePosition();
+        startPin = closePins[0];
+
+        const startPinPos = startPin.getAbsolutePosition();
 
         lastLine = new Konva.Line({
             stroke: '#df4b26',
@@ -174,7 +176,9 @@ function enableDrawWire(layer) {
             return;
         }
 
-        const endPinPos = closePins[0].getAbsolutePosition();
+        const endPin = closePins[0];
+
+        const endPinPos = endPin.getAbsolutePosition();
         const newPoints = lastLine.points().concat([endPinPos.x, endPinPos.y]);
         lastLine.points(newPoints);
 
@@ -191,8 +195,15 @@ function enableDrawWire(layer) {
             wireMid = [wireMid[1], wireMid[0]];
         }
 
+        const wire = new Wire({
+            _startPoint: wireStart,
+            _midPoint: wireMid, 
+            _endPoint: wireEnd,
+            _startPinId: parseInt(startPin.id(), 10),
+            _endPinId: parseInt(endPin.id(), 10)
+        });
+
         setTimeout(() => {
-            const wire = new Wire({ _startPoint: wireStart, _midPoint: wireMid, _endPoint: wireEnd });
             wire.createOnLayer(layer);
             lastLine.destroy();
         }, 200);
@@ -352,6 +363,7 @@ function flipSelectedSwitch(switchGroup) {
 function deleteSelectedComponent(nodeToDelete, transformer) {
     if (confirm("Delete selected component?")) {
         nodeToDelete.destroy();
+        DiagramState.instance.removeComponentById(nodeToDelete.id());
         clearSelection(transformer);
     }
 }
@@ -361,7 +373,10 @@ function enableClearDiagram(layer) {
         if (confirm("Clear the diagram? Are you sure?  This cannot be undone!")) {
             layer.getChildren()
                 .filter(child => child.getClassName() !== "Transformer")
-                .forEach(child => child.destroy());
+                .forEach(child =>{
+                    child.destroy();
+                    DiagramState.instance.removeComponentById(child.id());
+                });
         }
     };
 }

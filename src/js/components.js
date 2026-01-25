@@ -33,7 +33,7 @@ export class Component {
         const group = this._createShapeGroup(position);
         this._populateGroup(group);
         this._nodeAttrs = group.attrs;
-        this._wireupNodeEvents(group);
+        this._subscribeToEvents(group);
         return group;
     }
 
@@ -43,7 +43,7 @@ export class Component {
         this._populateGroup(group);
         layer.add(group);
         this._nodeAttrs = group.attrs;
-        this._wireupNodeEvents(group);
+        this._subscribeToEvents(group);
     }
 
     drawOnLayer(layer) {
@@ -52,13 +52,15 @@ export class Component {
         this._populateGroup(group);
         group.attrs = this._nodeAttrs;
         layer.add(group);
-        this._wireupNodeEvents(group);
+        this._subscribeToEvents(group);
     }
 
-    _wireupNodeEvents(group) {
+    _subscribeToEvents(group) {
         group.on("dragend transformend", (e) => {
-            console.log("updating attrs", e.type);
+            console.log(this.constructor.name, this.id, e.type);
             this._nodeAttrs = group.attrs;
+
+            this._moveAttachedWires(group);
         });
 
         group.on("dragstart", (e) => {
@@ -87,6 +89,53 @@ export class Component {
         node.shadowBlur(6);
         node.shadowOffset({ x: 3, y: 3 });
         node.shadowOpacity(0.4);
+    }
+
+    removeFromDiagram(layer) {
+        console.log("removeFromDiagram", this.id);
+        const node = layer.find("#" + this.id.toString()).at(0);
+        node.destroy();
+        DiagramState.instance.removeComponentById(this.id);
+    }
+
+    _moveAttachedWires(node) {
+        const layer = node.getLayer();
+        this._pins.forEach(pinId => {
+            //console.log("checking pin", pinId);
+            const pinNode = layer.find("#" + pinId.toString()).at(0);
+            const pinPos = pinNode.getAbsolutePosition();
+            const wiresStartingOnPin = DiagramState.instance.findComponents((c) => {
+                return c.constructor.name === "Wire" && c._startPinId === pinId
+            });
+            //console.log("wires starting on", wiresStartingOnPin);
+            wiresStartingOnPin.forEach(oldWire => {
+                const newWire = new Wire({
+                    _startPoint: [pinPos.x, pinPos.y],
+                    _midPoint: oldWire._midPoint,
+                    _endPoint: oldWire._endPoint,
+                    _startPinId: oldWire._startPinId,
+                    _endPinId: oldWire._endPinId
+                });
+                newWire.createOnLayer(layer);
+                oldWire.removeFromDiagram(layer);
+            });
+            const wiresEndingOnPin = DiagramState.instance.findComponents((c) => {
+                return c.constructor.name === "Wire" && c._endPinId === pinId
+            });
+           // console.log("wires ending on", wiresEndingOnPin);
+
+            wiresEndingOnPin.forEach(oldWire => {
+                const newWire = new Wire({
+                    _startPoint: oldWire._startPoint,
+                    _midPoint: oldWire._midPoint,
+                    _endPoint: [pinPos.x, pinPos.y],
+                    _startPinId: oldWire._startPinId,
+                    _endPinId: oldWire._endPinId
+                });
+                newWire.createOnLayer(layer);
+                oldWire.removeFromDiagram(layer);
+            });
+        });
     }
 }
 
@@ -119,6 +168,8 @@ export class Wire extends Component {
         this._startPoint = state._startPoint;
         this._endPoint = state._endPoint;
         this._midPoint = state._midPoint;
+        this._startPinId = state._startPinId;
+        this._endPinId = state._endPinId;
     }
 
     static get IsDraggable() { return false; }
@@ -127,7 +178,7 @@ export class Wire extends Component {
 
         const wirePoints = [...this._startPoint, ...this._midPoint, ...this._endPoint];
 
-        console.log("wire creating", wirePoints);
+        console.log("wire creating", this.id, wirePoints);
 
         const line = new Konva.Line({
             points: wirePoints,
