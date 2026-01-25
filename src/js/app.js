@@ -97,7 +97,7 @@ function enableDrawWire(layer) {
 
         const wireStart = [linePoints.at(0), linePoints.at(1)];
         const wireEnd = [linePoints.at(-2), linePoints.at(-1)];
-        
+
         let wireMid = [
             linePoints.at((linePoints.length / 2) - 1),
             linePoints.at((linePoints.length / 2))
@@ -205,12 +205,18 @@ function enableSelectComponent(transformer) {
             return;
         }
 
-        //TODO: don't assume is a group...
-        const componentGroup = e.target.getParent();
+        const node = e.target;
 
-        const isAlreadySelected = transformer.nodes().indexOf(componentGroup) >= 0;
+        let selectableNode;
+        if (node.getClassName() === "Line") {
+            selectableNode = node;
+        } else {
+            selectableNode = e.target.getParent();
+        }
+
+        const isAlreadySelected = transformer.nodes().indexOf(selectableNode) >= 0;
         if (!isAlreadySelected) {
-            transformer.nodes([componentGroup]);
+            transformer.nodes([selectableNode]);
         }
 
         console.log("selected component", transformer.nodes()[0].id(), transformer.nodes()[0].name(), transformer.nodes()[0]);
