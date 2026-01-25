@@ -109,6 +109,13 @@ class Component {
         DiagramState.instance.registerComponent(this, group);
     }
 
+    _applyShadow(node) {
+        node.shadowColor("black");
+        node.shadowBlur(6);
+        node.shadowOffset({ x: 3, y: 3 });
+        node.shadowOpacity(0.4);
+    }
+
     _createShapeGroup(position) {
         return new Konva.Group({
             x: position.x,
@@ -175,6 +182,7 @@ class DPDTSwitch extends Switch {
         }
 
         Konva.Image.fromURL(this._imageURL, (componentNode) => {
+            this._applyShadow(componentNode);
             group.add(componentNode);
             pins.forEach((pr) => {
                 pr.forEach((p) => {
@@ -203,6 +211,7 @@ class DPDTOnOn extends DPDTSwitch {
         Konva.Image.fromURL(this._getImageURLForState(), (componentNode) => {
             componentNode.position({ x: 0, y: -35 });
             componentNode.name("switch-actuator");
+            this._applyShadow(componentNode);
             group.add(componentNode);
         });
     }
@@ -219,6 +228,7 @@ class DPDTOnOn extends DPDTSwitch {
 
         Konva.Image.fromURL(this._getImageURLForState(), (componentNode) => {
             componentNode.position(pos);
+            this._applyShadow(componentNode);
             componentNode.name("switch-actuator");
             shapeGroup.add(componentNode);
         });
@@ -266,6 +276,7 @@ class Potentiometer extends Component {
         }
 
         Konva.Image.fromURL(this._imageURL, (componentNode) => {
+            this._applyShadow(componentNode);
             group.add(componentNode);
             pins.forEach((p) => {
                 p.zIndex(componentNode.zIndex());
@@ -339,14 +350,6 @@ function flipSelectedSwitch(switchGroup) {
         return;
 
     switchComponent.flip(switchGroup);
-
-    // const actuators = switchGroup.getChildren().filter(child => child.name() === "switch-actuator");
-    // if (actuators.length === 0)
-    //     return;
-    // const actuator = actuators[0];
-    // console.log("flipping switch", switchGroup.id());
-
-
 }
 
 function deleteSelectedComponent(nodeToDelete, transformer) {
