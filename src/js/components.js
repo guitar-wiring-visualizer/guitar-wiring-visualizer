@@ -12,6 +12,8 @@ export class Component {
         }
 
         this._nodeAttrs = state._nodeAttrs || {};
+
+        this._pins = state._pins || [];
     }
 
     get id() {
@@ -20,6 +22,15 @@ export class Component {
 
     static get ImageURL() {
         throw new Error("abstract method call");
+    }
+
+    createAsSubcomponent(position){
+        // for add new subcomponent to a component group
+        const group = this._createShapeGroup(position);
+        this._populateGroup(group);
+        this._nodeAttrs = group.attrs;
+        this._wireupNodeEvents(group);
+        return group;
     }
 
     createOnLayer(layer, position) {
@@ -75,6 +86,33 @@ export class Component {
     }
 }
 
+export class Pin extends Component {
+    constructor(state) {
+        super(state);
+    }
+
+    _createShapeGroup(position) {
+        var group = super._createShapeGroup(position);
+        group.draggable(false);
+        return group;
+    }
+
+    _populateGroup(group) {
+        const pinShape = new Konva.Circle({
+            radius: 6,
+            stroke: "red",
+            opacity: DiagramState.instance.showConnectors ? 1 : 0,
+            strokeWidth: 2
+        });
+        group.add(pinShape);
+    }
+
+    _applyGlobalStyling(node) {
+        //noop
+    }
+
+}
+
 export class Switch extends Component {
 
     constructor(state) {
@@ -116,16 +154,17 @@ export class DPDTSwitch extends Switch {
         for (let pr = 0; pr < pinRows; pr++) {
             pins.push([]);
             for (let pc = 0; pc < pinCols; pc++) {
-                const pin = new Konva.Circle({
+
+                const pinComponent = new Pin({});
+                this._pins.push(pinComponent.id);
+
+                const pinNode = pinComponent.createAsSubcomponent({
                     x: DPDTSwitch._pinsStartAtX + (pc * 22),
-                    y: DPDTSwitch._pinsStartAtY + (pr * 15),
-                    radius: 6,
-                    stroke: "red",
-                    opacity: DiagramState.instance.showConnectors ? 1 : 0,
-                    strokeWidth: 2
+                    y: DPDTSwitch._pinsStartAtY + (pr * 15)
                 });
-                pins[pr].push(pin);
-                group.add(pin);
+
+                pins[pr].push(pinNode);
+                group.add(pinNode);
             }
         }
 
@@ -239,16 +278,16 @@ export class Potentiometer extends Component {
         const pins = [];
 
         for (let p = 0; p < pinCount; p++) {
-            const pin = new Konva.Circle({
+
+            const pinComponent = new Pin({});
+            this._pins.push(pinComponent.id);
+
+            const pinNode = pinComponent.createAsSubcomponent({
                 x: Potentiometer._pinsStartAtX + (p * 24),
                 y: Potentiometer._pinsStartAtY,
-                radius: 10,
-                stroke: "red",
-                opacity: DiagramState.instance.showConnectors ? 1 : 0,
-                strokeWidth: 2
             });
-            pins.push(pin);
-            group.add(pin);
+            pins.push(pinNode);
+            group.add(pinNode);
         }
 
         Konva.Image.fromURL(Potentiometer.ImageURL, (componentNode) => {

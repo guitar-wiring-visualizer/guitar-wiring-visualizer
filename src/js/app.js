@@ -185,7 +185,7 @@ function enableSelectComponent(transformer) {
             transformer.nodes([componentGroup]);
         }
 
-        console.log("selected component", transformer.nodes()[0].id(), transformer.nodes()[0].name());
+        console.log("selected component", transformer.nodes()[0].id(), transformer.nodes()[0].name(), transformer.nodes()[0]);
     });
 }
 
@@ -197,7 +197,7 @@ function enableComponentKeyCommands(transformer) {
 
     stage.container().addEventListener("keydown", (e) => {
 
-        console.log(e.code);
+        //console.log(e.code);
 
         if (transformer.nodes().length === 0)
             return;
