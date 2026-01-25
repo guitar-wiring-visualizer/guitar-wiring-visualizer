@@ -4,12 +4,14 @@ export class Component {
     constructor(state = {}) {
         console.assert(state, "state is required");
 
-        if (state.componentId) {
-            this._id = state.componentId;
+        if (state._id) {
+            this._id = state._id;
         } else {
             this._id = DiagramState.instance.getNewIdentity();
             DiagramState.instance.registerComponent(this);
         }
+
+        this._nodeAttrs = state._nodeAttrs || {};
     }
 
     get id() {
@@ -21,9 +23,28 @@ export class Component {
     }
 
     createOnLayer(layer, position) {
+        // for adding new componenet to diagram
         const group = this._createShapeGroup(position);
         this._populateGroup(group);
         layer.add(group);
+        this._nodeAttrs = group.attrs;
+        this._wireupNodeEvents(group);
+    }
+
+    drawOnLayer(layer) {
+        // for adding deserialized component to diagram
+        const group = this._createShapeGroup(position);
+        this._populateGroup(group);
+        group.attrs = this._nodeAttrs;
+        layer.add(group);
+        this._wireupNodeEvents(group);
+    }
+
+    _wireupNodeEvents(group) {
+        group.on("dragend transformend", (e) => {
+            console.log("updating attrs", e.type);
+            this._nodeAttrs = group.attrs;
+        });
 
         group.on("dragstart", (e) => {
             if (DiagramState.instance.toolMode === TOOL_MODE_WIRE) {
