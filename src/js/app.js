@@ -92,19 +92,9 @@ function enableDrawWire(layer) {
 
         layer.add(startRect);
 
-        console.log("startRect", startRect.attrs.x, startRect.attrs.y);
+        //console.log("startRect", startRect.attrs.x, startRect.attrs.y);
 
-        const closePins = layer.find(".Pin").filter((pin) => {
-            const pinRectAttrs = pin.getClientRect();
-            const pinRect = new Konva.Rect({
-                x: pinRectAttrs.x,
-                y: pinRectAttrs.y,
-                width: pinRectAttrs.width,
-                height: pinRectAttrs.height
-            });
-            const intersects = rectanglesOverlap(startRect, pinRect);
-            return intersects;
-        });
+        const closePins = findPinsInRect(layer, startRect);
 
         startRect.destroy();
 
@@ -171,22 +161,9 @@ function enableDrawWire(layer) {
             strokeWidth: 1,
             stroke: '#df4b26',
         });
-
         layer.add(endRect);
 
-        //console.log("endRect", endRect.attrs.x, endRect.attrs.y);
-
-        const closePins = layer.find(".Pin").filter((pin) => {
-            const pinRectAttrs = pin.getClientRect();
-            const pinRect = new Konva.Rect({
-                x: pinRectAttrs.x,
-                y: pinRectAttrs.y,
-                width: pinRectAttrs.width,
-                height: pinRectAttrs.height
-            });
-            const intersects = rectanglesOverlap(endRect, pinRect);
-            return intersects;
-        });
+        const closePins = findPinsInRect(layer, endRect);
 
         endRect.destroy();
 
@@ -222,6 +199,21 @@ function enableDrawWire(layer) {
 
         enterSelectMode();
     });
+}
+
+function findPinsInRect(layer, targetRect) {
+    const foundPins = layer.find(".Pin").filter((pin) => {
+        const pinRectAttrs = pin.getClientRect();
+        const pinRect = new Konva.Rect({
+            x: pinRectAttrs.x,
+            y: pinRectAttrs.y,
+            width: pinRectAttrs.width,
+            height: pinRectAttrs.height
+        });
+        const intersects = rectanglesOverlap(targetRect, pinRect);
+        return intersects;
+    });
+    return foundPins;
 }
 
 function rectanglesOverlap(rect1, rect2) {
