@@ -185,7 +185,7 @@ function enableSelectComponent(transformer) {
             transformer.nodes([componentGroup]);
         }
 
-        console.log("selected node", transformer.nodes()[0]);
+        console.log("selected component", transformer.nodes()[0].id(), transformer.nodes()[0].name());
     });
 }
 

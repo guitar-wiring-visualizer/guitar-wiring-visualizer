@@ -2,7 +2,18 @@ import { DiagramState, TOOL_MODE_WIRE } from "./diagram.js";
 
 export class Component {
     constructor(state = {}) {
-        console.assert(state);
+        console.assert(state, "state is required");
+
+        if (state.componentId) {
+            this._id = state.componentId;
+        } else {
+            this._id = DiagramState.instance.getNewIdentity();
+            DiagramState.instance.registerComponent(this);
+        }
+    }
+
+    get id() {
+        return this._id;
     }
 
     static get ImageURL() {
@@ -13,7 +24,6 @@ export class Component {
         const group = this._createShapeGroup(position);
         this._populateGroup(group);
         layer.add(group);
-        DiagramState.instance.registerComponent(this, group);
 
         group.on("dragstart", (e) => {
             if (DiagramState.instance.toolMode === TOOL_MODE_WIRE) {
@@ -27,7 +37,8 @@ export class Component {
             x: position.x,
             y: position.y,
             draggable: true,
-            name: this.constructor.name
+            name: this.constructor.name,
+            id: this.id.toString()
         });
     }
 

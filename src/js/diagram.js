@@ -18,17 +18,16 @@ export class DiagramState {
 
     }
 
-    registerComponent(componentInstance, konvaNode) {
-        this._assignAutoIncrementIdentity(konvaNode);
-        this._addToComponentMap(konvaNode.id(), componentInstance);
+    getNewIdentity(){
+        return ++this._lastIssuedId;
+    }
+
+    registerComponent(componentInstance){
+        this._addToComponentMap(componentInstance.id, componentInstance);
     }
 
     getComponent(id) {
         return this._componenetMap[id];
-    }
-
-    _assignAutoIncrementIdentity(konvaNode) {
-        konvaNode.id((++this._lastIssuedId).toString());
     }
 
     _addToComponentMap(id, componentInstance) {
