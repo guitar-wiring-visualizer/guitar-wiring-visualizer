@@ -189,9 +189,19 @@ class DPDTSwitch extends Switch {
 
 class DPDTOnOn extends DPDTSwitch {
 
+    constructor(imageURL, dataset) {
+        super(imageURL, dataset);
+
+        this._actuatorState = 0;
+    }
+
+    _getImageURLForState() {
+        return this._actuatorState === 0 ? "/img/bat-small-left.svg" : "/img/bat-small-right.svg";
+    }
+
     _addActuator(group) {
-        Konva.Image.fromURL("/img/bat-small-left.svg", (componentNode) => {
-            componentNode.position({ x: 0, y: -32 });
+        Konva.Image.fromURL(this._getImageURLForState(), (componentNode) => {
+            componentNode.position({ x: 0, y: -35 });
             componentNode.name("switch-actuator");
             group.add(componentNode);
         });
@@ -199,13 +209,15 @@ class DPDTOnOn extends DPDTSwitch {
 
     _flipActuator(shapeGroup) {
 
+        this._actuatorState = this._actuatorState === 0 ? 1 : 0;
+
         const actuatorNode = shapeGroup.getChildren().filter(c => c.name() === "switch-actuator")[0];
 
         const pos = actuatorNode.position();
 
         actuatorNode.destroy();
 
-        Konva.Image.fromURL("/img/bat-small-right.svg", (componentNode) => {
+        Konva.Image.fromURL(this._getImageURLForState(), (componentNode) => {
             componentNode.position(pos);
             componentNode.name("switch-actuator");
             shapeGroup.add(componentNode);
