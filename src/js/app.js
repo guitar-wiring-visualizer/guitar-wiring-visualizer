@@ -1,5 +1,5 @@
 import { DiagramState, TOOL_MODE_SELECT, TOOL_MODE_WIRE } from "./diagram.js"
-import { DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Potentiometer } from "./components.js";
+import { DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Potentiometer, Wire } from "./components.js";
 
 const componentClassMap = { Potentiometer, DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn };
 
@@ -86,7 +86,34 @@ function enableDrawWire(layer) {
     });
 
     stage.on('mouseup touchend', function () {
+
+        if (!isPaint) {
+            return;
+        }
+
         isPaint = false;
+
+        const linePoints = lastLine.points();
+
+        const wireStart = [linePoints.at(0), linePoints.at(1)];
+        const wireEnd = [linePoints.at(-2), linePoints.at(-1)];
+        
+        let wireMid = [
+            linePoints.at((linePoints.length / 2) - 1),
+            linePoints.at((linePoints.length / 2))
+        ];
+
+        if ((wireStart[0] > wireStart[1] && wireMid[0] < wireMid[1]) || (wireStart[0] < wireStart[1] && wireMid[0] > wireMid[1])) {
+            console.log("correcting midpoint");
+            wireMid = [wireMid[1], wireMid[0]];
+        }
+
+        setTimeout(() => {
+            const wire = new Wire({ _startPoint: wireStart, _midPoint: wireMid, _endPoint: wireEnd });
+            wire.createOnLayer(layer);
+            lastLine.destroy();
+        }, 250);
+
         enterSelectMode();
     });
 
@@ -178,6 +205,7 @@ function enableSelectComponent(transformer) {
             return;
         }
 
+        //TODO: don't assume is a group...
         const componentGroup = e.target.getParent();
 
         const isAlreadySelected = transformer.nodes().indexOf(componentGroup) >= 0;

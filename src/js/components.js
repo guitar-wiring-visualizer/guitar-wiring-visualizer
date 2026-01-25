@@ -24,7 +24,11 @@ export class Component {
         throw new Error("abstract method call");
     }
 
-    createAsSubcomponent(position){
+    static get IsDraggable() {
+        return true;
+    }
+
+    createAsSubcomponent(position) {
         // for add new subcomponent to a component group
         const group = this._createShapeGroup(position);
         this._populateGroup(group);
@@ -68,7 +72,7 @@ export class Component {
         return new Konva.Group({
             x: position.x,
             y: position.y,
-            draggable: true,
+            draggable: this.constructor.IsDraggable,
             name: this.constructor.name,
             id: this.id.toString()
         });
@@ -91,11 +95,7 @@ export class Pin extends Component {
         super(state);
     }
 
-    _createShapeGroup(position) {
-        var group = super._createShapeGroup(position);
-        group.draggable(false);
-        return group;
-    }
+    static get IsDraggable() { return false; }
 
     _populateGroup(group) {
         const pinShape = new Konva.Circle({
@@ -110,7 +110,45 @@ export class Pin extends Component {
     _applyGlobalStyling(node) {
         //noop
     }
+}
 
+export class Wire extends Component {
+    constructor(state) {
+        super(state);
+
+        this._startPoint = state._startPoint;
+        this._endPoint = state._endPoint;
+        this._midPoint =  state._midPoint; 
+    }
+
+    static get IsDraggable() { return false; }
+
+    _createShapeGroup(position) {
+
+        const wirePoints = [...this._startPoint, ...this._midPoint, ...this._endPoint];
+
+        console.log("wire creating", wirePoints);
+
+        return new Konva.Line({
+            points: wirePoints,
+            stroke: 'blue',
+            strokeWidth: 5,
+            lineCap: 'butt',
+            lineJoin: 'round',
+            draggable: Wire.IsDraggable,
+            tension: .7,
+            id: this.id.toString(),
+            name: this.constructor.name,
+        });
+    }
+
+    _populateGroup(group) {
+        // noop
+    }
+
+    _applyGlobalStyling(node) {
+        //noop
+    }
 }
 
 export class Switch extends Component {
