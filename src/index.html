@@ -26,26 +26,35 @@
     <h1> Guitar Wiring Visualizer</h1>
 
     <div id="app-root" class="container-fluid">
+        <div class="row"><div class="col"><hr></div></div>
         <div class="row">
             <div class="col ">
-
-                <button type="button" class="btn btn-outline-primary m-3" id="vis-button">Start Visualizer</button>
-
-
+                <button type="button" class="btn btn-success" id="vis-button">Start Visualizer</button>
             </div>
             <div class="col">
-                <div class="form-check mt-3">
-                    <input class="form-check-input" type="checkbox" value="" id="checkShowConnectors">
+                <div class="btn-group" role="group">
+
+                    <input type="radio" class="btn-check" name="options-base" id="select-tool" autocomplete="off" checked>
+                    <label class="btn btn-outline-primary" for="select-tool">Select/Move</label>
+
+                    <input type="radio" class="btn-check" name="options-base" id="wire-tool" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="wire-tool">Add Wire</label>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" value="" id="checkShowConnectors">
                     <label class="form-check-label" for="checkShowConnectors">
-                        Show Component Connection Points
+                        Show Connection Hints
                     </label>
                 </div>
             </div>
             <div class="col text-end">
-                <button type="button" class="btn btn-outline-danger m-3" id="clear-button">Clear Diagram</button>
+                <button type="button" class="btn btn-outline-danger" id="clear-button">Clear Diagram</button>
 
             </div>
         </div>
+        <div class="row"><div class="col"><hr></div></div>
         <div class="row">
             <div class="col-2 text-center border">
                 <h4>Component Library</h4>

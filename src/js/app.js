@@ -10,8 +10,86 @@ const setupApp = () => {
 
     enableComponentKeyCommands(transformer);
     enableClearDiagram(diagramLayer);
-
     enableConnectorVisibilityToggle(diagramLayer);
+    enableToolbar();
+    enableDrawWire(diagramLayer);
+}
+
+let toolMode = "select";
+
+function enableToolbar() {
+    const defaultCursor = document.getElementById("diagram").style.cursor;
+
+    const selectButton = document.getElementById("select-tool");
+    const wireButton = document.getElementById("wire-tool");
+
+    selectButton.addEventListener("click", (e) => {
+        toolMode = "select";
+        document.getElementById("diagram").style.cursor = defaultCursor;
+    });
+
+    wireButton.addEventListener("click", (e) => {
+        toolMode = "wire";
+        document.getElementById("diagram").style.cursor = "crosshair";
+    });
+}
+
+function enterSelectMode() {
+    document.getElementById("select-tool").click();
+}
+
+function enterWireMode() {
+    document.getElementById("wire-tool").click();
+}
+
+function enableDrawWire(layer) {
+
+    let lastLine;
+    let isPaint = false;
+
+    const stage = layer.getStage();
+
+    stage.on("mousedown touchstart", (e) => {
+
+        if (toolMode === "select") {
+            return;
+        }
+
+        isPaint = true;
+        const pos = stage.getPointerPosition();
+        lastLine = new Konva.Line({
+            stroke: '#df4b26',
+            strokeWidth: 5,
+            globalCompositeOperation: 'source-over',
+            lineCap: 'round',
+            lineJoin: 'round',
+            points: [pos.x, pos.y],
+        });
+        layer.add(lastLine);
+    });
+
+    stage.on('mouseup touchend', function () {
+        isPaint = false;
+        enterSelectMode();
+    });
+
+    stage.on('mousemove touchmove', function (e) {
+
+        if (toolMode === "select") {
+            return;
+        }
+
+        if (!isPaint) {
+            return;
+        }
+
+        // prevent scrolling on touch devices
+        e.evt.preventDefault();
+
+        const pos = stage.getPointerPosition();
+        const newPoints = lastLine.points().concat([pos.x, pos.y]);
+        lastLine.points(newPoints);
+    });
 }
 
 function createDiagramLayer() {
@@ -107,6 +185,12 @@ class Component {
         this._populateGroup(group);
         layer.add(group);
         DiagramState.instance.registerComponent(this, group);
+
+        group.on("dragstart", (e) => {
+            if (toolMode === "wire") {
+                group.stopDrag();
+            }
+        });
     }
 
     _applyShadow(node) {
@@ -295,8 +379,12 @@ function enableSelectComponent(layer) {
 
     stage.on("click tap", function (e) {
 
+        if (toolMode === "wire") {
+            return;
+        }
+
         if (e.target === stage) {
-            transformer.nodes([]);
+            clearSelection(transformer);
             return;
         }
 
