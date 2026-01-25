@@ -11,13 +11,13 @@ const setupApp = () => {
     enableComponentKeyCommands(transformer);
     enableClearDiagram(diagramLayer);
     enableConnectorVisibilityToggle(diagramLayer);
-    enableToolbar();
+    enableToolbar(transformer);
     enableDrawWire(diagramLayer);
 }
 
 let toolMode = "select";
 
-function enableToolbar() {
+function enableToolbar(transformer) {
     const defaultCursor = document.getElementById("diagram").style.cursor;
 
     const selectButton = document.getElementById("select-tool");
@@ -31,6 +31,7 @@ function enableToolbar() {
     wireButton.addEventListener("click", (e) => {
         toolMode = "wire";
         document.getElementById("diagram").style.cursor = "crosshair";
+        clearSelection(transformer);
     });
 }
 
@@ -53,8 +54,7 @@ function enableDrawWire(layer) {
 
         if (toolMode === "select") {
             return;
-        }
-
+        }        
         isPaint = true;
         const pos = stage.getPointerPosition();
         lastLine = new Konva.Line({
