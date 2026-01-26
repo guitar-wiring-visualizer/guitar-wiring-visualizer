@@ -1,4 +1,13 @@
-import { DiagramState, TOOL_MODE_SELECT, TOOL_MODE_WIRE } from "./diagram.js"
+import {
+    DiagramState,
+    TOOL_MODE_SELECT,
+    TOOL_MODE_WIRE,
+    WIRE_COLOR_BLACK,
+    WIRE_COLOR_GREEN,
+    WIRE_COLOR_YELLOW,
+    WIRE_COLOR_RED,
+    WIRE_COLOR_BLUE
+} from "./diagram.js"
 import { DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Potentiometer, Wire } from "./components.js";
 
 const componentClassMap = { Potentiometer, DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn };
@@ -16,7 +25,7 @@ const setupApp = () => {
     const transformer = addTransformer(diagramLayer);
 
     enableSelectComponent(transformer);
-    enableComponentKeyCommands(transformer);
+    enableKeyboardCommands(transformer);
     enableClearDiagram(diagramLayer);
     enableConnectorVisibilityToggle(diagramLayer);
     enableToolbar(transformer);
@@ -89,7 +98,7 @@ function enableDrawWire(layer) {
             width: 15,
             height: 15,
             strokeWidth: 1,
-            stroke: '#df4b26',
+            stroke: DiagramState.instance.wireToolColor,
         });
 
         layer.add(startRect);
@@ -109,7 +118,7 @@ function enableDrawWire(layer) {
         const startPinPos = startPin.getAbsolutePosition();
 
         lastLine = new Konva.Line({
-            stroke: '#df4b26',
+            stroke: DiagramState.instance.wireToolColor,
             strokeWidth: 5,
             globalCompositeOperation: 'source-over',
             lineCap: 'round',
@@ -161,7 +170,7 @@ function enableDrawWire(layer) {
             width: 15,
             height: 15,
             strokeWidth: 1,
-            stroke: '#df4b26',
+            stroke: DiagramState.instance.wireToolColor,
         });
         layer.add(endRect);
 
@@ -197,10 +206,11 @@ function enableDrawWire(layer) {
 
         const wire = new Wire({
             _startPoint: wireStart,
-            _midPoint: wireMid, 
+            _midPoint: wireMid,
             _endPoint: wireEnd,
             _startPinId: parseInt(startPin.id(), 10),
-            _endPinId: parseInt(endPin.id(), 10)
+            _endPinId: parseInt(endPin.id(), 10),
+            _color: DiagramState.instance.wireToolColor
         });
 
         setTimeout(() => {
@@ -321,29 +331,75 @@ function enableSelectComponent(transformer) {
     });
 }
 
-function enableComponentKeyCommands(transformer) {
+function enableKeyboardCommands(transformer) {
     const stage = transformer.getStage();
 
     stage.container().tabIndex = 1;
     //stage.container().focus();
 
     stage.container().addEventListener("keydown", (e) => {
-
-        //console.log(e.code);
-
-        if (transformer.nodes().length === 0)
-            return;
-
-        const selectedNode = transformer.nodes()[0];
-
-        if (e.code === "Delete" || e.code === "Backspace") {
-            deleteSelectedComponent(selectedNode, transformer);
-        } else if (e.code === "KeyF") {
-            flipSelectedSwitch(selectedNode);
-        } else if (e.code === "Escape") {
-            clearSelection(transformer);
-        }
+        console.log(e.code);
+        handleSelectionKeyCode(transformer, e.code);
+        handleToolbarKeyCode(transformer, e.code);
     });
+}
+
+function handleSelectionKeyCode(transformer, code) {
+    if (transformer.nodes().length === 0)
+        return;
+
+    const selectedNode = transformer.nodes()[0];
+
+    if (code === "Delete" || code === "Backspace") {
+        deleteSelectedComponent(selectedNode, transformer);
+    } else if (code === "KeyF") {
+        flipSelectedSwitch(selectedNode);
+    } else if (code === "Escape") {
+        clearSelection(transformer);
+    } else if (code === "KeyC") {
+        changeColor(selectedNode);
+    }
+}
+
+function handleToolbarKeyCode(transformer, code) {
+    if (transformer.nodes().length > 0)
+        return;
+
+    if (code === "KeyW") {
+        enterWireMode();
+    } else if (code === "KeyS") {
+        enterSelectMode();
+    } else if (code === "KeyC") {
+        cycleWireColors();
+    }
+}
+
+const wireColors = [
+    WIRE_COLOR_BLACK,
+    WIRE_COLOR_BLUE,
+    WIRE_COLOR_GREEN,
+    WIRE_COLOR_RED,
+    WIRE_COLOR_YELLOW
+];
+let lastWireColor = 0;
+
+function cycleWireColors() {
+    lastWireColor++;
+    if (lastWireColor > wireColors.length -1) {
+        lastWireColor = 0;
+    }
+    DiagramState.instance.wireToolColor = wireColors.at(lastWireColor);
+    console.log("new color", DiagramState.instance.wireToolColor);
+}
+
+function changeColor(selectedNode) {
+    const component = DiagramState.instance.getComponent(selectedNode.id());
+    if (component.changeColor) {
+        cycleWireColors();
+        console.log("change color", component);
+
+        component.changeColor(selectedNode, DiagramState.instance.wireToolColor);
+    }
 }
 
 function clearSelection(transformer) {
@@ -373,7 +429,7 @@ function enableClearDiagram(layer) {
         if (confirm("Clear the diagram? Are you sure?  This cannot be undone!")) {
             layer.getChildren()
                 .filter(child => child.getClassName() !== "Transformer")
-                .forEach(child =>{
+                .forEach(child => {
                     child.destroy();
                     DiagramState.instance.removeComponentById(child.id());
                 });

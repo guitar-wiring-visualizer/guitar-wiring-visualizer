@@ -1,5 +1,13 @@
 export const TOOL_MODE_SELECT = "select";
-export const TOOL_MODE_WIRE = "wire"
+export const TOOL_MODE_WIRE = "wire";
+
+export const WIRE_COLOR_RED = "red";
+export const WIRE_COLOR_BLACK = "black";
+export const WIRE_COLOR_GREEN = "green";
+export const WIRE_COLOR_YELLOW = "yellow";
+export const WIRE_COLOR_BLUE = "blue";
+
+export const WIRE_COLOR_DEFAULT = WIRE_COLOR_BLACK;
 
 export class DiagramState {
 
@@ -13,9 +21,9 @@ export class DiagramState {
 
         this.showConnectors = false;
         this.toolMode = TOOL_MODE_SELECT;
+        this.wireToolColor = WIRE_COLOR_DEFAULT;
 
         DiagramState.instance = this;
-
     }
 
     getNewIdentity() {
@@ -27,7 +35,7 @@ export class DiagramState {
     }
 
     getComponent(id) {
-        return this._componenetMap[id];
+        return this._componenetMap[parseInt(id, 10)];
     }
 
     _addToComponentMap(id, componentInstance) {
@@ -39,7 +47,7 @@ export class DiagramState {
     }
 
     removeComponentById(componentId) {
-        const component = this._componenetMap[parseInt(componentId, 10)];
+        const component = this.getComponent(componentId);
         if (component.pinIds) {
             component.pinIds.forEach(pinId => {
                 this.removeComponentById(pinId);

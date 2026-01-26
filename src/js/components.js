@@ -118,7 +118,8 @@ export class Component {
                     _midPoint: oldWire.midPoint,
                     _endPoint: oldWire.endPoint,
                     _startPinId: oldWire.startPinId,
-                    _endPinId: oldWire.endPinId
+                    _endPinId: oldWire.endPinId,
+                    _color: oldWire.color
                 });
                 newWire.createOnLayer(layer);
                 oldWire.removeFromDiagram(layer);
@@ -133,7 +134,8 @@ export class Component {
                     _midPoint: oldWire.midPoint,
                     _endPoint: [pinPos.x, pinPos.y],
                     _startPinId: oldWire.startPinId,
-                    _endPinId: oldWire.endPinId
+                    _endPinId: oldWire.endPinId,
+                    _color: oldWire.color
                 });
                 newWire.createOnLayer(layer);
                 oldWire.removeFromDiagram(layer);
@@ -173,6 +175,7 @@ export class Wire extends Component {
         this._midPoint = state._midPoint;
         this._startPinId = state._startPinId;
         this._endPinId = state._endPinId;
+        this._color = state._color || DiagramState.instance.WIRE_COLOR_DEFAULT;
     }
 
     static get IsDraggable() { return false; }
@@ -185,16 +188,20 @@ export class Wire extends Component {
         return this._endPinId;
     }
 
-    get startPoint(){
+    get startPoint() {
         return this._startPoint;
     }
 
-    get midPoint(){
+    get midPoint() {
         return this._midPoint;
     }
 
-    get endPoint(){
+    get endPoint() {
         return this._endPoint;
+    }
+
+    get color() {
+        return this._color;
     }
 
     _createShapeGroup(position) {
@@ -205,7 +212,7 @@ export class Wire extends Component {
 
         const line = new Konva.Line({
             points: wirePoints,
-            stroke: 'blue',
+            stroke: this._color,
             strokeWidth: 5,
             lineCap: 'butt',
             lineJoin: 'round',
@@ -226,6 +233,11 @@ export class Wire extends Component {
 
     _applyGlobalStyling(node) {
         //noop
+    }
+
+    changeColor(node, color) {
+        this._color = color;
+        node.stroke(color);
     }
 }
 
