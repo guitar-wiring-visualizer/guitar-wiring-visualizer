@@ -18,11 +18,11 @@ export class DiagramState {
 
     }
 
-    getNewIdentity(){
+    getNewIdentity() {
         return ++this._lastIssuedId;
     }
 
-    registerComponent(componentInstance){
+    registerComponent(componentInstance) {
         this._addToComponentMap(componentInstance.id, componentInstance);
     }
 
@@ -34,11 +34,17 @@ export class DiagramState {
         this._componenetMap[id] = componentInstance;
     }
 
-    findComponents(predicate){
+    findComponents(predicate) {
         return Object.values(this._componenetMap).filter(predicate);
     }
 
-    removeComponentById(componentId){
-        delete this._componenetMap[parseInt(componentId, 10)];
+    removeComponentById(componentId) {
+        const component = this._componenetMap[parseInt(componentId, 10)];
+        if (component.pinIds) {
+            component.pinIds.forEach(pinId => {
+                this.removeComponentById(pinId);
+            });
+        }
+        delete this._componenetMap[component.id];
     }
 }

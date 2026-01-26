@@ -20,6 +20,10 @@ export class Component {
         return this._id;
     }
 
+    get pinIds() {
+        return this._pins;
+    }
+
     static get ImageURL() {
         throw new Error("abstract method call");
     }
