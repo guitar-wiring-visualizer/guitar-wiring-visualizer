@@ -109,32 +109,31 @@ export class Component {
             const pinNode = layer.find("#" + pinId.toString()).at(0);
             const pinPos = pinNode.getAbsolutePosition();
             const wiresStartingOnPin = DiagramState.instance.findComponents((c) => {
-                return c.constructor.name === "Wire" && c._startPinId === pinId
+                return c.constructor.name === "Wire" && c.startPinId === pinId
             });
             //console.log("wires starting on", wiresStartingOnPin);
             wiresStartingOnPin.forEach(oldWire => {
                 const newWire = new Wire({
                     _startPoint: [pinPos.x, pinPos.y],
-                    _midPoint: oldWire._midPoint,
-                    _endPoint: oldWire._endPoint,
-                    _startPinId: oldWire._startPinId,
-                    _endPinId: oldWire._endPinId
+                    _midPoint: oldWire.midPoint,
+                    _endPoint: oldWire.endPoint,
+                    _startPinId: oldWire.startPinId,
+                    _endPinId: oldWire.endPinId
                 });
                 newWire.createOnLayer(layer);
                 oldWire.removeFromDiagram(layer);
             });
             const wiresEndingOnPin = DiagramState.instance.findComponents((c) => {
-                return c.constructor.name === "Wire" && c._endPinId === pinId
+                return c.constructor.name === "Wire" && c.endPinId === pinId
             });
-           // console.log("wires ending on", wiresEndingOnPin);
 
             wiresEndingOnPin.forEach(oldWire => {
                 const newWire = new Wire({
-                    _startPoint: oldWire._startPoint,
-                    _midPoint: oldWire._midPoint,
+                    _startPoint: oldWire.startPoint,
+                    _midPoint: oldWire.midPoint,
                     _endPoint: [pinPos.x, pinPos.y],
-                    _startPinId: oldWire._startPinId,
-                    _endPinId: oldWire._endPinId
+                    _startPinId: oldWire.startPinId,
+                    _endPinId: oldWire.endPinId
                 });
                 newWire.createOnLayer(layer);
                 oldWire.removeFromDiagram(layer);
@@ -177,6 +176,26 @@ export class Wire extends Component {
     }
 
     static get IsDraggable() { return false; }
+
+    get startPinId() {
+        return this._startPinId;
+    }
+
+    get endPinId() {
+        return this._endPinId;
+    }
+
+    get startPoint(){
+        return this._startPoint;
+    }
+
+    get midPoint(){
+        return this._midPoint;
+    }
+
+    get endPoint(){
+        return this._endPoint;
+    }
 
     _createShapeGroup(position) {
 
