@@ -38,6 +38,17 @@ const setupApp = () => {
     enableConnectorVisibilityToggle(diagramLayer);
     enableToolbar(transformer);
     enableDrawWire(diagramLayer);
+    enableFlipSwitchButton(transformer);
+}
+
+function enableFlipSwitchButton(transformer) {
+    const flipButton = document.getElementById("flip-button");
+    flipButton.addEventListener("click", (e) => {
+        if (transformer.nodes().length === 0)
+            return;
+        const selectedNode = transformer.nodes()[0];
+        flipSelectedSwitch(selectedNode);
+    });
 }
 
 function initializeComponentLibrary() {
@@ -349,6 +360,10 @@ function enableSelectComponent(transformer) {
             transformer.nodes([selectableNode]);
         }
 
+        //if (isSwitch) {
+            document.getElementById("flip-button").disabled = false;
+        //}
+
         console.log("selected component", transformer.nodes()[0].id(), transformer.nodes()[0].name(), transformer.nodes()[0]);
     });
 }
@@ -420,6 +435,7 @@ function changeColor(selectedNode) {
 }
 
 function clearSelection(transformer) {
+    document.getElementById("flip-button").disabled = true;
     transformer.nodes([]);
 }
 
