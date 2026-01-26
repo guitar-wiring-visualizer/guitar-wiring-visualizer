@@ -16,16 +16,17 @@
 
  - Drag a component from the Library Pane on the left onto the Diagram surface.
 
-### Selecting Components
+### Selecting Items
   
-  Each item (any component or wire) on the diagram can be selected.
+Each item (any component or wire) on the diagram can be selected.
 
  - Activate the "Select/Move" tool.
- - Click on a component to select it.
+ - Click on an item to select it.
  - Click in an empty space on the diagram to un-select.
 
 
 ### Arranging Components
+
  - Selected component can be moved, rotated, or scaled.
  - **Note:** Selected wires can only have their color changed.  Wires are moved along with the components they are connected to.
 
@@ -42,7 +43,7 @@
  - Activate the "Add Wire" toool.
  - Optionally click a color-swatch from toolbar for new wire color.
  - Draw line from component Pin to component Pin.
- - **Note:** Wire must start and end on a Pin, or it will not be added. 
+ - **Note: Wire must start and end on a Pin, or it will not be added.**
  - Turn on "Hints" to see where Pins are.
 
 ### Change Wire Color
@@ -78,4 +79,4 @@ Pins must be connected to each other using Wires.  This applies to components th
 
 ### Visualization
 
-The app shows the flow of signal from pickups, through compoents, and (hopefully) to an output jack.  Note that if the signal goes through a switch, the position of the switch's actuator will route the signal through it's pins accordingly. 
+The app shows the flow of signal from pickups, through components, and (hopefully) to an output jack.  Note that if the signal goes through a switch, the position of the switch's actuator will route the signal through it's pins accordingly. 
