@@ -13,9 +13,9 @@ jobs:
         uses: andstor/copycat-action@v3.2.4
         with:
           personal_token: ${{ secrets.PERSONAL_TOKEN }}
-          src_path: /src
-          dst_path: /
+          src_path: src/.
+          dst_path: /.
           dst_owner: guitar-wiring-visualizer
-          dst_repo_name: guitar-wiring-visualizer
+          dst_repo_name: guitar-wiring-visualizer.github.io
           dst_branch: gh-pages
           
