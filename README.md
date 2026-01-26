@@ -1,3 +1,5 @@
+# Guitar Wiring Visualizer
+
 ### Development
 
 Handy local server:
