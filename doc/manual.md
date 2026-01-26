@@ -14,7 +14,7 @@
 
 ### Adding Components
 
- - Drag a component from the Library Pane on the left onto the Diagram surface in the center.
+ - Drag a component from the Library Pane on the left onto the Diagram surface.
 
 ### Selecting Components
   
@@ -22,10 +22,12 @@
 
  - Activate the "Select/Move" tool.
  - Click on a component to select it.
+ - Click in an empty space on the diagram to un-select.
 
 
 ### Arranging Components
  - Selected component can be moved, rotated, or scaled.
+ - **Note:** Selected wires can only have their color changed.  Wires are moved along with the components they are connected to.
 
 ### Remove Components and Wires
 
@@ -38,22 +40,21 @@
 ### Wires
 
  - Activate the "Add Wire" toool.
- - Optionally click a color swatch from toolbar for new wire color.
+ - Optionally click a color-swatch from toolbar for new wire color.
  - Draw line from component Pin to component Pin.
  - **Note:** Wire must start and end on a Pin, or it will not be added. 
- - Click "Show Hints" to see where Pins are.
+ - Turn on "Hints" to see where Pins are.
 
 ### Change Wire Color
 
  - Activate the "Select/Move" tool.
  - Select a Wire
- - Click the the desired color swatch from toolbar.
+ - Click the the desired color-swatch from toolbar.
 
 ### Flipping Switches
 
-Flipping a switch moves it's actuator through the available positions.  This will alter the internal connections within the switch to alter signal flow between pins.
+Flipping a switch moves it's actuator through the available positions.  This will move the internal connections within the switch to alter signal flow between pins.
 
- - Activate the "Select/Move" tool.
  - Select a switch
  - Hit `F` or click "Flip Switch" button.
 
@@ -73,14 +74,8 @@ This means any electrical component such as a guitar pickup, potentiometer (pot)
 Every component has one or more Pins which are the points at which it can be connected to the circuit.  These represent the lugs of a pot, or the solder tabs on a jack, etc.
 
 ### Wires
-Pins must be connected to each other using Wires.  This applies to components that in real life have their own leads such as capacitors and resistors.  However, for consistency of function the app needs to use wires in place of leads.  (If this doesn't work for you, please submit an issue.)
+Pins must be connected to each other using Wires.  This applies to components that in real life have their own leads (e.g. resistors) that can be directly soldered to the lugs/pins of a component.  However, for consistency of function the app needs to use wires in place of leads.  (If this doesn't work for you, please submit an issue.)
 
 ### Visualization
 
-The app shows the flow of signal from pickups, through compoents, and (hopefully) to an output jack.  Note that if the signal goes through a switch, the position of the swith's actuator will route the signal through it's pins accordingly. 
-
-
-
-
-
-
+The app shows the flow of signal from pickups, through compoents, and (hopefully) to an output jack.  Note that if the signal goes through a switch, the position of the switch's actuator will route the signal through it's pins accordingly. 
