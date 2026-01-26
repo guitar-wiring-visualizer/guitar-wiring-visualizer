@@ -9,15 +9,15 @@ GWV is a web page that allows a user to create wiring diagrams for electric guit
 ### MVP
 
 - [x] Library of component shapes (pickups, potentiometers, switches, etc)
-- [ ] Components have glue-points
+- [x] Components have glue-points
 - [ ] Components have text label
 - [x] User can drag component from library to canvas - creates instance on canvas
 - [x] User can move component instance to new location on canvas
 - [x] User can rotate component instance
 - [ ] User can edit label of component instances
 - [x] User can remove component instance from canvas
-- [ ] User can draw connector lines between component glue points
-- [ ] Connectors redraw when moving component
+- [x] User can draw connector lines between component glue points
+- [x] Connectors redraw when moving component
 
 ### Switches
 
