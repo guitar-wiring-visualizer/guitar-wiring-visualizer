@@ -1,0 +1,21 @@
+name: publish
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Copy
+        uses: andstor/copycat-action@v3.2.4
+        with:
+          personal_token: ${{ secrets.PERSONAL_TOKEN }}
+          src_path: /src
+          dst_path: /
+          dst_owner: guitar-wiring-visualizer
+          dst_repo_name: guitar-wiring-visualizer
+          dst_branch: gh-pages
+          
