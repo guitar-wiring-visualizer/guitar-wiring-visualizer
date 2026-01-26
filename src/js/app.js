@@ -12,6 +12,14 @@ import { DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Potentiometer, Wire } from "./compon
 
 const componentClassMap = { Potentiometer, DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn };
 
+const wireColors = [
+    WIRE_COLOR_BLACK,
+    WIRE_COLOR_RED,
+    WIRE_COLOR_YELLOW,
+    WIRE_COLOR_GREEN,
+    WIRE_COLOR_BLUE,
+];
+
 const setupApp = () => {
 
     window.GWVDiagramState = new DiagramState();
@@ -59,6 +67,20 @@ function enableToolbar(transformer) {
         document.getElementById("diagram").style.cursor = "crosshair";
         clearSelection(transformer);
     });
+
+    wireColors.forEach(color => {
+        const colorButton = document.getElementById("wire-color-" + color);
+        colorButton.addEventListener("click", (e) => {
+            DiagramState.instance.wireToolColor = color;
+
+            if (transformer.nodes().length === 0)
+                return;
+
+            const selectedNode = transformer.nodes()[0];
+            changeColor(selectedNode);
+        });
+    });
+
 }
 
 function enterSelectMode() {
@@ -357,6 +379,7 @@ function handleSelectionKeyCode(transformer, code) {
     } else if (code === "Escape") {
         clearSelection(transformer);
     } else if (code === "KeyC") {
+        cycleWireColors();
         changeColor(selectedNode);
     }
 }
@@ -374,30 +397,24 @@ function handleToolbarKeyCode(transformer, code) {
     }
 }
 
-const wireColors = [
-    WIRE_COLOR_BLACK,
-    WIRE_COLOR_BLUE,
-    WIRE_COLOR_GREEN,
-    WIRE_COLOR_RED,
-    WIRE_COLOR_YELLOW
-];
 let lastWireColor = 0;
 
 function cycleWireColors() {
     lastWireColor++;
-    if (lastWireColor > wireColors.length -1) {
+    if (lastWireColor > wireColors.length - 1) {
         lastWireColor = 0;
     }
-    DiagramState.instance.wireToolColor = wireColors.at(lastWireColor);
-    console.log("new color", DiagramState.instance.wireToolColor);
+    const newColor = wireColors.at(lastWireColor);
+    const colorButton = document.getElementById("wire-color-" + newColor);
+    colorButton.click();
+    //DiagramState.instance.wireToolColor = newColor;
+    //console.log("new color", DiagramState.instance.wireToolColor);
 }
 
 function changeColor(selectedNode) {
     const component = DiagramState.instance.getComponent(selectedNode.id());
     if (component.changeColor) {
-        cycleWireColors();
-        console.log("change color", component);
-
+        //console.log("change color", component);
         component.changeColor(selectedNode, DiagramState.instance.wireToolColor);
     }
 }
