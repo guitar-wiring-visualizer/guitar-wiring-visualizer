@@ -32,6 +32,8 @@ const setupApp = () => {
 
     const transformer = addTransformer(diagramLayer);
 
+    enableVisualizerButton();
+
     enableSelectComponent(transformer);
     enableKeyboardCommands(transformer);
     enableClearDiagram(diagramLayer);
@@ -39,6 +41,23 @@ const setupApp = () => {
     enableToolbar(transformer);
     enableDrawWire(diagramLayer);
     enableFlipSwitchButton(transformer);
+}
+
+let isVisualizerActive = false;
+
+function enableVisualizerButton() {
+    const visButton = document.getElementById("vis-button");
+    const originalText = visButton.textContent;
+    visButton.addEventListener("click", e => {
+        if (isVisualizerActive) {
+            visButton.textContent = originalText
+            isVisualizerActive = false;
+        } else {
+            visButton.textContent = "Stop Visualizer";
+            isVisualizerActive = true;
+        }
+        console.log("visualizer", isVisualizerActive);
+    });
 }
 
 function enableFlipSwitchButton(transformer) {
@@ -361,7 +380,7 @@ function enableSelectComponent(transformer) {
         }
 
         //if (isSwitch) {
-            document.getElementById("flip-button").disabled = false;
+        document.getElementById("flip-button").disabled = false;
         //}
 
         console.log("selected component", transformer.nodes()[0].id(), transformer.nodes()[0].name(), transformer.nodes()[0]);
@@ -376,9 +395,17 @@ function enableKeyboardCommands(transformer) {
 
     stage.container().addEventListener("keydown", (e) => {
         console.log(e.code);
+        handleGlobalKeyCode(e);
         handleSelectionKeyCode(transformer, e.code);
         handleToolbarKeyCode(transformer, e.code);
     });
+}
+
+function handleGlobalKeyCode(e) {
+    if (e.ctrlKey && e.key === 'Enter') {
+        document.getElementById("vis-button").click();
+        e.preventDefault();
+    }
 }
 
 function handleSelectionKeyCode(transformer, code) {
