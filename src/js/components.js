@@ -144,6 +144,91 @@ export class Component {
     }
 }
 
+export class Pickup extends Component {
+    constructor(state) {
+        super(state);
+    }
+
+
+}
+
+export class Humbucker extends Pickup {
+    constructor(state) {
+        super(state);
+    }
+
+    static get ImageURL() {
+        return "/img/pu-humbucker.svg";
+    }
+
+    _populateGroup(group) {
+
+        const pinCount = 3;
+        const pins = [];
+
+        // for (let p = 0; p < pinCount; p++) {
+
+        //     const pinComponent = new Pin({});
+        //     this._pins.push(pinComponent.id);
+
+        //     const pinNode = pinComponent.createAsSubcomponent({
+        //         x: Potentiometer._pinsStartAtX + (p * 24),
+        //         y: Potentiometer._pinsStartAtY,
+        //     });
+        //     pins.push(pinNode);
+        //     group.add(pinNode);
+        // }
+
+        Konva.Image.fromURL(Humbucker.ImageURL, (componentNode) => {
+            this._applyGlobalStyling(componentNode);
+            group.add(componentNode);
+            pins.forEach((p) => {
+                p.zIndex(componentNode.zIndex());
+            })
+        });
+    }
+}
+
+export class StratPickup extends Pickup {
+    constructor(state) {
+        super(state);
+    }
+
+    static get ImageURL() {
+        return "/img/pu-strat.svg";
+    }
+
+    _populateGroup(group) {
+         Konva.Image.fromURL(StratPickup.ImageURL, (componentNode) => {
+            this._applyGlobalStyling(componentNode);
+            group.add(componentNode);
+            // pins.forEach((p) => {
+            //     p.zIndex(componentNode.zIndex());
+            // })
+        });
+    }
+}
+
+export class Jack extends Component {
+    constructor(state) {
+        super(state);
+    }
+}
+
+export class MonoJack extends Jack {
+    constructor(state) {
+        super(state);
+    }
+
+    static get ImageURL() {
+        return "/img/jack-mono.svg";
+    }
+
+    _populateGroup(group) {
+        // TODO
+    }
+}
+
 export class Pin extends Component {
     constructor(state) {
         super(state);

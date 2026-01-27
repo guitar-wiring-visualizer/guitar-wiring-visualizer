@@ -44,7 +44,7 @@ Each item (any component or wire) on the diagram can be selected.
  - Optionally click a color-swatch from toolbar for new wire color.
  - Draw line from component Pin to component Pin.
  - **Note: Wire must start and end on a Pin, or it will not be added.**
- - Turn on "Hints" to see where Pins are.
+ - Turn on "Show Pins" to see where Pins are.
 
 ### Change Wire Color
 

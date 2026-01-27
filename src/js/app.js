@@ -8,9 +8,9 @@ import {
     WIRE_COLOR_RED,
     WIRE_COLOR_BLUE
 } from "./diagram.js"
-import { DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Potentiometer, Wire } from "./components.js";
+import { DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Potentiometer, Wire, Humbucker, StratPickup, MonoJack } from "./components.js";
 
-const componentClassMap = { Potentiometer, DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn };
+const componentClassMap = { Potentiometer, DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Humbucker, StratPickup, MonoJack };
 
 const wireColors = [
     WIRE_COLOR_BLACK,
