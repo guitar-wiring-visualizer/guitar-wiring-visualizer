@@ -1,9 +1,5 @@
 import { DiagramState } from "./diagram.js";
 
-const SPEED = 15;
-const TIME_DIFF_MULTIPLIER = 1000;
-const MAX_SHADOW = 10;
-
 export class Visualizer {
 
     constructor(diagramLayer) {
@@ -22,7 +18,9 @@ export class Visualizer {
 
         this._activeWireNodes = [];
 
-        this._animation = this._createAnimation();
+        this._animations = [
+            this._createActiveWireAnimation()
+        ];
 
         DiagramState.instance.on("wireChanged", (_) => {
             console.log("received wireChanged event");
@@ -40,11 +38,11 @@ export class Visualizer {
     start() {
         this._isActive = true;
         this._visLayer.visible(true);
-        this._animation.start();
+        this._animations.forEach(a => a.start());
     }
 
     stop() {
-        this._animation.stop();
+        this._animations.forEach(a => a.stop());
         this._visLayer.visible(false);
         this._isActive = false;
     }
@@ -57,7 +55,7 @@ export class Visualizer {
         });
 
         const activeWireNodes = activeWires.map((component) => {
-            if(component)
+            if (component)
                 return this._diagramLayer.findOne("#" + component.id.toString());
         });
 
@@ -72,7 +70,11 @@ export class Visualizer {
         });
     }
 
-    _createAnimation() {
+    _createActiveWireAnimation() {
+
+        const SPEED = 15;
+        const TIME_DIFF_MULTIPLIER = 1000;
+        const MAX_SHADOW = 10;
 
         let currentShadow = 0;
         let increasing = true;
