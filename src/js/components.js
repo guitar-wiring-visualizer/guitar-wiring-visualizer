@@ -160,31 +160,58 @@ export class Humbucker extends Pickup {
     }
 
     static get ImageURL() {
-        return "/img/pu-humbucker.svg";
+        return "/img/pu-humbucker4.svg";
     }
 
     _populateGroup(group) {
 
-        const pinCount = 3;
-        const pins = [];
+        const topCoilEndPin = new Pin({});
+        const topCoolEndPinNode = topCoilEndPin.createAsSubcomponent({
+            x: 5,
+            y: 165
+        });
+        group.add(topCoolEndPinNode);
 
-        // for (let p = 0; p < pinCount; p++) {
+        const topCoilStartPin = new Pin({});
+        const topCoilStartPinNode = topCoilStartPin.createAsSubcomponent({
+            x: 17,
+            y: 180
+        });
+        group.add(topCoilStartPinNode);
 
-        //     const pinComponent = new Pin({});
-        //     this._pins.push(pinComponent.id);
+        const bottomCoilEndPin = new Pin({});
+        const bottomCoilEndPinNode = bottomCoilEndPin.createAsSubcomponent({
+            x: 33,
+            y: 182
+        });
+        group.add(bottomCoilEndPinNode);
 
-        //     const pinNode = pinComponent.createAsSubcomponent({
-        //         x: Potentiometer._pinsStartAtX + (p * 24),
-        //         y: Potentiometer._pinsStartAtY,
-        //     });
-        //     pins.push(pinNode);
-        //     group.add(pinNode);
-        // }
+        const bottomCoilStartPin = new Pin({});
+        const bottomCoilStartPinNode = bottomCoilStartPin.createAsSubcomponent({
+            x: 50,
+            y: 173
+        });
+        group.add(bottomCoilStartPinNode);
+
+        const groundPin = new Pin({});
+        const groundPinNode = groundPin.createAsSubcomponent({
+            x: 60,
+            y: 158
+        });
+        group.add(groundPinNode);
+
+        this._pins.push(topCoilEndPin.id, topCoilStartPin.id, bottomCoilEndPin.id, bottomCoilStartPin.id, groundPin.id);
 
         Konva.Image.fromURL(Humbucker.ImageURL, (componentNode) => {
             this._applyGlobalStyling(componentNode);
             group.add(componentNode);
-            pins.forEach((p) => {
+            [
+                topCoolEndPinNode,
+                topCoilStartPinNode,
+                bottomCoilEndPinNode,
+                bottomCoilStartPinNode,
+                groundPinNode
+            ].forEach((p) => {
                 p.zIndex(componentNode.zIndex());
             })
         });
@@ -244,7 +271,7 @@ export class MonoJack extends Jack {
         return "/img/jack-mono.svg";
     }
 
-   _populateGroup(group) {
+    _populateGroup(group) {
         const tipPin = new Pin({});
         const tipPinNode = tipPin.createAsSubcomponent({
             x: 47,
