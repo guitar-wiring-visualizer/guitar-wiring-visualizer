@@ -9,7 +9,7 @@ A simple web-based app that lets you create wiring diagrams for electric guitars
 - See the effects of flipping switches on the signal flow.
 - Share diagrams via stateful URL links.
 
-The app is for creating _wiring diagrams_, not actual schematics.  (Although, generating a schematic from the diagram should be poissible, but has not been implemented yet.)
+The app is for creating _wiring diagrams_, not actual schematics.  (Although, generating a schematic from the diagram should be possible, but has not been implemented yet.)
 
 The thinking is:
 
@@ -24,13 +24,13 @@ For a schematic-based tools, see:
 
 ## Development
 
-The app is written in vanilla JavaScript and plain HTML.  No backend/server technology is needed.  The code leverages the great [Konva](https://konvajs.org/) library for drawing to the HTML canvas.
+The app is written in vanilla JavaScript and HTML.  No backend/server technology is needed.  The code leverages the great [Konva](https://konvajs.org/) library for drawing to the HTML canvas.
 
 Bootstrap is used for styling.
 
 ### Demo site hosting
 
-github pages is used to host the site.  Upon commit to master, the source code is copied to the guitar-wiring-visualizer.github.io repository to be served by giuthub pages, using a github action.
+github pages is used to host the site.  Upon commit to master, the source code is copied to the `guitar-wiring-visualizer.github.io` repository to be served by github pages, using an action.
 
 ### dev notes
 
