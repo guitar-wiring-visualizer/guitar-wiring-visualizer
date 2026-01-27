@@ -45,54 +45,6 @@ const setupApp = () => {
     enableVisualizerButton();
 }
 
-// function demoAnimateShadowLine(diagramLayer) {
-//     const stage = diagramLayer.getStage();
-
-//     const visLayer = new Konva.Layer();
-//     stage.add(visLayer);
-
-//     const wireLine = new Konva.Line({
-//         points: [10, 140, 200, 200, 600, 40],
-//         stroke: 'red',
-//         strokeWidth: 5,
-//         lineCap: 'butt',
-//         lineJoin: 'round',
-//         shadowColor: 'red',
-//         tension: 0.7
-//     });
-
-//     visLayer.add(wireLine);
-
-//     const maxShadow = 10;
-//     const speed = 15;
-
-//     let currentShadow = 0;
-//     let increasing = true;
-
-//     const visAnimation = new Konva.Animation((frame) => {
-//         // console.log({ currentShadow });
-//         if (currentShadow > maxShadow + 1 || currentShadow < 0) {
-//             currentShadow = 0;
-//             increasing = true;
-//         }
-//         if (currentShadow > maxShadow) {
-//             increasing = false;
-//         }
-//         const changeAmount = (frame.timeDiff / 1000) * speed;
-//         if (increasing) {
-//             currentShadow = currentShadow + changeAmount;
-//         } else {
-//             currentShadow = currentShadow - changeAmount;
-//         }
-//         wireLine.shadowBlur(currentShadow);
-//         wireLine.shadowOpacity(10 / currentShadow);
-//     }, visLayer);
-
-//     visAnimation.start();
-
-//     setTimeout(() => { visAnimation.stop(); }, 10000);
-// }
-
 function enableVisualizerButton() {
     const visButton = document.getElementById("vis-button");
     const originalText = visButton.textContent;
