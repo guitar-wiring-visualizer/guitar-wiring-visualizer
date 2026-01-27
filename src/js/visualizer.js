@@ -141,7 +141,7 @@ export class Visualizer {
             const electron = new Konva.Circle({
                 x: startPoint.x,
                 y: startPoint.y,
-                radius: 5,
+                radius: 4,
                 fill: 'cyan',
                 shadowColor: "#35FF1F",
                 shadowBlur: 10,
