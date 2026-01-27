@@ -491,6 +491,7 @@ function enableClearDiagram(layer) {
                 .filter(child => child.getClassName() !== "Transformer")
                 .forEach(child => {
                     child.destroy();
+                    DiagramState.instance.notifyNodeChanged(child);
                     DiagramState.instance.removeComponentById(child.id());
                 });
         }
