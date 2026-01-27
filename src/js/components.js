@@ -213,6 +213,8 @@ export class Jack extends Component {
     constructor(state) {
         super(state);
     }
+
+    
 }
 
 export class MonoJack extends Jack {
@@ -225,7 +227,13 @@ export class MonoJack extends Jack {
     }
 
     _populateGroup(group) {
-        // TODO
+         Konva.Image.fromURL(MonoJack.ImageURL, (componentNode) => {
+            this._applyGlobalStyling(componentNode);
+            group.add(componentNode);
+            // pins.forEach((p) => {
+            //     p.zIndex(componentNode.zIndex());
+            // })
+        });
     }
 }
 
