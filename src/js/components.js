@@ -199,12 +199,32 @@ export class StratPickup extends Pickup {
     }
 
     _populateGroup(group) {
-         Konva.Image.fromURL(StratPickup.ImageURL, (componentNode) => {
+
+        const pin1 = new Pin({});
+
+
+        const pinNode1 = pin1.createAsSubcomponent({
+            x: 140,
+            y: 105
+        });
+        group.add(pinNode1);
+
+        const pin2 = new Pin({});
+
+        const pinNode2 = pin2.createAsSubcomponent({
+            x: 159,
+            y: 105
+        });
+        group.add(pinNode2);
+
+        this._pins.push(pin1.id, pin2.id);
+
+        Konva.Image.fromURL(StratPickup.ImageURL, (componentNode) => {
             this._applyGlobalStyling(componentNode);
             group.add(componentNode);
-            // pins.forEach((p) => {
-            //     p.zIndex(componentNode.zIndex());
-            // })
+            [pinNode1, pinNode2].forEach((p) => {
+                p.zIndex(componentNode.zIndex());
+            });
         });
     }
 }
@@ -214,7 +234,7 @@ export class Jack extends Component {
         super(state);
     }
 
-    
+
 }
 
 export class MonoJack extends Jack {
@@ -227,7 +247,7 @@ export class MonoJack extends Jack {
     }
 
     _populateGroup(group) {
-         Konva.Image.fromURL(MonoJack.ImageURL, (componentNode) => {
+        Konva.Image.fromURL(MonoJack.ImageURL, (componentNode) => {
             this._applyGlobalStyling(componentNode);
             group.add(componentNode);
             // pins.forEach((p) => {
