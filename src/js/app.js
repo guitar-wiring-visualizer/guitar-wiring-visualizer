@@ -372,6 +372,10 @@ function enableSelectComponent(transformer) {
             selectableNode = node;
         } else {
             selectableNode = e.target.getParent();
+            while(selectableNode.getParent().getClassName() !== "Layer")
+            {
+                selectableNode = selectableNode.getParent();
+            }
         }
 
         const isAlreadySelected = transformer.nodes().indexOf(selectableNode) >= 0;
