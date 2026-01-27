@@ -1,3 +1,5 @@
+import EventEmitter from "./eventEmitter.js";
+
 export const TOOL_MODE_SELECT = "select";
 export const TOOL_MODE_WIRE = "wire";
 
@@ -9,9 +11,10 @@ export const WIRE_COLOR_BLUE = "blue";
 
 export const WIRE_COLOR_DEFAULT = WIRE_COLOR_BLACK;
 
-export class DiagramState {
+export class DiagramState extends EventEmitter {
 
     constructor() {
+        super()
         if (DiagramState.instance) {
             return DiagramState.instance;
         }
@@ -32,6 +35,13 @@ export class DiagramState {
 
     registerComponent(componentInstance) {
         this._addToComponentMap(componentInstance.id, componentInstance);
+    }
+
+    notifyNodeChanged(node) {
+        console.log("notifyNodeChanged", node.name())
+        if (node.name() === "Wire") {
+            this._emit("wireChanged", node);
+        }
     }
 
     getComponent(id) {
@@ -56,3 +66,4 @@ export class DiagramState {
         delete this._componenetMap[component.id];
     }
 }
+

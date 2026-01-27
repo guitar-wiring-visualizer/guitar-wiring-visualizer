@@ -9,6 +9,7 @@ import {
     WIRE_COLOR_BLUE
 } from "./diagram.js"
 import { DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Potentiometer, Wire, Humbucker, StratPickup, MonoJack } from "./components.js";
+import { Visualizer } from "./visualizer.js";
 
 const componentClassMap = { Potentiometer, DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Humbucker, StratPickup, MonoJack };
 
@@ -28,11 +29,11 @@ const setupApp = () => {
 
     const diagramLayer = createDiagramLayer();
 
+    window.GWVVisualizer = new Visualizer(diagramLayer);
+
     enableDragDropFromLibrary(diagramLayer);
 
     const transformer = addTransformer(diagramLayer);
-
-    enableVisualizerButton();
 
     enableSelectComponent(transformer);
     enableKeyboardCommands(transformer);
@@ -41,169 +42,69 @@ const setupApp = () => {
     enableToolbar(transformer);
     enableDrawWire(diagramLayer);
     enableFlipSwitchButton(transformer);
-
-    //demoAnimateOnPath(diagramLayer);
-    demoAnimateShadowLine(diagramLayer);
+    enableVisualizerButton();
 }
 
-function demoAnimateShadowLine(diagramLayer) {
-    const stage = diagramLayer.getStage();
+// function demoAnimateShadowLine(diagramLayer) {
+//     const stage = diagramLayer.getStage();
 
-    const visLayer = new Konva.Layer();
-    stage.add(visLayer);
+//     const visLayer = new Konva.Layer();
+//     stage.add(visLayer);
 
-    const wireLine = new Konva.Line({
-        points: [10, 140, 200, 200, 600, 40],
-        stroke: 'red',
-        strokeWidth: 5,
-        lineCap: 'butt',
-        lineJoin: 'round',
-        shadowColor: 'red',
-        tension: 0.7
-    });
+//     const wireLine = new Konva.Line({
+//         points: [10, 140, 200, 200, 600, 40],
+//         stroke: 'red',
+//         strokeWidth: 5,
+//         lineCap: 'butt',
+//         lineJoin: 'round',
+//         shadowColor: 'red',
+//         tension: 0.7
+//     });
 
-    visLayer.add(wireLine);
+//     visLayer.add(wireLine);
 
-    const maxShadow = 10;
-    const speed = 15;
+//     const maxShadow = 10;
+//     const speed = 15;
 
-    let currentShadow = 0;
-    let increasing = true;
+//     let currentShadow = 0;
+//     let increasing = true;
 
-    const visAnimation = new Konva.Animation((frame) => {
-        // console.log({ currentShadow });
-        if (currentShadow > maxShadow + 1 || currentShadow < 0) {
-            currentShadow = 0;
-            increasing = true;
-        }
-        if (currentShadow > maxShadow) {
-            increasing = false;
-        }
-        const changeAmount = (frame.timeDiff / 1000) * speed;
-        if (increasing) {
-            currentShadow = currentShadow + changeAmount;
-        } else {
-            currentShadow = currentShadow - changeAmount;
-        }
-        wireLine.shadowBlur(currentShadow);
-        wireLine.shadowOpacity(10 / currentShadow);
-    }, visLayer);
+//     const visAnimation = new Konva.Animation((frame) => {
+//         // console.log({ currentShadow });
+//         if (currentShadow > maxShadow + 1 || currentShadow < 0) {
+//             currentShadow = 0;
+//             increasing = true;
+//         }
+//         if (currentShadow > maxShadow) {
+//             increasing = false;
+//         }
+//         const changeAmount = (frame.timeDiff / 1000) * speed;
+//         if (increasing) {
+//             currentShadow = currentShadow + changeAmount;
+//         } else {
+//             currentShadow = currentShadow - changeAmount;
+//         }
+//         wireLine.shadowBlur(currentShadow);
+//         wireLine.shadowOpacity(10 / currentShadow);
+//     }, visLayer);
 
-    visAnimation.start();
+//     visAnimation.start();
 
-    setTimeout(() => { visAnimation.stop(); }, 10000);
-}
-
-function demoAnimateOnPath(diagramLayer) {
-    const stage = diagramLayer.getStage();
-
-    const visLayer = new Konva.Layer();
-    stage.add(visLayer);
-
-    const wireLine = new Konva.Line({
-        points: [10, 140, 200, 200, 600, 40],
-        stroke: 'red',
-        strokeWidth: 5,
-        lineCap: 'butt',
-        lineJoin: 'round',
-        shadowColor: 'magenta',
-        tension: 0.7
-    });
-
-        visLayer.add(wireLine);
-
-    const wirePoints = wireLine.points();
-
-    console.log({ wirePoints });
-    const tensionPoints = wireLine.getTensionPoints();
-    console.log({ tensionPoints });
-
-    // if original and tension are the standard 6 point lines, we can combine, otherwise use original wire points
-    const actualPoints = wirePoints.length === 6 && tensionPoints.length === 6 ? [
-        wirePoints.at(0), wirePoints.at(1),
-        tensionPoints.at(0), tensionPoints.at(1),
-        wirePoints.at(2), wirePoints.at(3),
-        tensionPoints.at(4), tensionPoints.at(5),
-        wirePoints.at(4), wirePoints.at(5)
-    ] : wirePoints;
-    console.log({ actualPoints });
-    // for(let i = 0; i< wirePoints.length; i++){
-    //     actualPoints.push(wirePoints.at(i));
-    //     actualPoints.push(wirePoints.at(i+1));
-    //     actualPoints.push(tensionPoints.at(i));
-    //     actualPoints.push(tensionPoints.at(i+1));
-    // }
-
-    const startPoint = { x: actualPoints.at(0), y: actualPoints.at(1) };
-
-    const electron = new Konva.Circle({
-        x: startPoint.x,
-        y: startPoint.y,
-        radius: 4,
-        fill: 'red',
-        strokeWidth: 0,
-        shadowColor: 'red',
-        shadowBlur: 10,
-        shadowOffset: { x: -5, y: 0 },
-        shadowOpacity: 1,
-    });
-    visLayer.add(electron);
-
-    const wirePathData = linePointsToPathData(actualPoints);
-
-    const wirePath = new Konva.Path({
-        data: wirePathData,
-        stroke: 'cyan',
-        strokeWidth: 1,
-        fill: 'transparent'
-    });
-
-    //visLayer.add(wirePath);
-
-    const steps = 20; // number of steps in animation
-    const pathLen = wirePath.getLength();
-    console.log({ pathLen });
-    const step = pathLen / steps;
-    let currentPos = 0, pointAtLen;
-
-    const visAnimation = new Konva.Animation((frame) => {
-        if (currentPos * step > pathLen) {
-            currentPos = 0;
-        }
-        currentPos = currentPos + 1;
-        pointAtLen = wirePath.getPointAtLength(currentPos * step);
-        //console.log({ currentPos, pointAtLen });
-        electron.position({ x: pointAtLen.x, y: pointAtLen.y });
-
-    }, visLayer);
-
-    visAnimation.start();
-
-    setTimeout(() => { visAnimation.stop(); }, 10000);
-
-    function linePointsToPathData(points) {
-        let path = 'M ' + points[0] + ',' + points[1];
-        for (let i = 2; i < points.length; i += 2) {
-            path += ' L ' + points[i] + ',' + points[i + 1];
-        }
-        return path;
-    }
-}
-
-let isVisualizerActive = false;
+//     setTimeout(() => { visAnimation.stop(); }, 10000);
+// }
 
 function enableVisualizerButton() {
     const visButton = document.getElementById("vis-button");
     const originalText = visButton.textContent;
     visButton.addEventListener("click", e => {
-        if (isVisualizerActive) {
-            visButton.textContent = originalText
-            isVisualizerActive = false;
+        if (Visualizer.instance.isActive) {
+            visButton.textContent = originalText;
+            Visualizer.instance.stop();
         } else {
             visButton.textContent = "Stop Visualizer";
-            isVisualizerActive = true;
+            Visualizer.instance.start();
         }
-        console.log("visualizer", isVisualizerActive);
+        console.log("visualizer", Visualizer.instance.isActive);
     });
 }
 

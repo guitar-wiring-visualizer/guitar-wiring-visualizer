@@ -48,6 +48,7 @@ export class Component {
         layer.add(group);
         this._nodeAttrs = group.attrs;
         this._subscribeToEvents(group);
+        DiagramState.instance.notifyNodeChanged(group);
     }
 
     drawOnLayer(layer) {
@@ -97,8 +98,9 @@ export class Component {
 
     removeFromDiagram(layer) {
         console.log("removeFromDiagram", this.id);
-        const node = layer.find("#" + this.id.toString()).at(0);
+        const node = layer.findOne("#" + this.id.toString());
         node.destroy();
+        DiagramState.instance.notifyNodeChanged(node);
         DiagramState.instance.removeComponentById(this.id);
     }
 
