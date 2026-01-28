@@ -14,14 +14,16 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.head_ref }}
           # Value already defaults to true, but `persist-credentials` is required to push new commits to the repository.
           persist-credentials: true
       
       # make the dist folder and copy files
-      - run: mkdir -p dist/manual && cp -r src/* dist/
+      - name: CreateDistFolder
+        run: mkdir -p dist/manual && cp -r src/* dist/
 
       # create the docs from markdown
       - name: MakeDocs
@@ -30,16 +32,34 @@ jobs:
           source: doc/manual.md
           output: dist/manual/index.html
 
-      - name: Minify
-        uses: docker://devatherock/minify-js:3.1.0
+      # minify (my way)
+      - name: InstallNode
+        uses: actions/setup-node@v4
         with:
-          directory: 'dist'
-          add_suffix: false
-          exclusions: |-
-            vendor/
+          node-version: '25.x'
+          registry-url: 'https://registry.npmjs.org'
 
-      # Commit all changed files back to the repository
-      - uses: stefanzweifel/git-auto-commit-action@v7
+      # get build utils, switch to dist folder and run shell script
+      - name: Minify
+        run: |
+          cp build/.minify.json dist/.minify.json
+          cp build/minify.sh dist/minify.sh
+          cd dist
+          chmod +x ./minify.sh
+          ./minify.sh
+          rm .minify.json
+          rm minify.sh
+
+      # - name: Minify
+      #   uses: docker://devatherock/minify-js:3.1.0
+      #   with:
+      #     directory: 'dist'
+      #     add_suffix: false
+      #     exclusions: |-
+      #       vendor/
+
+      - name: CommitDist
+        uses: stefanzweifel/git-auto-commit-action@v7
       
   deploy:
     runs-on: ubuntu-latest
@@ -62,15 +82,17 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.head_ref }}
           persist-credentials: true
 
-      # remove dist folder
-      - run: rm -r $GITHUB_WORKSPACE/dist
-      # Commit
-      - uses: stefanzweifel/git-auto-commit-action@v7
+      - name: Clean
+        run: rm -r $GITHUB_WORKSPACE/dist
+
+      - name: Commit
+        uses: stefanzweifel/git-auto-commit-action@v7
 
       
      
