@@ -42,7 +42,7 @@ jobs:
           add_suffix: false
           exclusions: |-
             *.min.*
-            */vendor/*
+            vendor/
 
       # Commit all changed files back to the repository
       - uses: stefanzweifel/git-auto-commit-action@v7
