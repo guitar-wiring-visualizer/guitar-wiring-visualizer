@@ -6,16 +6,43 @@ on:
       - master
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
+          # Value already defaults to true, but `persist-credentials` is required to push new commits to the repository.
+          persist-credentials: true
+
+      # Other steps that change files in the repository go here
+      
+      # do make the dist folder and copy files (TODO: minify, etc)
+      - run: mkdir dist && cp -r src/* dist/
+
+      # create the docs html from md
+      - name: MakeDocs
+        uses: jaywcjlove/markdown-to-html-cli@v5.0.3
+        with:
+          source: doc/manual.md
+          output: dist/manual/index.html
+
+      # Commit all changed files back to the repository
+      - uses: stefanzweifel/git-auto-commit-action@v7
+      
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - run: npm i markdown-to-html-cli -g
-      - run: markdown-to-html --source doc/manual.md --output src/manual/index.html
-      - name: Copy
+      - name: CopyToPublicSite
         uses: andstor/copycat-action@v3.2.4
         with:
           personal_token: ${{ secrets.PERSONAL_TOKEN }}
-          src_path: src/.
+          src_path: dist/.
           dst_path: /.
           dst_owner: guitar-wiring-visualizer
           dst_repo_name: guitar-wiring-visualizer.github.io
