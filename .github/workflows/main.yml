@@ -36,7 +36,6 @@ jobs:
           directory: 'dist'
           add_suffix: false
           exclusions: |-
-            .*min.*
             vendor/
 
       # Commit all changed files back to the repository
