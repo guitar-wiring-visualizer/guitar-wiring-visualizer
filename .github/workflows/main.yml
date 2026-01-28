@@ -21,16 +21,28 @@ jobs:
           persist-credentials: true
 
       # Other steps that change files in the repository go here
-      
-      # do make the dist folder and copy files (TODO: minify, etc)
-      - run: mkdir -p  dist/manual && cp -r src/* dist/
 
-      # create the docs html from md
+      # clean
+      - run: rm -r dist
+      
+      # make the dist folder and copy files
+      - run: mkdir -p dist/manual && cp -r src/* dist/
+
+      # create the docs from markdown
       - name: MakeDocs
         uses: jaywcjlove/markdown-to-html-cli@v5.0.3
         with:
           source: doc/manual.md
           output: dist/manual/index.html
+
+      - name: Minify
+        uses: docker://devatherock/minify-js:3.1.0
+        with:
+          directory: 'dist'
+          add_suffix: false
+          exclusions: |-
+            *.min.*
+            */vendor/*
 
       # Commit all changed files back to the repository
       - uses: stefanzweifel/git-auto-commit-action@v7
