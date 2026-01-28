@@ -68,8 +68,8 @@ jobs:
           persist-credentials: true
 
       # remove dist folder
-      - run: rm -r dist
-
+      #- run: rm -r dist
+      - run: stat $GITHUB_WORKSPACE/dist
       # Commit
       - uses: stefanzweifel/git-auto-commit-action@v7
 
