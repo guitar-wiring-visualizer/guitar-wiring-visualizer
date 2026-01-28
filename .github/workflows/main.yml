@@ -19,11 +19,6 @@ jobs:
           ref: ${{ github.head_ref }}
           # Value already defaults to true, but `persist-credentials` is required to push new commits to the repository.
           persist-credentials: true
-
-      # Other steps that change files in the repository go here
-
-      # clean
-      - run: rm -r dist
       
       # make the dist folder and copy files
       - run: mkdir -p dist/manual && cp -r src/* dist/
@@ -60,4 +55,26 @@ jobs:
           dst_owner: guitar-wiring-visualizer
           dst_repo_name: guitar-wiring-visualizer.github.io
           dst_branch: gh-pages
+
+  cleanup:
+    runs-on: ubuntu-latest
+    needs: deploy
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
+          persist-credentials: true
+
+      # remove dist folder
+      - run: rm -r dist
+
+      # Commit
+      - uses: stefanzweifel/git-auto-commit-action@v7
+
+      
+     
+  
           
