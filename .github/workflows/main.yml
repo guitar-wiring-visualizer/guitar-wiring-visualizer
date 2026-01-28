@@ -9,6 +9,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: MakeDocs
+        uses: jaywcjlove/markdown-to-html-cli@v5.0.3
+        with:
+          source: doc/manual.md
+          output: manual/index.html
       - name: Copy
         uses: andstor/copycat-action@v3.2.4
         with:
