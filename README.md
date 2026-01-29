@@ -25,9 +25,9 @@ For a schematic-based tools, see:
 
 ## Development
 
-The app is written in vanilla JavaScript and HTML.  No backend/server technology is needed.  The code leverages the great [Konva](https://konvajs.org/) library for drawing to the HTML canvas.
+The app is written in vanilla JavaScript and HTML.  No backend/server technology is needed.  The code leverages the great [Konva](https://konvajs.org/) ([MIT](https://github.com/konvajs/konva/blob/master/LICENSE)) library for drawing to the HTML canvas.
 
-Bootstrap is used for styling.
+[Bootstrap](https://getbootstrap.com/) ([MIT](https://github.com/twbs/bootstrap/blob/main/LICENSE)) is used for styling.
 
 ### Demo site hosting
 
