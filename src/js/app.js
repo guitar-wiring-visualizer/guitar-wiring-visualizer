@@ -1,7 +1,7 @@
 /**
  * @license AGPLv3
  * SPDX-License-Identifier: AGPLv3
- * SPDX-FileCopyrightText: Copyright (c) 2026 David W Martines
+ * SPDX-FileCopyrightText: Copyright (c) 2026 The Guitar Wiring Visualizer Authors
  */
 
 import {
