@@ -2,7 +2,9 @@
     "js": {
         "type": "terser",
         "terser": {
-            "drop_console": true
+            "compress": {
+                "drop_console": true
+            }
         }
     },
     "img": {
