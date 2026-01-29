@@ -85,7 +85,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
         with:
-          ref: ${{ github.head_ref }}
+          # checkout master explicitly to ensure latest commit is fetched
+          ref: master
           persist-credentials: true
 
       - name: Clean

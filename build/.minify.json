@@ -1,13 +1,8 @@
 {
     "js": {
-        "type": "putout",
-        "putout": {
-            "quote": "'",
-            "mangle": true,
-            "mangleClassNames": true,
-            "removeUnusedVariables": true,
-            "removeConsole": true,
-            "removeUselessSpread": true
+        "type": "terser",
+        "terser": {
+            "drop_console": true
         }
     },
     "img": {
