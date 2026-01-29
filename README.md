@@ -1,5 +1,7 @@
 # Guitar Wiring Visualizer
 
+[![CD](https://github.com/guitar-wiring-visualizer/guitar-wiring-visualizer/actions/workflows/cd.yml/badge.svg)](https://github.com/guitar-wiring-visualizer/guitar-wiring-visualizer/actions/workflows/cd.yml)
+
 Source code for  https://guitar-wiring-visualizer.github.io/
 
 ## Development
