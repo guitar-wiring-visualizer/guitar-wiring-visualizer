@@ -1,3 +1,9 @@
+/**
+ * @license AGPLv3
+ * SPDX-License-Identifier: AGPLv3
+ * SPDX-FileCopyrightText: Copyright (c) 2026 The Guitar Wiring Visualizer Authors
+ */
+
 import EventEmitter from "./eventEmitter.js";
 
 export const TOOL_MODE_SELECT = "select";
