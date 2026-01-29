@@ -1,3 +1,9 @@
+/**
+ * @license AGPLv3
+ * SPDX-License-Identifier: AGPLv3
+ * SPDX-FileCopyrightText: Copyright (c) 2026 David W Martines
+ */
+
 import EventEmitter from "./eventEmitter.js";
 
 export const TOOL_MODE_SELECT = "select";

@@ -1,3 +1,9 @@
+/**
+ * @license AGPLv3
+ * SPDX-License-Identifier: AGPLv3
+ * SPDX-FileCopyrightText: Copyright (c) 2026 David W Martines
+ */
+
 import { DiagramState, TOOL_MODE_WIRE } from "./diagram.js";
 
 export class Component {
