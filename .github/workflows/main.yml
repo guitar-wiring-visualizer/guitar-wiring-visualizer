@@ -20,10 +20,25 @@ jobs:
           ref: ${{ github.head_ref }}
           # Value already defaults to true, but `persist-credentials` is required to push new commits to the repository.
           persist-credentials: true
-      
-      # make the dist folder and copy files
-      - name: CreateDistFolder
-        run: mkdir -p dist/manual && cp -r src/* dist/
+
+      # Setup node and required build tools
+      - name: SetupNode
+        uses: actions/setup-node@v4
+        with:
+          node-version: '25.x'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: SetupBuildTools
+        run: |
+          npm i minify@15.0.1 -g
+          sudo apt-get update
+          sudo apt-get -y install moreutils
+
+      # Build
+      - name: BuildDist
+        run: |
+          chmod +x ./build_dist.sh
+          ./build_dist.sh
 
       # create the docs from markdown
       - name: MakeDocs
@@ -31,32 +46,6 @@ jobs:
         with:
           source: doc/manual.md
           output: dist/manual/index.html
-
-      # minify (my way)
-      - name: InstallNode
-        uses: actions/setup-node@v4
-        with:
-          node-version: '25.x'
-          registry-url: 'https://registry.npmjs.org'
-
-      # get build utils, switch to dist folder and run shell script
-      - name: Minify
-        run: |
-          cp build/.minify.json dist/.minify.json
-          cp build/minify.sh dist/minify.sh
-          cd dist
-          chmod +x ./minify.sh
-          ./minify.sh
-          rm .minify.json
-          rm minify.sh
-
-      # - name: Minify
-      #   uses: docker://devatherock/minify-js:3.1.0
-      #   with:
-      #     directory: 'dist'
-      #     add_suffix: false
-      #     exclusions: |-
-      #       vendor/
 
       - name: CommitDist
         uses: stefanzweifel/git-auto-commit-action@v7
