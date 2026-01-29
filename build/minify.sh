@@ -6,6 +6,6 @@ apt-get -y install moreutils
 
 find . -type f -not -path "*/vendor/*" \( -iname \*.html -o -iname \*.js -o -iname \*.css \) | while read fname
     do
-    # minify ${fname} | sponge ${fname}
-    echo ${fname}
+    minify ${fname} | sponge ${fname}
+    #echo ${fname}
     done
