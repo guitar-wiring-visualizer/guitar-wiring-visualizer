@@ -12,9 +12,16 @@ Bootstrap is used for styling.
 
 github pages is used to host the site.  Upon commit to master, the source code is copied to the `guitar-wiring-visualizer.github.io` repository to be served by github pages, using an action.  Note - the site is served from the `gh-pages` branch.
 
-### Notes
+### Local server
 
-Handy local server:
+For normal development:
 ```
 python3 -m http.server -d ./src
 ```
+
+To test the build:
+```
+./build_dist.sh
+python3 -m http.server -d ./dist
+```
+Remove the `./dist` folder when done.
