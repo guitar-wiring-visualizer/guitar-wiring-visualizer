@@ -12,25 +12,35 @@ export class Component extends EventEmitter {
         super()
 
         console.assert(state, "state is required");
+        
+        this._state = state
 
-        if (state._id) {
-            this._id = state._id;
-        } else {
-            this._id = DiagramState.instance.getNewIdentity();
+        if (!state.id) {
+            state.id = DiagramState.instance.getNewIdentity();
             DiagramState.instance.registerComponent(this);
         }
-
-        this._nodeAttrs = state._nodeAttrs || {};
-
-        this._pins = state._pins || [];
+        state.nodeAttrs = state.nodeAttrs || {};
+        state.pinIds = state.pinIds || [];
     }
 
     get id() {
-        return this._id;
+        return this._state.id;
+    }
+
+    get state() {
+        return this._state
     }
 
     get pinIds() {
-        return this._pins;
+        return this._state.pinIds;
+    }
+
+    get nodeAttrs() {
+        return this._state.nodeAttrs;
+    }
+
+    set nodeAttrs(val) {
+        this._state.nodeAttrs = val;
     }
 
     static get ImageURL() {
@@ -41,7 +51,7 @@ export class Component extends EventEmitter {
         return true;
     }
 
-    findNode(containerNode){
+    findNode(containerNode) {
         return containerNode.findOne("#" + this.id.toString())
     }
 
@@ -49,7 +59,7 @@ export class Component extends EventEmitter {
         // for add new subcomponent to a component group
         const group = this._createShapeGroup(position);
         this._populateGroup(group);
-        this._nodeAttrs = group.attrs;
+        this.nodeAttrs = group.attrs;
         this._subscribeToEvents(group);
         return group;
     }
@@ -59,7 +69,7 @@ export class Component extends EventEmitter {
         const group = this._createShapeGroup(position);
         this._populateGroup(group);
         layer.add(group);
-        this._nodeAttrs = group.attrs;
+        this.nodeAttrs = group.attrs;
         this._subscribeToEvents(group);
         DiagramState.instance.notifyNodeChanged(group);
     }
@@ -68,7 +78,7 @@ export class Component extends EventEmitter {
         // for adding deserialized component to diagram
         const group = this._createShapeGroup(position);
         this._populateGroup(group);
-        group.attrs = this._nodeAttrs;
+        group.attrs = this.nodeAttrs;
         layer.add(group);
         this._subscribeToEvents(group);
     }
@@ -76,7 +86,7 @@ export class Component extends EventEmitter {
     _subscribeToEvents(group) {
         group.on("dragend transformend", (e) => {
             console.log(this.constructor.name, this.id, e.type);
-            this._nodeAttrs = group.attrs;
+            this.nodeAttrs = group.attrs;
 
             this._moveAttachedWires(group);
         });
@@ -119,9 +129,10 @@ export class Component extends EventEmitter {
 
     _moveAttachedWires(node) {
         const layer = node.getLayer();
-        this._pins.forEach(pinId => {
+        this.pinIds.forEach(pinId => {
             //console.log("checking pin", pinId);
-            const pinNode = layer.findOne("#" + pinId.toString());
+            const pin = DiagramState.instance.getComponent(pinId);
+            const pinNode = pin.findNode(layer);
             const pinPos = pinNode.getAbsolutePosition();
             const wiresStartingOnPin = DiagramState.instance.findComponents((c) => {
                 return c.constructor.name === "Wire" && c.startPinId === pinId
@@ -134,7 +145,8 @@ export class Component extends EventEmitter {
                     _endPoint: oldWire.endPoint,
                     _startPinId: oldWire.startPinId,
                     _endPinId: oldWire.endPinId,
-                    _color: oldWire.color
+                    _color: oldWire.color,
+                    _voltage: oldWire.voltage
                 });
                 newWire.createOnLayer(layer);
                 oldWire.removeFromDiagram(layer);
@@ -150,7 +162,8 @@ export class Component extends EventEmitter {
                     _endPoint: [pinPos.x, pinPos.y],
                     _startPinId: oldWire.startPinId,
                     _endPinId: oldWire.endPinId,
-                    _color: oldWire.color
+                    _color: oldWire.color,
+                    _voltage: oldWire.voltage
                 });
                 newWire.createOnLayer(layer);
                 oldWire.removeFromDiagram(layer);
@@ -204,13 +217,6 @@ export class Pin extends Component {
     hasVoltage() {
         console.log("checking voltage on pin", this.id, this._voltage);
         return this._voltage !== 0;
-
-        // const connectedWires = DiagramState.instance.findComponents(wire => {
-        //     return wire.constructor.name == "Wire"
-        //         && (wire.endPinId == this.id || wire.startPinId == this.id)
-        // });
-        // console.log("check connected wires", connectedWires);
-        // return connectedWires.some(wire => wire && wire.hasVoltage());
     }
 }
 
@@ -225,7 +231,7 @@ export class Wire extends Component {
         this._endPinId = state._endPinId;
         this._color = state._color || DiagramState.instance.WIRE_COLOR_DEFAULT;
 
-        this._voltage = 0;
+        this._voltage = state._voltage || 0;
     }
 
     static get IsDraggable() { return false; }
@@ -383,7 +389,7 @@ export class Humbucker extends Pickup {
         });
         group.add(groundPinNode);
 
-        this._pins.push(topCoilEndPin.id, topCoilStartPin.id, bottomCoilEndPin.id, bottomCoilStartPin.id, groundPin.id);
+        this.pinIds.push(topCoilEndPin.id, topCoilStartPin.id, bottomCoilEndPin.id, bottomCoilStartPin.id, groundPin.id);
 
         Konva.Image.fromURL(Humbucker.ImageURL, (componentNode) => {
             this._applyGlobalStyling(componentNode);
@@ -410,9 +416,9 @@ export class StratPickup extends Pickup {
         return "/img/pu-strat.svg";
     }
 
-    get startPin() { return DiagramState.instance.getComponent(this._pins.at(1)); }
+    get startPin() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
 
-    get endPin() { return DiagramState.instance.getComponent(this._pins.at(0)); }
+    get endPin() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
 
     induct() {
         console.log(this.constructor.name, this.id, "received induct message");
@@ -435,7 +441,7 @@ export class StratPickup extends Pickup {
         });
         group.add(pinNode2);
 
-        this._pins.push(pin1.id, pin2.id);
+        this.pinIds.push(pin1.id, pin2.id);
 
         Konva.Image.fromURL(StratPickup.ImageURL, (componentNode) => {
             this._applyGlobalStyling(componentNode);
@@ -462,7 +468,7 @@ export class MonoJack extends Jack {
         const tipPin = new Pin({});
         const sleevePin = new Pin({});
 
-        this._pins.push(tipPin.id, sleevePin.id);
+        this.pinIds.push(tipPin.id, sleevePin.id);
 
         tipPin.on("voltageChanged", (value) => {
             console.log(this.constructor.name, "got vc event from tip pin", tipPin.id, value)
@@ -481,9 +487,9 @@ export class MonoJack extends Jack {
         return "/img/jack-mono.svg";
     }
 
-    get tipPin() { return DiagramState.instance.getComponent(this._pins.at(0)); }
+    get tipPin() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
 
-    get sleevePin() { return DiagramState.instance.getComponent(this._pins.at(1)); }
+    get sleevePin() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
 
 
     _populateGroup(group) {
@@ -556,7 +562,7 @@ export class DPDTSwitch extends Switch {
             for (let pc = 0; pc < pinCols; pc++) {
 
                 const pinComponent = new Pin({});
-                this._pins.push(pinComponent.id);
+                this.pinIds.push(pinComponent.id);
 
                 const pinNode = pinComponent.createAsSubcomponent({
                     x: DPDTSwitch._pinsStartAtX + (pc * 22),
@@ -680,7 +686,7 @@ export class Potentiometer extends Component {
         for (let p = 0; p < pinCount; p++) {
 
             const pinComponent = new Pin({});
-            this._pins.push(pinComponent.id);
+            this.pinIds.push(pinComponent.id);
 
             const pinNode = pinComponent.createAsSubcomponent({
                 x: Potentiometer._pinsStartAtX + (p * 24),
