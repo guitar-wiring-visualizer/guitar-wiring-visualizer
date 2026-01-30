@@ -530,7 +530,17 @@ export class Switch extends Component {
 
     constructor(state) {
         super(state);
+        this.state.actuatorState = this.state.actuatorState || 0;
     }
+
+    get actuatorState() {
+        return this.state.actuatorState;
+    }
+
+    _setActuatorState(val){
+        this.state.actuatorState = val;
+    }
+
 
     flip(shapeGroup) {
         this._flipActuator(shapeGroup);
@@ -599,8 +609,6 @@ export class DPDTOnOn extends DPDTSwitch {
 
     constructor(state) {
         super(state);
-
-        this._actuatorState = 0;
     }
 
     static get ImageURL() {
@@ -608,7 +616,7 @@ export class DPDTOnOn extends DPDTSwitch {
     }
 
     _getActuatorImageURLForState() {
-        return this._actuatorState === 0 ? "/img/bat-small-left.svg" : "/img/bat-small-right.svg";
+        return this.actuatorState === 0 ? "/img/bat-small-left.svg" : "/img/bat-small-right.svg";
     }
 
     _addActuator(group) {
@@ -622,7 +630,7 @@ export class DPDTOnOn extends DPDTSwitch {
 
     _flipActuator(shapeGroup) {
 
-        this._actuatorState = this._actuatorState === 0 ? 1 : 0;
+        this._setActuatorState(this.actuatorState === 0 ? 1 : 0);
 
         const actuatorNode = shapeGroup.getChildren().filter(c => c.name() === "switch-actuator")[0];
 
@@ -645,21 +653,16 @@ export class DPDTOnOn extends DPDTSwitch {
 export class DPDTOnOffOn extends DPDTSwitch {
     constructor(state) {
         super(state);
-
-        this._actuatorState = 0;
     }
 
     static get ImageURL() {
         return "/img/dpdt-purple.svg";
     }
-
 }
 
 export class DPDTOnOnOn extends DPDTSwitch {
     constructor(state) {
         super(state);
-
-        this._actuatorState = 0;
     }
 
     static get ImageURL() {
