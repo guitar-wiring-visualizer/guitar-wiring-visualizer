@@ -17,6 +17,8 @@ import {
 import { DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Potentiometer, Wire, Humbucker, StratPickup, MonoJack } from "./components.js";
 import { Visualizer } from "./visualizer.js";
 
+import testScripts from './testScripts.js'
+
 const componentClassMap = { Potentiometer, DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Humbucker, StratPickup, MonoJack };
 
 const wireColors = [
@@ -49,6 +51,20 @@ const setupApp = () => {
     enableDrawWire(diagramLayer);
     enableFlipSwitchButton(transformer);
     enableVisualizerButton();
+
+    enableTestScript(diagramLayer);
+
+}
+
+function enableTestScript(diagramLayer) {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("script")) {
+        const script = params.get("script");
+        if (script in testScripts)
+            testScripts[script](diagramLayer);
+        else
+            console.warn(script, "unknown");
+    }
 }
 
 function enableVisualizerButton() {
@@ -60,6 +76,11 @@ function enableVisualizerButton() {
             Visualizer.instance.stop();
         } else {
             visButton.textContent = "Stop Visualizer";
+
+            DiagramState.instance.findComponents((c) => {
+                return typeof c.induct === 'function';
+            }).forEach(pickup => pickup.induct());
+
             Visualizer.instance.start();
         }
         console.log("visualizer", Visualizer.instance.isActive);

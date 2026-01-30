@@ -41,6 +41,10 @@ export class Component extends EventEmitter {
         return true;
     }
 
+    findNode(containerNode){
+        return containerNode.findOne("#" + this.id.toString())
+    }
+
     createAsSubcomponent(position) {
         // for add new subcomponent to a component group
         const group = this._createShapeGroup(position);
@@ -107,7 +111,7 @@ export class Component extends EventEmitter {
 
     removeFromDiagram(layer) {
         console.log("removeFromDiagram", this.id);
-        const node = layer.findOne("#" + this.id.toString());
+        const node = this.findNode(layer);
         node.destroy();
         DiagramState.instance.notifyNodeChanged(node);
         DiagramState.instance.removeComponentById(this.id);
@@ -117,7 +121,7 @@ export class Component extends EventEmitter {
         const layer = node.getLayer();
         this._pins.forEach(pinId => {
             //console.log("checking pin", pinId);
-            const pinNode = layer.find("#" + pinId.toString()).at(0);
+            const pinNode = layer.findOne("#" + pinId.toString());
             const pinPos = pinNode.getAbsolutePosition();
             const wiresStartingOnPin = DiagramState.instance.findComponents((c) => {
                 return c.constructor.name === "Wire" && c.startPinId === pinId
@@ -193,6 +197,8 @@ export class Pin extends Component {
         connectedWires.forEach(wire => wire.receiveVoltage(this.id, value));
 
         this._emit("voltageChanged", this.voltage);
+
+        //TODO: emit event so visulizer refreshes nodes
     }
 
     hasVoltage() {
@@ -404,11 +410,13 @@ export class StratPickup extends Pickup {
         return "/img/pu-strat.svg";
     }
 
+    get startPin() { return DiagramState.instance.getComponent(this._pins.at(1)); }
+
+    get endPin() { return DiagramState.instance.getComponent(this._pins.at(0)); }
+
     induct() {
         console.log(this.constructor.name, this.id, "received induct message");
-        const startPin = DiagramState.instance.getComponent(this._pins.at(0));
-        const endPin = DiagramState.instance.getComponent(this._pins.at(1));
-        var coil = new InductionCoil(startPin, endPin);
+        var coil = new InductionCoil(this.startPin, this.endPin);
         coil.induct();
     }
 
@@ -450,29 +458,38 @@ export class Jack extends Component {
 export class MonoJack extends Jack {
     constructor(state) {
         super(state);
+
+        const tipPin = new Pin({});
+        const sleevePin = new Pin({});
+
+        this._pins.push(tipPin.id, sleevePin.id);
+
+        tipPin.on("voltageChanged", (value) => {
+            console.log(this.constructor.name, "got vc event from tip pin", tipPin.id, value)
+            if (!sleevePin.hasVoltage())
+                sleevePin.receiveVoltage(this.id, -value);
+        });
+        sleevePin.on("voltageChanged", (value) => {
+            console.log(this.constructor.name, "got vc event from sleevePin", sleevePin.id, value)
+            if (!tipPin.hasVoltage())
+                tipPin.receiveVoltage(this.id, -value);
+        });
+
     }
 
     static get ImageURL() {
         return "/img/jack-mono.svg";
     }
 
+    get tipPin() { return DiagramState.instance.getComponent(this._pins.at(0)); }
+
+    get sleevePin() { return DiagramState.instance.getComponent(this._pins.at(1)); }
+
+
     _populateGroup(group) {
 
-        const tipPin = new Pin({});
-        const shieldPin = new Pin({});
-
-        tipPin.on("voltageChanged", (value) => {
-            console.log(this.constructor.name, "got vc event from tip pin", tipPin.id, value)
-            if (!shieldPin.hasVoltage())
-                shieldPin.receiveVoltage(this.id, -value);
-        });
-        shieldPin.on("voltageChanged", (value) => {
-            console.log(this.constructor.name, "got vc event from shieldPin", shieldPin.id, value)
-            if (!tipPin.hasVoltage())
-                tipPin.receiveVoltage(this.id, -value);
-        });
-
-        this._pins.push(tipPin.id, shieldPin.id);
+        const tipPin = this.tipPin;
+        const sleevePin = this.sleevePin;
 
         const tipPinNode = tipPin.createAsSubcomponent({
             x: 47,
@@ -480,16 +497,16 @@ export class MonoJack extends Jack {
         });
         group.add(tipPinNode);
 
-        const shieldPinNode = shieldPin.createAsSubcomponent({
+        const sleevePinNode = sleevePin.createAsSubcomponent({
             x: 48,
             y: 31
         });
-        group.add(shieldPinNode);
+        group.add(sleevePinNode);
 
         Konva.Image.fromURL(MonoJack.ImageURL, (componentNode) => {
             this._applyGlobalStyling(componentNode);
             group.add(componentNode);
-            [tipPinNode, shieldPinNode].forEach((p) => {
+            [tipPinNode, sleevePinNode].forEach((p) => {
                 p.zIndex(componentNode.zIndex());
             });
         });
