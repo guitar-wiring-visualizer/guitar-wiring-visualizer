@@ -5,9 +5,12 @@
  */
 
 import { DiagramState, TOOL_MODE_WIRE } from "./diagram.js";
+import EventEmitter from "./eventEmitter.js";
 
-export class Component {
+export class Component extends EventEmitter {
     constructor(state = {}) {
+        super()
+
         console.assert(state, "state is required");
 
         if (state._id) {
@@ -152,12 +155,176 @@ export class Component {
     }
 }
 
+export class Pin extends Component {
+    constructor(state) {
+        super(state);
+
+        this._voltage = 0;
+    }
+
+    static get IsDraggable() { return false; }
+
+    get voltage() { return this._voltage };
+
+    _populateGroup(group) {
+        const pinShape = new Konva.Circle({
+            radius: 6,
+            stroke: "red",
+            opacity: DiagramState.instance.showConnectors ? 1 : 0,
+            strokeWidth: 2
+        });
+        group.add(pinShape);
+    }
+
+    _applyGlobalStyling(node) {
+        //noop
+    }
+
+    receiveVoltage(fromId, value) {
+        console.log(this.id, "pin received voltage", fromId, value);
+        this._voltage = value;
+
+        const connectedWires = DiagramState.instance.findComponents(wire => {
+            return wire.constructor.name == "Wire"
+                && wire.id !== fromId
+                && (wire.endPinId == this.id || wire.startPinId == this.id)
+        });
+        console.log("send to connected wires", connectedWires);
+        connectedWires.forEach(wire => wire.receiveVoltage(this.id, value));
+
+        this._emit("voltageChanged", this.voltage);
+    }
+
+    hasVoltage() {
+        console.log("checking voltage on pin", this.id, this._voltage);
+        return this._voltage !== 0;
+
+        // const connectedWires = DiagramState.instance.findComponents(wire => {
+        //     return wire.constructor.name == "Wire"
+        //         && (wire.endPinId == this.id || wire.startPinId == this.id)
+        // });
+        // console.log("check connected wires", connectedWires);
+        // return connectedWires.some(wire => wire && wire.hasVoltage());
+    }
+}
+
+export class Wire extends Component {
+    constructor(state) {
+        super(state);
+
+        this._startPoint = state._startPoint;
+        this._endPoint = state._endPoint;
+        this._midPoint = state._midPoint;
+        this._startPinId = state._startPinId;
+        this._endPinId = state._endPinId;
+        this._color = state._color || DiagramState.instance.WIRE_COLOR_DEFAULT;
+
+        this._voltage = 0;
+    }
+
+    static get IsDraggable() { return false; }
+
+    get startPinId() {
+        return this._startPinId;
+    }
+
+    get endPinId() {
+        return this._endPinId;
+    }
+
+    get startPoint() {
+        return this._startPoint;
+    }
+
+    get midPoint() {
+        return this._midPoint;
+    }
+
+    get endPoint() {
+        return this._endPoint;
+    }
+
+    get color() {
+        return this._color;
+    }
+
+    receiveVoltage(fromId, value) {
+        console.log(this.id, "wire received voltage", fromId, value);
+        this._voltage = value;
+        const targetPinId = this._startPinId === fromId ? this.endPinId : this.startPinId;
+        const targetPin = DiagramState.instance.getComponent(targetPinId);
+        targetPin.receiveVoltage(this.id, value);
+    }
+
+    hasVoltage() {
+        console.log("checking voltage on wire", this.id);
+        return this._voltage !== 0;
+    }
+
+    _createShapeGroup(position) {
+
+        const wirePoints = [...this._startPoint, ...this._midPoint, ...this._endPoint];
+
+        console.log("wire creating", this.id, wirePoints);
+
+        const line = new Konva.Line({
+            points: wirePoints,
+            stroke: this._color,
+            strokeWidth: 5,
+            lineCap: 'butt',
+            lineJoin: 'round',
+            draggable: Wire.IsDraggable,
+            tension: .7,
+            id: this.id.toString(),
+            name: this.constructor.name,
+        });
+
+        line.transformsEnabled("none");
+
+        return line;
+    }
+
+    _populateGroup(group) {
+        // noop
+    }
+
+    _applyGlobalStyling(node) {
+        //noop
+    }
+
+    changeColor(node, color) {
+        this._color = color;
+        node.stroke(color);
+    }
+}
+
+class InductionCoil {
+
+    constructor(startPin, endPin) {
+        this._startPin = startPin;
+        this._endPin = endPin;
+    }
+
+    induct() {
+        console.log(this.constructor.name, "received induct message");
+        if (this._startPin.hasVoltage())
+            this._endPin.receiveVoltage(this._startPin.id, -this._startPin.voltage);
+        else if (this._endPin.hasVoltage())
+            this._startPin.receiveVoltage(this._endPin.id, -this._endPin.voltage);
+        else
+            this._endPin.receiveVoltage(this._startPin.id, 1);
+
+    }
+}
+
 export class Pickup extends Component {
     constructor(state) {
         super(state);
     }
 
-
+    induct() {
+        throw new Error("Abstract method call")
+    }
 }
 
 export class Humbucker extends Pickup {
@@ -167,6 +334,10 @@ export class Humbucker extends Pickup {
 
     static get ImageURL() {
         return "/img/pu-humbucker4.svg";
+    }
+
+    induct() {
+        console.warn("Humbuker induct not yet implemented");
     }
 
     _populateGroup(group) {
@@ -233,6 +404,14 @@ export class StratPickup extends Pickup {
         return "/img/pu-strat.svg";
     }
 
+    induct() {
+        console.log(this.constructor.name, this.id, "received induct message");
+        const startPin = DiagramState.instance.getComponent(this._pins.at(0));
+        const endPin = DiagramState.instance.getComponent(this._pins.at(1));
+        var coil = new InductionCoil(startPin, endPin);
+        coil.induct();
+    }
+
     _populateGroup(group) {
         const pin1 = new Pin({});
         const pinNode1 = pin1.createAsSubcomponent({
@@ -278,21 +457,34 @@ export class MonoJack extends Jack {
     }
 
     _populateGroup(group) {
+
         const tipPin = new Pin({});
+        const shieldPin = new Pin({});
+
+        tipPin.on("voltageChanged", (value) => {
+            console.log(this.constructor.name, "got vc event from tip pin", tipPin.id, value)
+            if (!shieldPin.hasVoltage())
+                shieldPin.receiveVoltage(this.id, -value);
+        });
+        shieldPin.on("voltageChanged", (value) => {
+            console.log(this.constructor.name, "got vc event from shieldPin", shieldPin.id, value)
+            if (!tipPin.hasVoltage())
+                tipPin.receiveVoltage(this.id, -value);
+        });
+
+        this._pins.push(tipPin.id, shieldPin.id);
+
         const tipPinNode = tipPin.createAsSubcomponent({
             x: 47,
             y: 10
         });
         group.add(tipPinNode);
 
-        const shieldPin = new Pin({});
         const shieldPinNode = shieldPin.createAsSubcomponent({
             x: 48,
             y: 31
         });
         group.add(shieldPinNode);
-
-        this._pins.push(tipPin.id, shieldPin.id);
 
         Konva.Image.fromURL(MonoJack.ImageURL, (componentNode) => {
             this._applyGlobalStyling(componentNode);
@@ -301,103 +493,6 @@ export class MonoJack extends Jack {
                 p.zIndex(componentNode.zIndex());
             });
         });
-    }
-}
-
-export class Pin extends Component {
-    constructor(state) {
-        super(state);
-    }
-
-    static get IsDraggable() { return false; }
-
-    _populateGroup(group) {
-        const pinShape = new Konva.Circle({
-            radius: 6,
-            stroke: "red",
-            opacity: DiagramState.instance.showConnectors ? 1 : 0,
-            strokeWidth: 2
-        });
-        group.add(pinShape);
-    }
-
-    _applyGlobalStyling(node) {
-        //noop
-    }
-}
-
-export class Wire extends Component {
-    constructor(state) {
-        super(state);
-
-        this._startPoint = state._startPoint;
-        this._endPoint = state._endPoint;
-        this._midPoint = state._midPoint;
-        this._startPinId = state._startPinId;
-        this._endPinId = state._endPinId;
-        this._color = state._color || DiagramState.instance.WIRE_COLOR_DEFAULT;
-    }
-
-    static get IsDraggable() { return false; }
-
-    get startPinId() {
-        return this._startPinId;
-    }
-
-    get endPinId() {
-        return this._endPinId;
-    }
-
-    get startPoint() {
-        return this._startPoint;
-    }
-
-    get midPoint() {
-        return this._midPoint;
-    }
-
-    get endPoint() {
-        return this._endPoint;
-    }
-
-    get color() {
-        return this._color;
-    }
-
-    _createShapeGroup(position) {
-
-        const wirePoints = [...this._startPoint, ...this._midPoint, ...this._endPoint];
-
-        console.log("wire creating", this.id, wirePoints);
-
-        const line = new Konva.Line({
-            points: wirePoints,
-            stroke: this._color,
-            strokeWidth: 5,
-            lineCap: 'butt',
-            lineJoin: 'round',
-            draggable: Wire.IsDraggable,
-            tension: .7,
-            id: this.id.toString(),
-            name: this.constructor.name,
-        });
-
-        line.transformsEnabled("none");
-
-        return line;
-    }
-
-    _populateGroup(group) {
-        // noop
-    }
-
-    _applyGlobalStyling(node) {
-        //noop
-    }
-
-    changeColor(node, color) {
-        this._color = color;
-        node.stroke(color);
     }
 }
 

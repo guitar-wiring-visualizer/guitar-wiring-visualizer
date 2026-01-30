@@ -30,21 +30,21 @@ export class Visualizer {
             console.log("received wireChanged event");
             const wasActiveWhenEventReceived = this.isActive;
 
-            if(wasActiveWhenEventReceived)
+            if (wasActiveWhenEventReceived)
                 this.stop();
 
             this._refreshActiveWireNodesList();
             this._createAllAnimations()
             console.log(this._activeWireNodes);
 
-            if(wasActiveWhenEventReceived)
+            if (wasActiveWhenEventReceived)
                 this.start();
         });
 
         Visualizer.instance = this;
     }
 
-    _createAllAnimations(){
+    _createAllAnimations() {
         this._animations = [this._createActiveWireAnimation()].concat(this._createSignalWireAnimations());
     }
 
@@ -53,6 +53,12 @@ export class Visualizer {
     }
 
     start() {
+        DiagramState.instance.findComponents((c) => {
+            return typeof c.induct === 'function';
+        }).forEach(pickup => pickup.induct());
+        
+        this._refreshActiveWireNodesList();
+        
         this._isActive = true;
         this._visLayer.visible(true);
         this._animations.filter(a => a != null).forEach(a => a.start());
@@ -67,8 +73,7 @@ export class Visualizer {
     _refreshActiveWireNodesList() {
         this._visLayer.destroyChildren();
         const activeWires = DiagramState.instance.findComponents((component) => {
-            return component.constructor.name === "Wire";
-            //TODO filter to wires actively getting signal
+            return component.constructor.name === "Wire" && component.hasVoltage();
         });
 
         const activeWireNodes = activeWires.filter(a => a != null).map((component) => {
@@ -81,8 +86,8 @@ export class Visualizer {
             });
             this._visLayer.add(clone);
             return clone;
-
         });
+        console.log("_activeWireNodes", this._activeWireNodes);
     }
 
     _createActiveWireAnimation() {
