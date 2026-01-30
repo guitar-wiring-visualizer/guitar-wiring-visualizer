@@ -140,13 +140,13 @@ export class Component extends EventEmitter {
             //console.log("wires starting on", wiresStartingOnPin);
             wiresStartingOnPin.forEach(oldWire => {
                 const newWire = new Wire({
-                    _startPoint: [pinPos.x, pinPos.y],
-                    _midPoint: oldWire.midPoint,
-                    _endPoint: oldWire.endPoint,
-                    _startPinId: oldWire.startPinId,
-                    _endPinId: oldWire.endPinId,
-                    _color: oldWire.color,
-                    _voltage: oldWire.voltage
+                    startPoint: [pinPos.x, pinPos.y],
+                    midPoint: oldWire.midPoint,
+                    endPoint: oldWire.endPoint,
+                    startPinId: oldWire.startPinId,
+                    endPinId: oldWire.endPinId,
+                    color: oldWire.color,
+                    voltage: oldWire.voltage
                 });
                 newWire.createOnLayer(layer);
                 oldWire.removeFromDiagram(layer);
@@ -157,13 +157,13 @@ export class Component extends EventEmitter {
 
             wiresEndingOnPin.forEach(oldWire => {
                 const newWire = new Wire({
-                    _startPoint: oldWire.startPoint,
-                    _midPoint: oldWire.midPoint,
-                    _endPoint: [pinPos.x, pinPos.y],
-                    _startPinId: oldWire.startPinId,
-                    _endPinId: oldWire.endPinId,
-                    _color: oldWire.color,
-                    _voltage: oldWire.voltage
+                    startPoint: oldWire.startPoint,
+                    midPoint: oldWire.midPoint,
+                    endPoint: [pinPos.x, pinPos.y],
+                    startPinId: oldWire.startPinId,
+                    endPinId: oldWire.endPinId,
+                    color: oldWire.color,
+                    voltage: oldWire.voltage
                 });
                 newWire.createOnLayer(layer);
                 oldWire.removeFromDiagram(layer);
@@ -226,64 +226,69 @@ export class Wire extends Component {
     constructor(state) {
         super(state);
 
-        this._startPoint = state._startPoint;
-        this._endPoint = state._endPoint;
-        this._midPoint = state._midPoint;
-        this._startPinId = state._startPinId;
-        this._endPinId = state._endPinId;
-        this._color = state._color || DiagramState.instance.WIRE_COLOR_DEFAULT;
+        // this._startPoint = state._startPoint;
+        // this._endPoint = state._endPoint;
+        // this._midPoint = state._midPoint;
+        // this._startPinId = state._startPinId;
+        // this._endPinId = state._endPinId;
 
-        this._voltage = state._voltage || 0;
+        this.state.color = state.color || DiagramState.instance.WIRE_COLOR_DEFAULT;
+        this.state.voltage = state.voltage || 0;
     }
 
     static get IsDraggable() { return false; }
 
     get startPinId() {
-        return this._startPinId;
+        return this.state.startPinId;
     }
 
     get endPinId() {
-        return this._endPinId;
+        return this.state.endPinId;
     }
 
     get startPoint() {
-        return this._startPoint;
+        return this.state.startPoint;
     }
 
     get midPoint() {
-        return this._midPoint;
+        return this.state.midPoint;
     }
 
     get endPoint() {
-        return this._endPoint;
+        return this.state.endPoint;
     }
 
     get color() {
-        return this._color;
+        return this.state.color;
     }
+
+    get voltage() { return this.state.voltage };
+
+    _setVoltage(val) { this.state.voltage = val; }
+
 
     receiveVoltage(fromId, value) {
         console.log(this.id, "wire received voltage", fromId, value);
-        this._voltage = value;
-        const targetPinId = this._startPinId === fromId ? this.endPinId : this.startPinId;
+        this._setVoltage(value);
+        const targetPinId = this.startPinId === fromId ? this.endPinId : this.startPinId;
         const targetPin = DiagramState.instance.getComponent(targetPinId);
         targetPin.receiveVoltage(this.id, value);
     }
 
     hasVoltage() {
         console.log("checking voltage on wire", this.id);
-        return this._voltage !== 0;
+        return this.voltage !== 0;
     }
 
     _createShapeGroup(position) {
 
-        const wirePoints = [...this._startPoint, ...this._midPoint, ...this._endPoint];
+        const wirePoints = [...this.startPoint, ...this.midPoint, ...this.endPoint];
 
         console.log("wire creating", this.id, wirePoints);
 
         const line = new Konva.Line({
             points: wirePoints,
-            stroke: this._color,
+            stroke: this.color,
             strokeWidth: 5,
             lineCap: 'butt',
             lineJoin: 'round',
@@ -307,7 +312,7 @@ export class Wire extends Component {
     }
 
     changeColor(node, color) {
-        this._color = color;
+        this.color = color;
         node.stroke(color);
     }
 }

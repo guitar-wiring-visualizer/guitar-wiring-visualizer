@@ -284,12 +284,12 @@ function enableDrawWire(layer) {
         }
 
         const wire = new Wire({
-            _startPoint: wireStart,
-            _midPoint: wireMid,
-            _endPoint: wireEnd,
-            _startPinId: parseInt(startPin.id(), 10),
-            _endPinId: parseInt(endPin.id(), 10),
-            _color: DiagramState.instance.wireToolColor
+            startPoint: wireStart,
+            midPoint: wireMid,
+            endPoint: wireEnd,
+            startPinId: parseInt(startPin.id(), 10),
+            endPinId: parseInt(endPin.id(), 10),
+            color: DiagramState.instance.wireToolColor
         });
 
         setTimeout(() => {

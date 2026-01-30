@@ -26,22 +26,22 @@ const stratPickupAndJack = (diagramLayer) => {
     const sleevePos = sleevePin.findNode(diagramLayer).getAbsolutePosition();
 
     const hotWire = new Wire({
-        _startPoint: [hotPinPos.x, hotPinPos.y],
-        _midPoint: [150, 150],
-        _endPoint: [tipPos.x, tipPos.y],
-        _startPinId: hotPin.id,
-        _endPinId: tipPin.id,
-        _color: "red"
+        startPoint: [hotPinPos.x, hotPinPos.y],
+        midPoint: [150, 150],
+        endPoint: [tipPos.x, tipPos.y],
+        startPinId: hotPin.id,
+        endPinId: tipPin.id,
+        color: "red"
     });
     hotWire.createOnLayer(diagramLayer);
 
     const groundWire = new Wire({
-        _startPoint: [groundPinPos.x, groundPinPos.y],
-        _midPoint: [160, 160],
-        _endPoint: [sleevePos.x, sleevePos.y],
-        _startPinId: groundPin.id,
-        _endPinId: sleevePin.id,
-        _color: "black"
+        startPoint: [groundPinPos.x, groundPinPos.y],
+        midPoint: [160, 160],
+        endPoint: [sleevePos.x, sleevePos.y],
+        startPinId: groundPin.id,
+        endPinId: sleevePin.id,
+        color: "black"
     });
     groundWire.createOnLayer(diagramLayer);
 
