@@ -12,7 +12,7 @@ export class Component extends EventEmitter {
         super()
 
         console.assert(state, "state is required");
-        
+
         this._state = state
 
         if (!state.id) {
@@ -176,12 +176,14 @@ export class Pin extends Component {
     constructor(state) {
         super(state);
 
-        this._voltage = 0;
+        this.state.voltage = state.voltage || 0;
     }
 
     static get IsDraggable() { return false; }
 
-    get voltage() { return this._voltage };
+    get voltage() { return this.state.voltage };
+
+    _setVoltage(val) { this.state.voltage = val; }
 
     _populateGroup(group) {
         const pinShape = new Konva.Circle({
@@ -199,7 +201,7 @@ export class Pin extends Component {
 
     receiveVoltage(fromId, value) {
         console.log(this.id, "pin received voltage", fromId, value);
-        this._voltage = value;
+        this._setVoltage(value);
 
         const connectedWires = DiagramState.instance.findComponents(wire => {
             return wire.constructor.name == "Wire"
@@ -215,8 +217,8 @@ export class Pin extends Component {
     }
 
     hasVoltage() {
-        console.log("checking voltage on pin", this.id, this._voltage);
-        return this._voltage !== 0;
+        console.log("checking voltage on pin", this.id, this.voltage);
+        return this.voltage !== 0;
     }
 }
 
