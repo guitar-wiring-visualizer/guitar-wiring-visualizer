@@ -24,19 +24,13 @@ export class Visualizer {
         this._isActive = false;
 
         this._activeWireNodes = [];
+        this._signalWireNodes = [];
 
         this._createAllAnimations();
 
         DiagramState.instance.on("wireChanged", (_) => {
             console.log("received wireChanged event");
             const wasActiveWhenEventReceived = this.isActive;
-
-            // if (wasActiveWhenEventReceived)
-            //     this.stop();
-
-            // this._refreshActiveWireNodesList();
-            // this._createAllAnimations()
-            // console.log(this._activeWireNodes);
 
             this.stop();
 
@@ -56,7 +50,7 @@ export class Visualizer {
     }
 
     start() {
-        this._refreshActiveWireNodesList();
+        this._refreshWireNodesLists();
         this._createAllAnimations();
 
         this._isActive = true;
@@ -70,24 +64,32 @@ export class Visualizer {
         this._isActive = false;
     }
 
-    _refreshActiveWireNodesList() {
+    _refreshWireNodesLists() {
         this._visLayer.destroyChildren();
-        const activeWires = DiagramState.instance.findComponentsOfType(Wire, (component) => {
+
+        this._activeWireNodes = [];
+        this._signalWireNodes = [];
+
+        const activeWiresOnDiagram = DiagramState.instance.findComponentsOfType(Wire, (component) => {
             return component.hasVoltage();
         }).filter(Boolean);
 
-        const activeWireNodes = activeWires.map((component) => {
-            return this._diagramLayer.findOne("#" + component.id.toString());
-        }).filter(Boolean);
+        activeWiresOnDiagram.forEach(activeWire => {
+            const activeWireNode = activeWire.findNode(this._diagramLayer);
 
-        this._activeWireNodes = activeWireNodes.map((node) => {
-            const clone = node.clone({
-                shadowColor: node.stroke()
+            const clonedWireNode = activeWireNode.clone({
+                shadowColor: activeWireNode.stroke()
             });
-            this._visLayer.add(clone);
-            return clone;
-        }).filter(Boolean);
+            this._visLayer.add(clonedWireNode);
+            this._activeWireNodes.push(clonedWireNode);
+
+            if (activeWire.voltage > 0) {
+                this._signalWireNodes.push(clonedWireNode);
+            }
+        });
+
         console.log("_activeWireNodes", this._activeWireNodes);
+        console.log("_signalWireNodes", this._signalWireNodes);
     }
 
     _createActiveWireAnimation() {
@@ -196,7 +198,7 @@ export class Visualizer {
             }
         }
 
-        return this._activeWireNodes.map(wireNode => {
+        return this._signalWireNodes.map(wireNode => {
             return createAnimationForWire(wireNode);
         });
 
