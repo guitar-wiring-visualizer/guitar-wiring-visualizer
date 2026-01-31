@@ -7,7 +7,7 @@
 import { DiagramState } from "./diagram.js";
 import { Wire } from './components.js';
 
-const rangeToConsiderPointsBeingClose = 2.0;
+const RANGE_FOR_CLOSE_POINT_COMPARISON = 2.0;
 
 export class Visualizer {
 
@@ -114,7 +114,7 @@ export class Visualizer {
         console.log("_signalWireNodes", this._signalWireNodes);
 
         function areClose(a, b) {
-            return Math.abs(a - b) <= rangeToConsiderPointsBeingClose;
+            return Math.abs(a - b) <= RANGE_FOR_CLOSE_POINT_COMPARISON;
         }
 
         function reverseWirePoints(originalPoints) {
