@@ -234,14 +234,14 @@ export class Pin extends Component {
     constructor(state = {}) {
         super(state);
 
-        this.state.voltage = state.voltage || 0;
+        this._voltage = 0;
     }
 
     static get IsDraggable() { return false; }
 
-    get voltage() { return this.state.voltage };
+    get voltage() { return this._voltage };
 
-    _setVoltage(val) { this.state.voltage = val; }
+    _setVoltage(val) { this._voltage = val; }
 
     _drawChildNodes(parentNode) {
         const pinShape = new Konva.Circle({
@@ -284,7 +284,7 @@ export class Wire extends Component {
         super(state);
 
         this.state.color = state.color || DiagramState.instance.WIRE_COLOR_DEFAULT;
-        this.state.voltage = state.voltage || 0;
+        this._voltage = 0;
     }
 
     static get IsDraggable() { return false; }
@@ -338,9 +338,9 @@ export class Wire extends Component {
         super.moveTo(position);
     }
 
-    get voltage() { return this.state.voltage };
+    get voltage() { return this._voltage };
 
-    _setVoltage(val) { this.state.voltage = val; }
+    _setVoltage(val) { this._voltage = val; }
 
     receiveVoltage(fromId, value) {
         console.log(this.id, "wire received voltage", fromId, value);
