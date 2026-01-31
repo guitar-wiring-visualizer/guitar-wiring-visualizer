@@ -44,128 +44,140 @@
         </div>
         <div class="row">
             <div class="col ">
-                <button type="button" class="btn btn-success" id="vis-button">Start Visualizer</button>
-            </div>
-            <div class="col">
-                <button type="button" class="btn btn-info" id="save-url">Save</button>
-                <button type="button" class="btn btn-info" id="save-copy-url">Save and Copy URL</button>
-            </div>
-            <div class="col">
-                <div class="btn-group" role="group">
+                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
+                    <div class="btn-group me-2" role="group">
+                        <button type="button" class="btn btn-success" id="vis-button">Start Visualizer</button>
+                    </div>
+                    <div class="btn-group me-2" role="group">
+                        <button type="button" class="btn btn-outline-secondary" id="save-url">Save</button>
+                        <button type="button" class="btn btn-outline-secondary" id="save-copy-url">Save and Copy
+                            URL</button>
+                    </div>
+                    <div class="btn-group me-2" role="group">
+                        <input type="radio" class="btn-check" name="options-tool" id="select-tool" autocomplete="off"
+                            checked>
+                        <label class="btn btn-outline-primary" for="select-tool">Select/Move</label>
 
-                    <input type="radio" class="btn-check" name="options-tool" id="select-tool" autocomplete="off"
-                        checked>
-                    <label class="btn btn-outline-primary" for="select-tool">Select/Move</label>
+                        <input type="radio" class="btn-check" name="options-tool" id="wire-tool" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="wire-tool">Add Wire</label>
+                        <input type="radio" class="btn-check" name="options-wire-color" id="wire-color-black"
+                            autocomplete="off" checked>
+                        <label class="btn btn-outline-secondary" for="wire-color-black">
+                            <div
+                                style="width: 35px; height: 25px; background-color:black; color: white; display: flex;">
+                            </div>
+                        </label>
+                        <input type="radio" class="btn-check" name="options-wire-color" id="wire-color-red"
+                            autocomplete="off">
+                        <label class="btn btn-outline-secondary" for="wire-color-red">
+                            <div style="width: 35px; height: 25px; background-color: red; color: white; display: flex;">
+                            </div>
+                        </label>
+                        <input type="radio" class="btn-check" name="options-wire-color" id="wire-color-yellow"
+                            autocomplete="off">
+                        <label class="btn btn-outline-secondary" for="wire-color-yellow">
+                            <div
+                                style="width: 35px; height: 25px; background-color: yellow; color: white; display: flex;">
+                            </div>
+                        </label>
+                        <input type="radio" class="btn-check" name="options-wire-color" id="wire-color-green"
+                            autocomplete="off">
+                        <label class="btn btn-outline-secondary" for="wire-color-green">
+                            <div
+                                style="width: 35px; height: 25px; background-color:green; color: white; display: flex;">
+                            </div>
+                        </label>
+                        <input type="radio" class="btn-check" name="options-wire-color" id="wire-color-blue"
+                            autocomplete="off">
+                        <label class="btn btn-outline-secondary" for="wire-color-blue">
+                            <div
+                                style="width: 35px; height: 25px; background-color: blue; color: white; display: flex;">
+                            </div>
+                        </label>
+                    </div>
+                    <div class="btn-group me-2" role="group">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="flip-button" disabled>Flip
+                            Switch
+                        </button>
+                    </div>
+                    <div class="btn-group text-end" role="group">
+                        <button type="button" class="btn btn-outline-danger" id="clear-button">Clear
+                            Diagram</button>
+                    </div>
 
-                    <input type="radio" class="btn-check" name="options-tool" id="wire-tool" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="wire-tool">Add Wire</label>
-                </div>
-                <div class="form-check form-switch mt-2">
-                    <input class="form-check-input" type="checkbox" role="switch" value="" id="check-show-connectors">
-                    <label class="form-check-label" for="check-show-connectors">
-                        Show Pins
-                    </label>
                 </div>
             </div>
-            <div class="col">
-                <div class="btn-group" role="group">
-                    <input type="radio" class="btn-check" name="options-wire-color" id="wire-color-black"
-                        autocomplete="off" checked>
-                    <label class="btn btn-outline-secondary" for="wire-color-black">
-                        <div style="width: 35px; height: 25px; background-color:black; color: white; display: flex;">
-                        </div>
-                    </label>
-                    <input type="radio" class="btn-check" name="options-wire-color" id="wire-color-red"
-                        autocomplete="off">
-                    <label class="btn btn-outline-secondary" for="wire-color-red">
-                        <div style="width: 35px; height: 25px; background-color: red; color: white; display: flex;">
-                        </div>
-                    </label>
-                    <input type="radio" class="btn-check" name="options-wire-color" id="wire-color-yellow"
-                        autocomplete="off">
-                    <label class="btn btn-outline-secondary" for="wire-color-yellow">
-                        <div style="width: 35px; height: 25px; background-color: yellow; color: white; display: flex;">
-                        </div>
-                    </label>
-                    <input type="radio" class="btn-check" name="options-wire-color" id="wire-color-green"
-                        autocomplete="off">
-                    <label class="btn btn-outline-secondary" for="wire-color-green">
-                        <div style="width: 35px; height: 25px; background-color:green; color: white; display: flex;">
-                        </div>
-                    </label>
-                    <input type="radio" class="btn-check" name="options-wire-color" id="wire-color-blue"
-                        autocomplete="off">
-                    <label class="btn btn-outline-secondary" for="wire-color-blue">
-                        <div style="width: 35px; height: 25px; background-color: blue; color: white; display: flex;">
-                        </div>
-                    </label>
+            <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
+                <div class="btn-group me-2" role="group">
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" role="switch" value=""
+                            id="check-show-connectors">
+                        <label class="form-check-label" for="check-show-connectors">
+                            Show Pins
+                        </label>
+                    </div>
                 </div>
-            </div>
-            <div class="col">
-                <button type="button" class="btn btn-sm btn-outline-secondary" id="flip-button" disabled>Flip
-                    Switch</button>
-            </div>
-            <div class="col text-end">
-                <button type="button" class="btn btn-outline-danger" id="clear-button">Clear Diagram</button>
             </div>
         </div>
-        <div class="row">
-            <div class="col">
-                <hr>
-            </div>
+
+    </div>
+    <div class="row">
+        <div class="col">
+            <hr>
         </div>
-        <div class="row">
-            <div class="col-2 text-center border">
-                <!-- <h4>Component Library</h4>
+    </div>
+    <div class="row">
+        <div class="col-2 text-center border">
+            <!-- <h4>Component Library</h4>
                 <hr> -->
-                <div id="library-items" style="height: 800px;">
-                    <div class="mt-5">
-                        <h5>Pickups</h5>
-                    </div>
-                    <div>
-                        <img data-component-class="StratPickup" src="" draggable="true" width="175">
-                        <p>Strat</p>
-                    </div>
-                    <div>
-                        <img data-component-class="Humbucker" src="" draggable="true" width="175">
-                        <p>Humbucker</p>
-                    </div>
-                    <div>
-                        <h5>Potentiometers</h5>
-                    </div>
-                    <div>
-                        <img data-component-class="Potentiometer" src="" draggable="true">
-                        <p>Standard Pot</p>
-                    </div>
-                    <div class="mt-5">
-                        <h5>Switches</h5>
-                    </div>
-                    <div>
-                        <img data-component-class="DPDTOnOn" src="" draggable="true">
-                        <p>DPDT On-On</p>
-                    </div>
-                    <div>
-                        <img data-component-class="DPDTOnOffOn" src="" draggable="true">
-                        <p>DPDT On-Off-On</p>
-                    </div>
-                    <div>
-                        <img data-component-class="DPDTOnOnOn" src="" draggable="true">
-                        <p>DPDT On-On-On</p>
-                    </div>
-                    <div class="mt-5">
-                        <h5>Jacks</h5>
-                    </div>
-                    <div>
-                        <img data-component-class="MonoJack" src="" draggable="true">
-                        <p>Mono Jack</p>
-                    </div>
+            <div id="library-items" style="height: 800px;">
+                <div class="mt-5">
+                    <h5>Pickups</h5>
+                </div>
+                <div>
+                    <img data-component-class="StratPickup" src="" draggable="true" width="175">
+                    <p>Strat</p>
+                </div>
+                <div>
+                    <img data-component-class="Humbucker" src="" draggable="true" width="175">
+                    <p>Humbucker</p>
+                </div>
+                <div>
+                    <h5>Potentiometers</h5>
+                </div>
+                <div>
+                    <img data-component-class="Potentiometer" src="" draggable="true">
+                    <p>Standard Pot</p>
+                </div>
+                <div class="mt-5">
+                    <h5>Switches</h5>
+                </div>
+                <div>
+                    <img data-component-class="DPDTOnOn" src="" draggable="true">
+                    <p>DPDT On-On</p>
+                </div>
+                <div>
+                    <img data-component-class="DPDTOnOffOn" src="" draggable="true">
+                    <p>DPDT On-Off-On</p>
+                </div>
+                <div>
+                    <img data-component-class="DPDTOnOnOn" src="" draggable="true">
+                    <p>DPDT On-On-On</p>
+                </div>
+                <div class="mt-5">
+                    <h5>Jacks</h5>
+                </div>
+                <div>
+                    <img data-component-class="MonoJack" src="" draggable="true">
+                    <p>Mono Jack</p>
                 </div>
             </div>
-            <div class="col border" style="overflow-x: auto">
-                <div id="loader">Loading...</div>
-                <div id="diagram" class="bg-secondary-subtle"></div>
-            </div>
         </div>
+        <div class="col border" style="overflow-x: auto">
+            <div id="loader">Loading...</div>
+            <div id="diagram" class="bg-secondary-subtle"></div>
+        </div>
+    </div>
     </div>
 
     <script src="https://unpkg.com/konva@10.2.0/konva.min.js"></script>
