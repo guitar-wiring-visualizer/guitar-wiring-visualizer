@@ -5,10 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Guitar Wiring Visualizer</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-        crossorigin="anonymous"
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous"
         onerror="this.onerror=null;this.href='/css/vendor/bootstrap.min.css';this.integrity='';">
     <meta name="description" content="">
     <meta property="og:title" content="">
@@ -29,12 +27,13 @@
     <div class="p-2 bg-warning-subtle text-warning-emphasis text-center">Note: You are accessing a pre-release
         version of this app, guaranteed to have bugs and incomplete functionality. Stay tuned for a 1.0.0 release!</div>
     <div class="p-2 bg-dark text-white text-end">
-        <a class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="/manual">User
+        <a class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
+            href="/manual">User
             Manual<a />
             | <a class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
                 href="https://github.com/guitar-wiring-visualizer/guitar-wiring-visualizer/issues">Issues<a />
                 | <a class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
-                href="https://github.com/guitar-wiring-visualizer/guitar-wiring-visualizer">Code<a />
+                    href="https://github.com/guitar-wiring-visualizer/guitar-wiring-visualizer">Code<a />
     </div>
 
     <div id="app-root" class="container-fluid">
@@ -46,6 +45,9 @@
         <div class="row">
             <div class="col ">
                 <button type="button" class="btn btn-success" id="vis-button">Start Visualizer</button>
+            </div>
+            <div class="col">
+                <button type="button" class="btn btn-info" id="update-url">Save</button>
             </div>
             <div class="col">
                 <div class="btn-group" role="group">
@@ -99,7 +101,7 @@
                 </div>
             </div>
             <div class="col">
-                <button type="button" class="btn btn-sm btn-outline-seconday" id="flip-button" disabled>Flip
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="flip-button" disabled>Flip
                     Switch</button>
             </div>
             <div class="col text-end">

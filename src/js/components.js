@@ -17,6 +17,7 @@ export class Component extends EventEmitter {
 
         if (isNewComponent()) {
             state.id = DiagramState.instance.getNewIdentity();
+            state.className = this.constructor.name;
             DiagramState.instance.registerComponent(this);
 
             state.nodeAttrs = state.nodeAttrs || {};
@@ -82,7 +83,6 @@ export class Component extends EventEmitter {
      */
     draw(containerNode) {
         console.assert(containerNode, "containerNode is required");
-        this._unDrawIfNeeded(containerNode);
         const positionInContainer = this._getPosition();
         const rootNode = this._createRootNode(positionInContainer);
         this._drawChildNodes(rootNode);
@@ -92,11 +92,26 @@ export class Component extends EventEmitter {
         DiagramState.instance.notifyNodeChanged(rootNode);
     }
 
+    /**
+     * Render this component in the container, replacing the existing node.
+     * Usually not necessary.
+     * This is to be used after changing the state of a component and you want to force re-render.
+     * Delegates to the normal draw method after destroying any existing node.
+     * @param {Konva.Node} containerNode 
+     */
+    reDraw(containerNode){
+        console.assert(containerNode, "containerNode is required");
+        this._unDrawIfNeeded(containerNode);
+        this.draw(containerNode);
+    }
+
     _unDrawIfNeeded(containerNode) {
         console.assert(containerNode, "containerNode is required");
         const node = this.findNode(containerNode);
-        if (node)
+        if (node){
+            console.log("undraw node", node.id());
             node.destroy();
+        }
     }
 
     /**
@@ -217,14 +232,14 @@ export class Component extends EventEmitter {
             });
             wiresStartingOnPin.forEach(oldWire => {
                 oldWire.updateStartPoint([pinPos.x, pinPos.y]);
-                oldWire.draw(layer);
+                oldWire.reDraw(layer);
             });
             const wiresEndingOnPin = DiagramState.instance.findComponentsOfType(Wire, (w) => {
                 return w.endPinId === pinId
             });
             wiresEndingOnPin.forEach(oldWire => {
                 oldWire.updateEndPoint([pinPos.x, pinPos.y]);
-                oldWire.draw(layer);
+                oldWire.reDraw(layer);
             });
         });
     }
@@ -419,7 +434,7 @@ class InductionCoil {
     }
 
     stopInducting() {
-        if(this._endPin.hasVoltage())
+        if (this._endPin.hasVoltage())
             this._endPin.receiveVoltage(this._startPin, 0);
     }
 }
@@ -558,6 +573,7 @@ export class StratPickup extends Pickup {
         Konva.Image.fromURL(StratPickup.ImageURL, (componentNode) => {
             this._applyGlobalStyling(componentNode);
             parentNode.add(componentNode);
+            console.log("this._getPinNodes(parentNode)", this._getPinNodes(parentNode));
             this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
         });
     }
@@ -826,4 +842,4 @@ export class Potentiometer extends Component {
 /**
  * Map of components for dynamic creation.
  */
-export const componentClassMap = { Potentiometer, DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Humbucker, StratPickup, MonoJack };
+export const componentClassMap = { Potentiometer, DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Humbucker, StratPickup, MonoJack, Wire, Pin };

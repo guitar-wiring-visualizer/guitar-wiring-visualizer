@@ -25,6 +25,8 @@ const wireColors = [
     WIRE_COLOR_BLUE,
 ];
 
+const SERIALIZED_DIAGRAM_STATE_PARAM = "d";
+
 const setupApp = async () => {
 
     window.GWVDiagramState = new DiagramState();
@@ -48,8 +50,29 @@ const setupApp = async () => {
     enableFlipSwitchButton(transformer);
     enableVisualizerButton();
 
-    await enableTestScript(diagramLayer);
+    enableExportToUrl();
+    enableImportFromUrl(diagramLayer);
 
+    await enableTestScript(diagramLayer);
+}
+
+function enableExportToUrl() {
+    document.getElementById("update-url").addEventListener("click", (e) => {
+        const serializedState = DiagramState.instance.serializeState();
+        const url = new URL(window.location);
+        url.searchParams.set(SERIALIZED_DIAGRAM_STATE_PARAM, serializedState);
+        window.history.replaceState({}, '', url);
+        alert("The state of the diagram has been captured. Copy the current window URL to keep this diagram.");
+    });
+}
+
+function enableImportFromUrl(diagramLayer) {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has(SERIALIZED_DIAGRAM_STATE_PARAM)) {
+        const serializedState = params.get(SERIALIZED_DIAGRAM_STATE_PARAM);
+        DiagramState.instance.loadState(serializedState);
+        DiagramState.instance.drawAll(diagramLayer);
+    }
 }
 
 async function enableTestScript(diagramLayer) {
@@ -534,6 +557,10 @@ function enableClearDiagram(layer) {
                     DiagramState.instance.notifyNodeChanged(child);
                     DiagramState.instance.removeComponentById(child.id());
                 });
+
+            const url = new URL(window.location);
+            url.searchParams.delete(SERIALIZED_DIAGRAM_STATE_PARAM);
+            window.history.replaceState({}, '', url);
         }
     };
 }

@@ -4,6 +4,7 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 The Guitar Wiring Visualizer Authors
  */
 
+import { componentClassMap } from "./components.js";
 import EventEmitter from "./eventEmitter.js";
 
 export const TOOL_MODE_SELECT = "select";
@@ -58,11 +59,15 @@ export class DiagramState extends EventEmitter {
         this._componenetMap[id] = componentInstance;
     }
 
-    findComponents(predicate) {
-        return Object.values(this._componenetMap).filter(predicate);
+    _allComponentInstances() {
+        return Object.values(this._componenetMap);
     }
 
-    findComponentsOfType(type, predicate){
+    findComponents(predicate) {
+        return this._allComponentInstances().filter(predicate);
+    }
+
+    findComponentsOfType(type, predicate) {
         return this.findComponents((c) => c.constructor === type && predicate(c));
     }
 
@@ -74,6 +79,54 @@ export class DiagramState extends EventEmitter {
             });
         }
         delete this._componenetMap[component.id];
+    }
+
+    serializeState() {
+        const diagramState = {
+            componentStates: this._allComponentInstances().map(component => {
+                return component.state;
+            }),
+        }
+        console.log({ data: diagramState });
+
+        const encoded = btoa(JSON.stringify(diagramState));
+        console.log({ encoded });
+
+        return encoded;
+    }
+
+    loadState(data) {
+        console.log({ data });
+
+        const decoded = atob(data);
+        console.log({ decoded });
+
+        const diagramState = JSON.parse(decoded);
+        console.log({ diagramState });
+
+        const idsDeserliazed = []
+        diagramState.componentStates.forEach(state => {
+            idsDeserliazed.push(state.id);
+
+            const className = state.className;
+            console.log("deserializing", className);
+            
+            const componentInstance = new componentClassMap[className](state);
+
+            this.registerComponent(componentInstance);
+
+        });
+
+        this._lastIssuedId = idsDeserliazed.sort((a, b) => b - a).at(0);
+        console.log("reset last issued id", this._lastIssuedId);
+
+        console.log("loaded diagram state!");
+    }
+
+    drawAll(container) {
+        this._allComponentInstances()
+            .filter(i => i.constructor.name !== 'Pin') //Pins don't need to be drawn directly.
+            .forEach(c => c.draw(container));
     }
 }
 
