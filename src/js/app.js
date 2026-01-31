@@ -364,10 +364,9 @@ function enableDragDropFromLibrary(layer) {
         const y = pointerPos.y - POINTER_COMP;
         const creationPosition = { x, y };
 
-        const state = {};
-
-        const component = new componentClassMap[componentClassName](state);
-        component.createOnLayer(layer, creationPosition);
+        const component = new componentClassMap[componentClassName]();
+        component.moveTo(creationPosition);
+        component.draw(layer);
     });
 }
 
