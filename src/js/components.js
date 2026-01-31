@@ -82,6 +82,7 @@ export class Component extends EventEmitter {
      */
     draw(containerNode) {
         console.assert(containerNode, "containerNode is required");
+        this._unDrawIfNeeded(containerNode);
         const positionInContainer = this._getPosition();
         const rootNode = this._createRootNode(positionInContainer);
         this._drawChildNodes(rootNode);
@@ -89,6 +90,13 @@ export class Component extends EventEmitter {
         this.nodeAttrs = rootNode.attrs;
         this._subscribeToEvents(rootNode);
         DiagramState.instance.notifyNodeChanged(rootNode);
+    }
+
+    _unDrawIfNeeded(containerNode){
+        console.assert(containerNode, "containerNode is required");
+        const node = this.findNode(containerNode);
+        if(node)
+            node.destroy();
     }
 
     /**
@@ -124,16 +132,6 @@ export class Component extends EventEmitter {
     }
 
     /**
-     * Gets a reference to the node representing this component.
-     * Uses id.
-     * @param {Konva.Node} container 
-     * @returns {Konva.Node}
-     */
-    getNode(container) {
-        return container.findOne("#" + this.id.toString());
-    }
-
-    /**
      * Utility function to get a list of nodes of the component.
      * @param {Konva.Node} container 
      * @returns [{Konva.Node}]
@@ -142,7 +140,7 @@ export class Component extends EventEmitter {
         console.assert(container, "container is required");
         return this.pinIds.map(id => {
             const pin = DiagramState.instance.getComponent(id);
-            return pin.getNode(container);
+            return pin.findNode(container);
         });
     }
 
@@ -217,36 +215,16 @@ export class Component extends EventEmitter {
             const wiresStartingOnPin = DiagramState.instance.findComponentsOfType(Wire, (w) => {
                 return w.startPinId === pinId
             });
-            //console.log("wires starting on", wiresStartingOnPin);
             wiresStartingOnPin.forEach(oldWire => {
-                const newWire = new Wire({
-                    startPoint: [pinPos.x, pinPos.y],
-                    midPoint: oldWire.midPoint,
-                    endPoint: oldWire.endPoint,
-                    startPinId: oldWire.startPinId,
-                    endPinId: oldWire.endPinId,
-                    color: oldWire.color,
-                    voltage: oldWire.voltage
-                });
-                newWire.draw(layer);
-                oldWire.removeFromDiagram(layer);
+                oldWire.updateStartPoint([pinPos.x, pinPos.y]);
+                oldWire.draw(layer);
             });
             const wiresEndingOnPin = DiagramState.instance.findComponentsOfType(Wire, (w) => {
                 return w.endPinId === pinId
             });
-
             wiresEndingOnPin.forEach(oldWire => {
-                const newWire = new Wire({
-                    startPoint: oldWire.startPoint,
-                    midPoint: oldWire.midPoint,
-                    endPoint: [pinPos.x, pinPos.y],
-                    startPinId: oldWire.startPinId,
-                    endPinId: oldWire.endPinId,
-                    color: oldWire.color,
-                    voltage: oldWire.voltage
-                });
-                newWire.draw(layer);
-                oldWire.removeFromDiagram(layer);
+                oldWire.updateEndPoint([pinPos.x, pinPos.y]);
+                oldWire.draw(layer);
             });
         });
     }
@@ -335,6 +313,26 @@ export class Wire extends Component {
         return this.state.color;
     }
 
+    /**
+     * Updates the start point of the wire.
+     * @param {[]} newPoint a flat array of the x and y integers.
+     */
+    updateStartPoint(newPoint) {
+        console.assert(newPoint, "newPoint is required");
+        console.assert(Array.isArray(newPoint) && newPoint.length === 2, "newPoint must be a flat array of two values");
+        this.state.startPoint = newPoint;
+    }
+
+    /**
+     * Updates the end point of the wire.
+     * @param {[]} newPoint a flat array of the x and y integers.
+     */
+    updateEndPoint(newPoint) {
+        console.assert(newPoint, "newPoint is required");
+        console.assert(Array.isArray(newPoint) && newPoint.length === 2, "newPoint must be a flat array of two values");
+        this.state.endPoint = newPoint;
+    }
+
     moveTo(position) {
         console.warn("_moveTo called on a Wire.  You probably want to set the startPoint, midPoint, and endPoint instead.");
         super.moveTo(position);
@@ -357,7 +355,12 @@ export class Wire extends Component {
         return this.voltage !== 0;
     }
 
-    _createRootNode(position) {
+    /**
+     * Special root node creation for Wire.
+     * No position arg is needed since it draws based on start/mid/endpoints.
+     * This just creates a Line node, not a group, since no child nodes are used.
+     */
+    _createRootNode(_) {
 
         const wirePoints = [...this.startPoint, ...this.midPoint, ...this.endPoint];
 
