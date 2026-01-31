@@ -269,8 +269,6 @@ export class Pin extends Component {
         connectedWires.forEach(wire => wire.receiveVoltage(this.id, value));
 
         this._emit("voltageChanged", this.voltage);
-
-        //TODO: emit event so visulizer refreshes nodes
     }
 
     hasVoltage() {

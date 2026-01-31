@@ -490,14 +490,13 @@ function cycleWireColors() {
     const newColor = wireColors.at(lastWireColor);
     const colorButton = document.getElementById("wire-color-" + newColor);
     colorButton.click();
-    //DiagramState.instance.wireToolColor = newColor;
-    //console.log("new color", DiagramState.instance.wireToolColor);
+    console.log("new color", DiagramState.instance.wireToolColor);
 }
 
 function changeColor(selectedNode) {
     const component = DiagramState.instance.getComponent(selectedNode.id());
     if (component.changeColor) {
-        //console.log("change color", component);
+        console.log("change color", component);
         component.changeColor(selectedNode, DiagramState.instance.wireToolColor);
     }
 }
