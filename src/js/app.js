@@ -50,8 +50,8 @@ const setupApp = async () => {
     enableFlipSwitchButton(transformer);
     enableVisualizerButton();
 
-    enableSaveToURL();
-    enableSaveAndCopyURL();
+    enableSave();
+
     enableImportFromURL(diagramLayer);
 
     await enableTestScript(diagramLayer);
@@ -70,20 +70,13 @@ function saveStateToURL() {
     return url;
 }
 
-function enableSaveToURL() {
-    document.getElementById("save-url").addEventListener("click", (e) => {
-        const url = saveStateToURL();
-        if (url)
-            alert("Diagram was saved to the URL.");
-    });
-}
-
-function enableSaveAndCopyURL() {
-    document.getElementById("save-copy-url").addEventListener("click", async (e) => {
+function enableSave() {
+    document.getElementById("save-url").addEventListener("click", async (e) => {
         const url = saveStateToURL();
         if (url) {
-            await copyToClipboard(url);
-            alert("Diagram was saved and link copied to your clipboard.");
+            if (document.getElementById("check-copy-to-clipboard").checked) {
+                await copyToClipboard(url);
+            }
         }
     });
 }
@@ -130,6 +123,7 @@ function stopSimulatingGuitar() {
 function enableVisualizerButton() {
     const visButton = document.getElementById("vis-button");
     const originalText = visButton.textContent;
+
     visButton.addEventListener("click", e => {
         if (Visualizer.instance.isActive) {
             visButton.textContent = originalText;
