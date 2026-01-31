@@ -50,23 +50,49 @@ const setupApp = async () => {
     enableFlipSwitchButton(transformer);
     enableVisualizerButton();
 
-    enableExportToUrl();
-    enableImportFromUrl(diagramLayer);
+    enableSaveToURL();
+    enableSaveAndCopyURL();
+    enableImportFromURL(diagramLayer);
 
     await enableTestScript(diagramLayer);
 }
 
-function enableExportToUrl() {
-    document.getElementById("update-url").addEventListener("click", (e) => {
-        const serializedState = DiagramState.instance.serializeState();
-        const url = new URL(window.location);
-        url.searchParams.set(SERIALIZED_DIAGRAM_STATE_PARAM, serializedState);
-        window.history.replaceState({}, '', url);
-        alert("The state of the diagram has been captured. Copy the current window URL to keep this diagram.");
+function saveStateToURL() {
+    const serializedState = DiagramState.instance.serializeState();
+    if (serializedState === "") {
+        console.warn("mo state to save");
+        return "";
+    }
+
+    const url = new URL(window.location);
+    url.searchParams.set(SERIALIZED_DIAGRAM_STATE_PARAM, serializedState);
+    window.history.replaceState({}, '', url);
+    return url;
+}
+
+function enableSaveToURL() {
+    document.getElementById("save-url").addEventListener("click", (e) => {
+        const url = saveStateToURL();
+        if (url)
+            alert("Diagram was saved to the URL.");
     });
 }
 
-function enableImportFromUrl(diagramLayer) {
+function enableSaveAndCopyURL() {
+    document.getElementById("save-copy-url").addEventListener("click", async (e) => {
+        const url = saveStateToURL();
+        if (url) {
+            await copyToClipboard(url);
+            alert("Diagram was saved and link copied to your clipboard.");
+        }
+    });
+}
+
+async function copyToClipboard(str) {
+    await navigator.clipboard.writeText(str);
+}
+
+function enableImportFromURL(diagramLayer) {
     const params = new URLSearchParams(window.location.search);
     if (params.has(SERIALIZED_DIAGRAM_STATE_PARAM)) {
         const serializedState = params.get(SERIALIZED_DIAGRAM_STATE_PARAM);

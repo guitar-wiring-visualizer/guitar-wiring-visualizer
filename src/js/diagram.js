@@ -82,6 +82,9 @@ export class DiagramState extends EventEmitter {
     }
 
     serializeState() {
+        if (this._allComponentInstances().length === 0) {
+            return "";
+        }
         const diagramState = {
             componentStates: this._allComponentInstances().map(component => {
                 return component.state;
@@ -110,7 +113,7 @@ export class DiagramState extends EventEmitter {
 
             const className = state.className;
             console.log("deserializing", className);
-            
+
             const componentInstance = new componentClassMap[className](state);
 
             this.registerComponent(componentInstance);

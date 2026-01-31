@@ -573,7 +573,6 @@ export class StratPickup extends Pickup {
         Konva.Image.fromURL(StratPickup.ImageURL, (componentNode) => {
             this._applyGlobalStyling(componentNode);
             parentNode.add(componentNode);
-            console.log("this._getPinNodes(parentNode)", this._getPinNodes(parentNode));
             this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
         });
     }
