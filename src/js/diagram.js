@@ -62,6 +62,10 @@ export class DiagramState extends EventEmitter {
         return Object.values(this._componenetMap).filter(predicate);
     }
 
+    findComponentsOfType(type, predicate){
+        return this.findComponents((c) => c.constructor === type && predicate(c));
+    }
+
     removeComponentById(componentId) {
         const component = this.getComponent(componentId);
         if (component.pinIds) {

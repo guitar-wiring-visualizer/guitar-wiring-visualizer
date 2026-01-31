@@ -214,8 +214,8 @@ export class Component extends EventEmitter {
             const pin = DiagramState.instance.getComponent(pinId);
             const pinNode = pin.findNode(layer);
             const pinPos = pinNode.getAbsolutePosition();
-            const wiresStartingOnPin = DiagramState.instance.findComponents((c) => {
-                return c.constructor.name === "Wire" && c.startPinId === pinId
+            const wiresStartingOnPin = DiagramState.instance.findComponentsOfType(Wire, (w) => {
+                return w.startPinId === pinId
             });
             //console.log("wires starting on", wiresStartingOnPin);
             wiresStartingOnPin.forEach(oldWire => {
@@ -231,8 +231,8 @@ export class Component extends EventEmitter {
                 newWire.draw(layer);
                 oldWire.removeFromDiagram(layer);
             });
-            const wiresEndingOnPin = DiagramState.instance.findComponents((c) => {
-                return c.constructor.name === "Wire" && c.endPinId === pinId
+            const wiresEndingOnPin = DiagramState.instance.findComponentsOfType(Wire, (w) => {
+                return w.endPinId === pinId
             });
 
             wiresEndingOnPin.forEach(oldWire => {
@@ -283,9 +283,8 @@ export class Pin extends Component {
         console.log(this.id, "pin received voltage", fromId, value);
         this._setVoltage(value);
 
-        const connectedWires = DiagramState.instance.findComponents(wire => {
-            return wire.constructor.name == "Wire"
-                && wire.id !== fromId
+        const connectedWires = DiagramState.instance.findComponentsOfType(Wire, wire => {
+            return wire.id !== fromId
                 && (wire.endPinId == this.id || wire.startPinId == this.id)
         });
         console.log("send to connected wires", connectedWires);

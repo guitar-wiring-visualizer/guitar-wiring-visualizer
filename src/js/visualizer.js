@@ -5,6 +5,7 @@
  */
 
 import { DiagramState } from "./diagram.js";
+import { Wire } from './components.js';
 
 export class Visualizer {
 
@@ -71,8 +72,8 @@ export class Visualizer {
 
     _refreshActiveWireNodesList() {
         this._visLayer.destroyChildren();
-        const activeWires = DiagramState.instance.findComponents((component) => {
-            return component.constructor.name === "Wire" && component.hasVoltage();
+        const activeWires = DiagramState.instance.findComponentsOfType(Wire, (component) => {
+            return component.hasVoltage();
         }).filter(Boolean);
 
         const activeWireNodes = activeWires.map((component) => {
