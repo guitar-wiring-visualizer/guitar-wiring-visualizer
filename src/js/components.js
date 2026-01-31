@@ -8,19 +8,26 @@ import { DiagramState, TOOL_MODE_WIRE } from "./diagram.js";
 import EventEmitter from "./eventEmitter.js";
 
 export class Component extends EventEmitter {
-    constructor(state = {}) {
+    constructor(state) {
         super()
 
         console.assert(state, "state is required");
 
         this._state = state
 
-        if (!state.id) {
+        if (isNewComponent()) {
             state.id = DiagramState.instance.getNewIdentity();
             DiagramState.instance.registerComponent(this);
+
+            state.nodeAttrs = state.nodeAttrs || {};
+            state.pinIds = state.pinIds || [];
+
+            this._createChildComponents();
         }
-        state.nodeAttrs = state.nodeAttrs || {};
-        state.pinIds = state.pinIds || [];
+
+        function isNewComponent() {
+            return !state.id;
+        }
     }
 
     get id() {
@@ -40,6 +47,7 @@ export class Component extends EventEmitter {
     }
 
     set nodeAttrs(val) {
+        console.assert(val, "val is required");
         this._state.nodeAttrs = val;
     }
 
@@ -51,80 +59,152 @@ export class Component extends EventEmitter {
         return true;
     }
 
+    /**
+     * Sets the X,Y position of this component, relative to its container.
+     * @param {x, y} position 
+     */
+    moveTo(position) {
+        console.assert(position, "position is required");
+        this.nodeAttrs.x = position.x;
+        this.nodeAttrs.y = position.y;
+    }
+
+    /**
+     * Render this component in the container.
+     * This function can be called on a newly created component or one
+     * that was restored from persisted state.
+     * 
+     * For newly created components, you probably want to call moveTo first,
+     * or else it will draw at 0,0.
+     * 
+     * From the app perspective, the container will typically be a Konva.Layer.
+     * @param {Konva.Node} containerNode 
+     */
+    draw(containerNode) {
+        console.assert(containerNode, "containerNode is required");
+        const positionInContainer = this._getPosition();
+        const rootNode = this._createRootNode(positionInContainer);
+        this._drawChildNodes(rootNode);
+        containerNode.add(rootNode);
+        this.nodeAttrs = rootNode.attrs;
+        this._subscribeToEvents(rootNode);
+        DiagramState.instance.notifyNodeChanged(rootNode);
+    }
+
+    /**
+     * Removes this component from the diagram
+     * (both visually and from persisted state).
+     * @param {Konva.Node} layer 
+     */
+    removeFromDiagram(layer) {
+        console.assert(layer, "layer is required");
+        console.log("removeFromDiagram", this.id);
+        const node = this.findNode(layer);
+        node.destroy();
+        DiagramState.instance.notifyNodeChanged(node);
+        DiagramState.instance.removeComponentById(this.id);
+    }
+
+    /**
+     * Gets a reference to the root Konva.node for this component.
+     * @param {Konva.Node} containerNode 
+     * @returns Konva.node
+     */
     findNode(containerNode) {
+        console.assert(containerNode, "containerNode is required");
         return containerNode.findOne("#" + this.id.toString())
     }
 
-    createAsSubcomponent(position) {
-        // for add new subcomponent to a component group
-        const group = this._createShapeGroup(position);
-        this._populateGroup(group);
-        this.nodeAttrs = group.attrs;
-        this._subscribeToEvents(group);
-        return group;
+    /**
+     * Utility function to get the x,y position based on the node attrs.
+     * @returns {x,y}
+     */
+    _getPosition() {
+        return { x: this.nodeAttrs.x, y: this.nodeAttrs.y };
     }
 
-    createOnLayer(layer, position) {
-        // for adding new componenet to diagram
-        const group = this._createShapeGroup(position);
-        this._populateGroup(group);
-        layer.add(group);
-        this.nodeAttrs = group.attrs;
-        this._subscribeToEvents(group);
-        DiagramState.instance.notifyNodeChanged(group);
+    /**
+     * Gets a reference to the node representing this component.
+     * Uses id.
+     * @param {Konva.Node} container 
+     * @returns {Konva.Node}
+     */
+    getNode(container) {
+        return container.findOne("#" + this.id.toString());
     }
 
-    drawOnLayer(layer) {
-        // for adding deserialized component to diagram
-        const group = this._createShapeGroup(position);
-        this._populateGroup(group);
-        group.attrs = this.nodeAttrs;
-        layer.add(group);
-        this._subscribeToEvents(group);
+    /**
+     * Utility function to get a list of nodes of the component.
+     * @param {Konva.Node} container 
+     * @returns [{Konva.Node}]
+     */
+    _getPinNodes(container) {
+        console.assert(container, "container is required");
+        return this.pinIds.map(id => {
+            const pin = DiagramState.instance.getComponent(id);
+            return pin.getNode(container);
+        });
     }
 
-    _subscribeToEvents(group) {
-        group.on("dragend transformend", (e) => {
+    _subscribeToEvents(componentNode) {
+        componentNode.on("dragend transformend", (e) => {
             console.log(this.constructor.name, this.id, e.type);
-            this.nodeAttrs = group.attrs;
+            this.state.nodeAttrs = componentNode.attrs;
 
-            this._moveAttachedWires(group);
+            this._moveAttachedWires(componentNode);
         });
 
-        group.on("dragstart", (e) => {
+        componentNode.on("dragstart", (e) => {
             if (DiagramState.instance.toolMode === TOOL_MODE_WIRE) {
-                group.stopDrag();
+                componentNode.stopDrag();
             }
         });
     }
 
-    _createShapeGroup(position) {
+    /**
+     * Allows a component to create child components such as pins, actuators, etc.
+     * @virtual
+     */
+    _createChildComponents() {
+    }
+
+
+    /**
+     * Creates the root node of the component.
+     * In most cases this is a {Konva.Group} to which child elements can be added.
+     * Can be overridden in special cases, such as for Wires which are not groups.
+     * @virtual
+     * @returns {Konva.Node}
+     */
+    _createRootNode() {
         return new Konva.Group({
-            x: position.x,
-            y: position.y,
+            x: this.nodeAttrs.x,
+            y: this.nodeAttrs.y,
             draggable: this.constructor.IsDraggable,
             name: this.constructor.name,
             id: this.id.toString()
         });
     }
 
-    _populateGroup(group) {
-        throw new Error("abstract method call");
+    /**
+     * Renders all child nodes into the parentNode.
+     * @param {Konva.Node} parentNode.
+     * @virtual
+     */
+    _drawChildNodes(parentNode) {
     }
 
+    /**
+     * Applies common styling to the node.  This is called automatically during drawing.
+     * Can be overridden.
+     * @param {Konva.Node} node
+     * @virtual
+     */
     _applyGlobalStyling(node) {
         node.shadowColor("black");
         node.shadowBlur(6);
         node.shadowOffset({ x: 3, y: 3 });
         node.shadowOpacity(0.4);
-    }
-
-    removeFromDiagram(layer) {
-        console.log("removeFromDiagram", this.id);
-        const node = this.findNode(layer);
-        node.destroy();
-        DiagramState.instance.notifyNodeChanged(node);
-        DiagramState.instance.removeComponentById(this.id);
     }
 
     _moveAttachedWires(node) {
@@ -148,7 +228,7 @@ export class Component extends EventEmitter {
                     color: oldWire.color,
                     voltage: oldWire.voltage
                 });
-                newWire.createOnLayer(layer);
+                newWire.draw(layer);
                 oldWire.removeFromDiagram(layer);
             });
             const wiresEndingOnPin = DiagramState.instance.findComponents((c) => {
@@ -165,7 +245,7 @@ export class Component extends EventEmitter {
                     color: oldWire.color,
                     voltage: oldWire.voltage
                 });
-                newWire.createOnLayer(layer);
+                newWire.draw(layer);
                 oldWire.removeFromDiagram(layer);
             });
         });
@@ -173,7 +253,7 @@ export class Component extends EventEmitter {
 }
 
 export class Pin extends Component {
-    constructor(state) {
+    constructor(state = {}) {
         super(state);
 
         this.state.voltage = state.voltage || 0;
@@ -185,14 +265,14 @@ export class Pin extends Component {
 
     _setVoltage(val) { this.state.voltage = val; }
 
-    _populateGroup(group) {
+    _drawChildNodes(parentNode) {
         const pinShape = new Konva.Circle({
             radius: 6,
             stroke: "red",
             opacity: DiagramState.instance.showConnectors ? 1 : 0,
             strokeWidth: 2
         });
-        group.add(pinShape);
+        parentNode.add(pinShape);
     }
 
     _applyGlobalStyling(node) {
@@ -223,14 +303,8 @@ export class Pin extends Component {
 }
 
 export class Wire extends Component {
-    constructor(state) {
+    constructor(state = {}) {
         super(state);
-
-        // this._startPoint = state._startPoint;
-        // this._endPoint = state._endPoint;
-        // this._midPoint = state._midPoint;
-        // this._startPinId = state._startPinId;
-        // this._endPinId = state._endPinId;
 
         this.state.color = state.color || DiagramState.instance.WIRE_COLOR_DEFAULT;
         this.state.voltage = state.voltage || 0;
@@ -262,10 +336,14 @@ export class Wire extends Component {
         return this.state.color;
     }
 
+    moveTo(position) {
+        console.warn("_moveTo called on a Wire.  You probably want to set the startPoint, midPoint, and endPoint instead.");
+        super.moveTo(position);
+    }
+
     get voltage() { return this.state.voltage };
 
     _setVoltage(val) { this.state.voltage = val; }
-
 
     receiveVoltage(fromId, value) {
         console.log(this.id, "wire received voltage", fromId, value);
@@ -280,7 +358,7 @@ export class Wire extends Component {
         return this.voltage !== 0;
     }
 
-    _createShapeGroup(position) {
+    _createRootNode(position) {
 
         const wirePoints = [...this.startPoint, ...this.midPoint, ...this.endPoint];
 
@@ -303,7 +381,7 @@ export class Wire extends Component {
         return line;
     }
 
-    _populateGroup(group) {
+    _drawChildNodes(group) {
         // noop
     }
 
@@ -337,7 +415,7 @@ class InductionCoil {
 }
 
 export class Pickup extends Component {
-    constructor(state) {
+    constructor(state = {}) {
         super(state);
     }
 
@@ -347,7 +425,7 @@ export class Pickup extends Component {
 }
 
 export class Humbucker extends Pickup {
-    constructor(state) {
+    constructor(state = {}) {
         super(state);
     }
 
@@ -359,63 +437,63 @@ export class Humbucker extends Pickup {
         console.warn("Humbuker induct not yet implemented");
     }
 
-    _populateGroup(group) {
+    get topCoilStartPin() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
+    get topCoilEndPin() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
+    get bottomCoilEndPin() { return DiagramState.instance.getComponent(this.pinIds.at(2)); }
+    get bottomCoilStartPin() { return DiagramState.instance.getComponent(this.pinIds.at(3)); }
+    get groundPin() { return DiagramState.instance.getComponent(this.pinIds.at(4)); }
 
-        const topCoilEndPin = new Pin({});
-        const topCoolEndPinNode = topCoilEndPin.createAsSubcomponent({
+    _createChildComponents() {
+        const topCoilStartPin = new Pin();
+        const topCoilEndPin = new Pin();
+        const bottomCoilEndPin = new Pin();
+        const bottomCoilStartPin = new Pin();
+        const groundPin = new Pin();
+        this.pinIds.push(topCoilEndPin.id, topCoilStartPin.id, bottomCoilEndPin.id, bottomCoilStartPin.id, groundPin.id);
+    }
+
+    _drawChildNodes(parentNode) {
+
+        this.topCoilEndPin.moveTo({
             x: 5,
             y: 165
         });
-        group.add(topCoolEndPinNode);
+        this.topCoilEndPin.draw(parentNode);
 
-        const topCoilStartPin = new Pin({});
-        const topCoilStartPinNode = topCoilStartPin.createAsSubcomponent({
+        this.topCoilStartPin.moveTo({
             x: 17,
             y: 180
         });
-        group.add(topCoilStartPinNode);
+        this.topCoilStartPin.draw(parentNode);
 
-        const bottomCoilEndPin = new Pin({});
-        const bottomCoilEndPinNode = bottomCoilEndPin.createAsSubcomponent({
+        this.bottomCoilEndPin.moveTo({
             x: 33,
             y: 182
         });
-        group.add(bottomCoilEndPinNode);
+        this.bottomCoilEndPin.draw(parentNode);
 
-        const bottomCoilStartPin = new Pin({});
-        const bottomCoilStartPinNode = bottomCoilStartPin.createAsSubcomponent({
+        this.bottomCoilStartPin.moveTo({
             x: 50,
             y: 173
         });
-        group.add(bottomCoilStartPinNode);
+        this.bottomCoilStartPin.draw(parentNode);
 
-        const groundPin = new Pin({});
-        const groundPinNode = groundPin.createAsSubcomponent({
+        this.groundPin.moveTo({
             x: 60,
             y: 158
         });
-        group.add(groundPinNode);
-
-        this.pinIds.push(topCoilEndPin.id, topCoilStartPin.id, bottomCoilEndPin.id, bottomCoilStartPin.id, groundPin.id);
+        this.groundPin.draw(parentNode);
 
         Konva.Image.fromURL(Humbucker.ImageURL, (componentNode) => {
             this._applyGlobalStyling(componentNode);
-            group.add(componentNode);
-            [
-                topCoolEndPinNode,
-                topCoilStartPinNode,
-                bottomCoilEndPinNode,
-                bottomCoilStartPinNode,
-                groundPinNode
-            ].forEach((p) => {
-                p.zIndex(componentNode.zIndex());
-            })
+            parentNode.add(componentNode);
+            this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
         });
     }
 }
 
 export class StratPickup extends Pickup {
-    constructor(state) {
+    constructor(state = {}) {
         super(state);
     }
 
@@ -433,47 +511,55 @@ export class StratPickup extends Pickup {
         coil.induct();
     }
 
-    _populateGroup(group) {
-        const pin1 = new Pin({});
-        const pinNode1 = pin1.createAsSubcomponent({
+    _createChildComponents() {
+        const pin1 = new Pin();
+        const pin2 = new Pin();
+        this.pinIds.push(pin1.id, pin2.id);
+    }
+
+    _drawChildNodes(parentNode) {
+        this.endPin.moveTo({
             x: 140,
             y: 105
         });
-        group.add(pinNode1);
+        this.endPin.draw(parentNode);
 
-        const pin2 = new Pin({});
-        const pinNode2 = pin2.createAsSubcomponent({
+        this.startPin.moveTo({
             x: 159,
             y: 105
         });
-        group.add(pinNode2);
-
-        this.pinIds.push(pin1.id, pin2.id);
+        this.startPin.draw(parentNode);
 
         Konva.Image.fromURL(StratPickup.ImageURL, (componentNode) => {
             this._applyGlobalStyling(componentNode);
-            group.add(componentNode);
-            [pinNode1, pinNode2].forEach((p) => {
-                p.zIndex(componentNode.zIndex());
-            });
+            parentNode.add(componentNode);
+            this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
         });
     }
 }
 
 export class Jack extends Component {
-    constructor(state) {
+    constructor(state = {}) {
         super(state);
     }
-
-
 }
 
 export class MonoJack extends Jack {
-    constructor(state) {
+    constructor(state = {}) {
         super(state);
+    }
 
-        const tipPin = new Pin({});
-        const sleevePin = new Pin({});
+    static get ImageURL() {
+        return "/img/jack-mono.svg";
+    }
+
+    get tipPin() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
+
+    get sleevePin() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
+
+    _createChildComponents() {
+        const tipPin = new Pin();
+        const sleevePin = new Pin();
 
         this.pinIds.push(tipPin.id, sleevePin.id);
 
@@ -487,48 +573,32 @@ export class MonoJack extends Jack {
             if (!tipPin.hasVoltage())
                 tipPin.receiveVoltage(this.id, -value);
         });
-
     }
 
-    static get ImageURL() {
-        return "/img/jack-mono.svg";
-    }
-
-    get tipPin() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
-
-    get sleevePin() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
-
-
-    _populateGroup(group) {
-
-        const tipPin = this.tipPin;
-        const sleevePin = this.sleevePin;
-
-        const tipPinNode = tipPin.createAsSubcomponent({
+    _drawChildNodes(parentNode) {
+        this.tipPin.moveTo({
             x: 47,
             y: 10
         });
-        group.add(tipPinNode);
+        this.tipPin.draw(parentNode);
 
-        const sleevePinNode = sleevePin.createAsSubcomponent({
+        this.sleevePin.moveTo({
             x: 48,
             y: 31
         });
-        group.add(sleevePinNode);
+        this.sleevePin.draw(parentNode);
 
         Konva.Image.fromURL(MonoJack.ImageURL, (componentNode) => {
             this._applyGlobalStyling(componentNode);
-            group.add(componentNode);
-            [tipPinNode, sleevePinNode].forEach((p) => {
-                p.zIndex(componentNode.zIndex());
-            });
+            parentNode.add(componentNode);
+            this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
         });
     }
 }
 
 export class Switch extends Component {
 
-    constructor(state) {
+    constructor(state = {}) {
         super(state);
         this.state.actuatorState = this.state.actuatorState || 0;
     }
@@ -537,7 +607,7 @@ export class Switch extends Component {
         return this.state.actuatorState;
     }
 
-    _setActuatorState(val){
+    _setActuatorState(val) {
         this.state.actuatorState = val;
     }
 
@@ -557,7 +627,7 @@ export class Switch extends Component {
 
 export class DPDTSwitch extends Switch {
 
-    constructor(state) {
+    constructor(state = {}) {
         super(state);
     }
 
@@ -569,45 +639,52 @@ export class DPDTSwitch extends Switch {
         return 9;
     }
 
-    _populateGroup(group) {
+    get pin6() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
+    get pin3() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
+    get pin5() { return DiagramState.instance.getComponent(this.pinIds.at(2)); }
+    get pin2() { return DiagramState.instance.getComponent(this.pinIds.at(3)); }
+    get pin4() { return DiagramState.instance.getComponent(this.pinIds.at(4)); }
+    get pin1() { return DiagramState.instance.getComponent(this.pinIds.at(5)); }
+
+    _createChildComponents() {
         const pinRows = 3;
         const pinCols = 2;
-        const pins = [[]];
-
         for (let pr = 0; pr < pinRows; pr++) {
-            pins.push([]);
             for (let pc = 0; pc < pinCols; pc++) {
 
-                const pinComponent = new Pin({});
+                const pinComponent = new Pin();
                 this.pinIds.push(pinComponent.id);
 
-                const pinNode = pinComponent.createAsSubcomponent({
+                pinComponent.moveTo({
                     x: DPDTSwitch._pinsStartAtX + (pc * 22),
                     y: DPDTSwitch._pinsStartAtY + (pr * 15)
                 });
-
-                pins[pr].push(pinNode);
-                group.add(pinNode);
             }
         }
+    }
+
+    _drawChildNodes(parentNode) {
+
+        this.pin1.draw(parentNode);
+        this.pin2.draw(parentNode);
+        this.pin3.draw(parentNode);
+        this.pin4.draw(parentNode);
+        this.pin5.draw(parentNode);
+        this.pin6.draw(parentNode);
 
         Konva.Image.fromURL(this.constructor.ImageURL, (componentNode) => {
             this._applyGlobalStyling(componentNode);
-            group.add(componentNode);
-            pins.forEach((pr) => {
-                pr.forEach((p) => {
-                    p.zIndex(componentNode.zIndex());
-                });
-            });
+            parentNode.add(componentNode);
+            this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
         });
 
-        this._addActuator(group);
+        this._addActuator(parentNode);
     }
 }
 
 export class DPDTOnOn extends DPDTSwitch {
 
-    constructor(state) {
+    constructor(state = {}) {
         super(state);
     }
 
@@ -651,7 +728,7 @@ export class DPDTOnOn extends DPDTSwitch {
 }
 
 export class DPDTOnOffOn extends DPDTSwitch {
-    constructor(state) {
+    constructor(state = {}) {
         super(state);
     }
 
@@ -661,7 +738,7 @@ export class DPDTOnOffOn extends DPDTSwitch {
 }
 
 export class DPDTOnOnOn extends DPDTSwitch {
-    constructor(state) {
+    constructor(state = {}) {
         super(state);
     }
 
@@ -672,7 +749,7 @@ export class DPDTOnOnOn extends DPDTSwitch {
 
 export class Potentiometer extends Component {
 
-    constructor(state) {
+    constructor(state = {}) {
         super(state);
     }
 
@@ -688,30 +765,40 @@ export class Potentiometer extends Component {
         return 110;
     }
 
-    _populateGroup(group) {
+    get startPin() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
+    get endPin() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
+    get wiperPin() { return DiagramState.instance.getComponent(this.pinIds.at(2)); }
+
+
+    _createChildComponents() {
 
         const pinCount = 3;
-        const pins = [];
 
         for (let p = 0; p < pinCount; p++) {
 
-            const pinComponent = new Pin({});
+            const pinComponent = new Pin();
             this.pinIds.push(pinComponent.id);
 
-            const pinNode = pinComponent.createAsSubcomponent({
+            pinComponent.moveTo({
                 x: Potentiometer._pinsStartAtX + (p * 24),
                 y: Potentiometer._pinsStartAtY,
             });
-            pins.push(pinNode);
-            group.add(pinNode);
         }
+    }
 
+    _drawChildNodes(parentNode) {
+        this.startPin.draw(parentNode);
+        this.endPin.draw(parentNode);
+        this.wiperPin.draw(parentNode);
         Konva.Image.fromURL(Potentiometer.ImageURL, (componentNode) => {
             this._applyGlobalStyling(componentNode);
-            group.add(componentNode);
-            pins.forEach((p) => {
-                p.zIndex(componentNode.zIndex());
-            })
+            parentNode.add(componentNode);
+            this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
         });
     }
 }
+
+/**
+ * Map of components for dynamic creation.
+ */
+export const componentClassMap = { Potentiometer, DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Humbucker, StratPickup, MonoJack };

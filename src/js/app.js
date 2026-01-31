@@ -14,12 +14,8 @@ import {
     WIRE_COLOR_RED,
     WIRE_COLOR_BLUE
 } from "./diagram.js"
-import { DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Potentiometer, Wire, Humbucker, StratPickup, MonoJack } from "./components.js";
+import { componentClassMap, Wire } from "./components.js";
 import { Visualizer } from "./visualizer.js";
-
-import testScripts from './testScripts.js'
-
-const componentClassMap = { Potentiometer, DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Humbucker, StratPickup, MonoJack };
 
 const wireColors = [
     WIRE_COLOR_BLACK,
@@ -29,7 +25,7 @@ const wireColors = [
     WIRE_COLOR_BLUE,
 ];
 
-const setupApp = () => {
+const setupApp = async () => {
 
     window.GWVDiagramState = new DiagramState();
 
@@ -52,18 +48,19 @@ const setupApp = () => {
     enableFlipSwitchButton(transformer);
     enableVisualizerButton();
 
-    enableTestScript(diagramLayer);
+    await enableTestScript(diagramLayer);
 
 }
 
-function enableTestScript(diagramLayer) {
+async function enableTestScript(diagramLayer) {
     const params = new URLSearchParams(window.location.search);
     if (params.has("script")) {
+        const { default: testScripts } = await import('./testScripts.js');
         const script = params.get("script");
         if (script in testScripts)
             testScripts[script](diagramLayer);
         else
-            console.warn(script, "unknown");
+            throw new Error(`${script} is not a known test script`);
     }
 }
 
@@ -293,7 +290,7 @@ function enableDrawWire(layer) {
         });
 
         setTimeout(() => {
-            wire.createOnLayer(layer);
+            wire.draw(layer);
             lastLine.destroy();
         }, 200);
 

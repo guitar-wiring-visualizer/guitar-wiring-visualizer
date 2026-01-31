@@ -4,20 +4,22 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 The Guitar Wiring Visualizer Authors
  */
 
-import { StratPickup, MonoJack, Wire } from "./components.js";
+import { StratPickup, MonoJack, Wire, componentClassMap } from "./components.js";
 
 const stratPickupAndJack = (diagramLayer) => {
 
-    const pickup = new StratPickup({});
-    pickup.createOnLayer(diagramLayer, { x: 10, y: 10 });
+    const pickup = new StratPickup();
+    pickup.moveTo({ x: 10, y: 10 });
+    pickup.draw(diagramLayer);
 
     const hotPin = pickup.endPin;
     const hotPinPos = hotPin.findNode(diagramLayer).getAbsolutePosition();
     const groundPin = pickup.startPin;
     const groundPinPos = groundPin.findNode(diagramLayer).getAbsolutePosition();
 
-    const jack = new MonoJack({});
-    jack.createOnLayer(diagramLayer, { x: 10, y: 200 });
+    const jack = new MonoJack();
+    jack.moveTo({ x: 10, y: 200 });
+    jack.draw(diagramLayer);
 
     const tipPin = jack.tipPin;
     const tipPos = tipPin.findNode(diagramLayer).getAbsolutePosition();
@@ -33,7 +35,7 @@ const stratPickupAndJack = (diagramLayer) => {
         endPinId: tipPin.id,
         color: "red"
     });
-    hotWire.createOnLayer(diagramLayer);
+    hotWire.draw(diagramLayer);
 
     const groundWire = new Wire({
         startPoint: [groundPinPos.x, groundPinPos.y],
@@ -43,8 +45,34 @@ const stratPickupAndJack = (diagramLayer) => {
         endPinId: sleevePin.id,
         color: "black"
     });
-    groundWire.createOnLayer(diagramLayer);
+    groundWire.draw(diagramLayer);
 
 };
 
-export default { stratPickupAndJack };
+const testDrawAll = (diagramLayer) => {
+
+    const startX = 10;
+    const startY = 50;
+
+    const xOffset = 325;
+    const yOffset = 150;
+
+    const numPerRow = 3;
+
+    let x = startX, y = startY, count = 0;
+
+    Object.keys(componentClassMap).forEach(kind => {
+        const component = new componentClassMap[kind]();
+        component.moveTo({ x, y });
+        component.draw(diagramLayer);
+
+        count++;
+        x += xOffset;
+        if (count % numPerRow === 0) {
+            x = startX;
+            y += yOffset;
+        }
+    });
+}
+
+export default { stratPickupAndJack, testDrawAll };
