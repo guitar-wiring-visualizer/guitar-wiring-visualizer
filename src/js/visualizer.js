@@ -7,6 +7,8 @@
 import { DiagramState } from "./diagram.js";
 import { Wire } from './components.js';
 
+const rangeToConsiderPointsBeingClose = 2.0;
+
 export class Visualizer {
 
     constructor(diagramLayer) {
@@ -70,26 +72,59 @@ export class Visualizer {
         this._activeWireNodes = [];
         this._signalWireNodes = [];
 
-        const activeWiresOnDiagram = DiagramState.instance.findComponentsOfType(Wire, (component) => {
+        DiagramState.instance.findComponentsOfType(Wire, (component) => {
             return component.hasVoltage();
-        }).filter(Boolean);
+        })
+            .filter(Boolean)
+            .forEach(activeWire => {
+                const activeWireNode = activeWire.findNode(this._diagramLayer);
 
-        activeWiresOnDiagram.forEach(activeWire => {
-            const activeWireNode = activeWire.findNode(this._diagramLayer);
+                let animationWirePoints = activeWireNode.points();
+                console.log({ animationWirePoints });
 
-            const clonedWireNode = activeWireNode.clone({
-                shadowColor: activeWireNode.stroke()
+                if (activeWire.voltage > 0) {
+                    // Make sure to draw animation with so it shows the direction of signal flow (i.e. sending pin -> receiving pin)
+                    // The wire may have been drawn in opposite direction.
+                    // This is ok, but the wire we draw here needs to be in signal flow direction.
+                    const pinVoltageIsFrom = activeWire.pinVoltageIsFrom;
+                    const pinNodeVoltageIsFrom = pinVoltageIsFrom.findNode(this._diagramLayer);
+                    const pinPosition = pinNodeVoltageIsFrom.getAbsolutePosition();
+                    console.log({ pinVoltageIsFrom, pinNodeVoltageIsFrom, pinPosition });
+                    
+                    const wireEndX = animationWirePoints.at(-2);
+                    if (areClose(pinPosition.x, wireEndX)) {
+                        animationWirePoints = reverseWirePoints(animationWirePoints);
+                        console.log("reversed wire points", activeWireNode.points(), animationWirePoints)
+                    }
+                }
+
+                const clonedWireNode = activeWireNode.clone({
+                    points: animationWirePoints,
+                    shadowColor: activeWireNode.stroke()
+                });
+                this._visLayer.add(clonedWireNode);
+                this._activeWireNodes.push(clonedWireNode);
+
+                if (activeWire.voltage > 0) {
+                    this._signalWireNodes.push(clonedWireNode);
+                }
             });
-            this._visLayer.add(clonedWireNode);
-            this._activeWireNodes.push(clonedWireNode);
-
-            if (activeWire.voltage > 0) {
-                this._signalWireNodes.push(clonedWireNode);
-            }
-        });
 
         console.log("_activeWireNodes", this._activeWireNodes);
         console.log("_signalWireNodes", this._signalWireNodes);
+
+        function areClose(a, b) {
+            return Math.abs(a - b) <= rangeToConsiderPointsBeingClose;
+        }
+
+        function reverseWirePoints(originalPoints) {
+            const newPoints = [];
+            for (let x = originalPoints.length - 1; x >= 1; x -= 2) {
+                newPoints.push(originalPoints.at(x - 1));
+                newPoints.push(originalPoints.at(x));
+            }
+            return newPoints;
+        }
     }
 
     _createActiveWireAnimation() {

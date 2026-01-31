@@ -258,7 +258,7 @@ export class Pin extends Component {
     }
 
     receiveVoltage(fromId, value) {
-        console.log(this.id, "pin received voltage", fromId, value);
+        console.log(`pin ${this.id} received voltage ${value} from wire ${fromId}`);
         this._setVoltage(value);
 
         const connectedWires = DiagramState.instance.findComponentsOfType(Wire, wire => {
@@ -274,7 +274,7 @@ export class Pin extends Component {
     }
 
     hasVoltage() {
-        console.log("checking voltage on pin", this.id, this.voltage);
+        console.log(`checking voltage on pin ${this.id}: ${this.voltage}`);
         return this.voltage !== 0;
     }
 }
@@ -285,6 +285,7 @@ export class Wire extends Component {
 
         this.state.color = state.color || DiagramState.instance.WIRE_COLOR_DEFAULT;
         this._voltage = 0;
+        this._pinVoltageIsFrom = null;
     }
 
     static get IsDraggable() { return false; }
@@ -343,15 +344,20 @@ export class Wire extends Component {
     _setVoltage(val) { this._voltage = val; }
 
     receiveVoltage(fromId, value) {
-        console.log(this.id, "wire received voltage", fromId, value);
+        console.log(`wire ${this.id} received voltage ${value} from pin ${fromId}`);
         this._setVoltage(value);
+        this._pinVoltageIsFrom = DiagramState.instance.getComponent(fromId);
         const targetPinId = this.startPinId === fromId ? this.endPinId : this.startPinId;
         const targetPin = DiagramState.instance.getComponent(targetPinId);
         targetPin.receiveVoltage(this.id, value);
     }
 
+    get pinVoltageIsFrom() {
+        return this._pinVoltageIsFrom;
+    }
+
     hasVoltage() {
-        console.log("checking voltage on wire", this.id);
+        console.log(`checking voltage on wire ${this.id}: ${this.voltage}`);
         return this.voltage !== 0;
     }
 
