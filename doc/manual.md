@@ -64,6 +64,18 @@ Flipping a switch moves it's actuator through the available positions.  This wil
   - Start: Click "Start Visualizer" button or use `Ctrl-Enter`.
   - Stop: Click "Stop Visualizer" button or use `Ctrl-Enter`.
 
+### Saving
+
+#### Save
+
+To save a link to the the diagram, click the "Save" button.  This will update the URL of the browser with the state of the diagram.  You may copy the current window URL and send to a friend!
+
+Alternatively, simply click the "Save and Copy URL" button to save as well as copy the link  to your clipboard in one action.
+
+#### Load
+
+To view a previously saved diagram, simply navigate to the saved link.
+
 
 ## Concepts
 
