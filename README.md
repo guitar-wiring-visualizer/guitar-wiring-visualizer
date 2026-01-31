@@ -46,3 +46,11 @@ To test the build:
 python3 -m http.server -d ./dist
 ```
 Remove the `./dist` folder when done.
+
+### Test/Demo Scripts
+To make development easier, a pre-configured diagram can be created on page-load.  The scripts to create the diagram are in the `testScipts.js` module.
+
+To load a script, specify the name in the `script` URL parameter.
+
+For example `?script=stratPickupAndJack` with load and run the `stratPickupAndJack` script from the `testScripts.js` module.
+
