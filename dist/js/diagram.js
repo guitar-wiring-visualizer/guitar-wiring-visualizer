@@ -1,0 +1,6 @@
+/**
+ * @license AGPLv3
+ * SPDX-License-Identifier: AGPLv3
+ * SPDX-FileCopyrightText: Copyright (c) 2026 The Guitar Wiring Visualizer Authors
+ */
+import EventEmitter from"./eventEmitter.js";export const TOOL_MODE_SELECT="select";export const TOOL_MODE_WIRE="wire";export const WIRE_COLOR_RED="red";export const WIRE_COLOR_BLACK="black";export const WIRE_COLOR_GREEN="green";export const WIRE_COLOR_YELLOW="yellow";export const WIRE_COLOR_BLUE="blue";export const WIRE_COLOR_DEFAULT="black";export class DiagramState extends EventEmitter{constructor(){if(super(),DiagramState.instance)return DiagramState.instance;this._lastIssuedId=0,this._componenetMap={},this.showConnectors=!1,this.toolMode="select",this.wireToolColor="black",DiagramState.instance=this}getNewIdentity(){return++this._lastIssuedId}registerComponent(t){this._addToComponentMap(t.id,t)}notifyNodeChanged(t){"Wire"===t.name()&&this._emit("wireChanged",t)}getComponent(t){return this._componenetMap[parseInt(t,10)]}_addToComponentMap(t,e){this._componenetMap[t]=e}findComponents(t){return Object.values(this._componenetMap).filter(t)}findComponentsOfType(t,e){return this.findComponents(o=>o.constructor===t&&e(o))}removeComponentById(t){const e=this.getComponent(t);e.pinIds&&e.pinIds.forEach(t=>{this.removeComponentById(t)}),delete this._componenetMap[e.id]}}
