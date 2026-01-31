@@ -64,20 +64,31 @@ async function enableTestScript(diagramLayer) {
     }
 }
 
+function findAllPickups() {
+    return DiagramState.instance.findComponents((c) => {
+        return typeof c.pickUp === 'function';
+    });
+}
+
+function simulateGuitar() {
+    findAllPickups().forEach(pickup => pickup.pickUp());
+}
+
+function stopSimulatingGuitar() {
+    findAllPickups().forEach(pickup => pickup.stopPickingUp());
+}
+
 function enableVisualizerButton() {
     const visButton = document.getElementById("vis-button");
     const originalText = visButton.textContent;
     visButton.addEventListener("click", e => {
         if (Visualizer.instance.isActive) {
             visButton.textContent = originalText;
+            stopSimulatingGuitar();
             Visualizer.instance.stop();
         } else {
             visButton.textContent = "Stop Visualizer";
-
-            DiagramState.instance.findComponents((c) => {
-                return typeof c.induct === 'function';
-            }).forEach(pickup => pickup.induct());
-
+            simulateGuitar();
             Visualizer.instance.start();
         }
         console.log("visualizer", Visualizer.instance.isActive);

@@ -92,10 +92,10 @@ export class Component extends EventEmitter {
         DiagramState.instance.notifyNodeChanged(rootNode);
     }
 
-    _unDrawIfNeeded(containerNode){
+    _unDrawIfNeeded(containerNode) {
         console.assert(containerNode, "containerNode is required");
         const node = this.findNode(containerNode);
-        if(node)
+        if (node)
             node.destroy();
     }
 
@@ -412,7 +412,11 @@ class InductionCoil {
             this._startPin.receiveVoltage(this._endPin.id, -this._endPin.voltage);
         else
             this._endPin.receiveVoltage(this._startPin.id, 1);
+    }
 
+    stopInducting() {
+        if(this._endPin.hasVoltage())
+            this._endPin.receiveVoltage(this._startPin, 0);
     }
 }
 
@@ -421,7 +425,11 @@ export class Pickup extends Component {
         super(state);
     }
 
-    induct() {
+    startPickingUp() {
+        throw new Error("Abstract method call")
+    }
+
+    stopPickingUp() {
         throw new Error("Abstract method call")
     }
 }
@@ -435,8 +443,12 @@ export class Humbucker extends Pickup {
         return "/img/pu-humbucker4.svg";
     }
 
-    induct() {
-        console.warn("Humbuker induct not yet implemented");
+    startPickingUp() {
+        console.warn("Humbuker startPickingUp not yet implemented");
+    }
+
+    stopPickingUp() {
+        console.warn("Humbuker stopPickingUp not yet implemented");
     }
 
     get topCoilStartPin() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
@@ -497,6 +509,7 @@ export class Humbucker extends Pickup {
 export class StratPickup extends Pickup {
     constructor(state = {}) {
         super(state);
+        this._coil = null;
     }
 
     static get ImageURL() {
@@ -507,10 +520,16 @@ export class StratPickup extends Pickup {
 
     get endPin() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
 
-    induct() {
-        console.log(this.constructor.name, this.id, "received induct message");
-        var coil = new InductionCoil(this.startPin, this.endPin);
-        coil.induct();
+    pickUp() {
+        console.log(this.constructor.name, this.id, "received pickUp message");
+        this._coil = new InductionCoil(this.startPin, this.endPin);
+        this._coil.induct();
+    }
+
+    stopPickingUp() {
+        console.log(this.constructor.name, this.id, "received stopPickingUp message");
+        if (this._coil)
+            this._coil.stopInducting();
     }
 
     _createChildComponents() {
