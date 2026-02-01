@@ -543,62 +543,66 @@ export class Pickup extends Component {
 export class Humbucker extends Pickup {
     constructor(state = {}) {
         super(state);
+        this._northCoil = null;
+        this._southCoil = null;
     }
 
     static get ImageURL() {
         return "/img/pu-humbucker.svg";
     }
 
-    startPickingUp() {
-        console.warn("Humbuker startPickingUp not yet implemented");
+    pickUp() {
+        console.info(this.constructor.name, this.id, "received pickUp message");
+        this._northCoil = new InductionCoil(this.northCoilEndPin, this.northCoilStartPin);
+        this._southCoil = new InductionCoil(this.southCoilStartPin, this.southCoilEndPin);
+        this._northCoil.induct();
+        this._southCoil.induct();
     }
 
     stopPickingUp() {
         console.warn("Humbuker stopPickingUp not yet implemented");
     }
 
-    get topCoilStartPin() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
-    get topCoilEndPin() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
-    get bottomCoilEndPin() { return DiagramState.instance.getComponent(this.pinIds.at(2)); }
-    get bottomCoilStartPin() { return DiagramState.instance.getComponent(this.pinIds.at(3)); }
+    get northCoilStartPin() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
+    get northCoilEndPin() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
+    get southCoilEndPin() { return DiagramState.instance.getComponent(this.pinIds.at(2)); }
+    get southCoilStartPin() { return DiagramState.instance.getComponent(this.pinIds.at(3)); }
     get groundPin() { return DiagramState.instance.getComponent(this.pinIds.at(4)); }
 
     _createChildComponents() {
-        const topCoilStartPin = new Pin();
-        const topCoilEndPin = new Pin();
-        const bottomCoilEndPin = new Pin();
-        const bottomCoilStartPin = new Pin();
+        const northCoilStartPin = new Pin();
+        const northCoilEndPin = new Pin();
+        const southCoilEndPin = new Pin();
+        const southCoilStartPin = new Pin();
         const groundPin = new Pin();
-        this.pinIds.push(topCoilEndPin.id, topCoilStartPin.id, bottomCoilEndPin.id, bottomCoilStartPin.id, groundPin.id);
+        this.pinIds.push(northCoilEndPin.id, northCoilStartPin.id, southCoilEndPin.id, southCoilStartPin.id, groundPin.id);
     }
 
     _drawChildNodes(parentNode) {
 
-        this.topCoilStartPin.moveTo({
-            x: 5,
-            y: 165
+        this.northCoilStartPin.moveTo({
+            x: 6,
+            y: 164
         });
-        this.topCoilStartPin.draw(parentNode);
+        this.northCoilStartPin.draw(parentNode);
 
-
-        this.topCoilEndPin.moveTo({
+        this.northCoilEndPin.moveTo({
             x: 19,
             y: 181
         });
-        this.topCoilEndPin.draw(parentNode);
+        this.northCoilEndPin.draw(parentNode);
 
-
-        this.bottomCoilEndPin.moveTo({
+        this.southCoilEndPin.moveTo({
             x: 38,
             y: 182
         });
-        this.bottomCoilEndPin.draw(parentNode);
+        this.southCoilEndPin.draw(parentNode);
 
-        this.bottomCoilStartPin.moveTo({
+        this.southCoilStartPin.moveTo({
             x: 55,
             y: 172
         });
-        this.bottomCoilStartPin.draw(parentNode);
+        this.southCoilStartPin.draw(parentNode);
 
         this.groundPin.moveTo({
             x: 62,
