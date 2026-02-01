@@ -511,12 +511,13 @@ class InductionCoil {
 
     induct() {
         console.info(this.constructor.name, "received induct message");
+
         if (this._startPin.hasVoltage())
-            this._endPin.receiveVoltage(this._startPin.id, -this._startPin.voltage);
+            this._endPin.receiveVoltage(null, -this._startPin.voltage, this._startPin.id);
         else if (this._endPin.hasVoltage())
-            this._startPin.receiveVoltage(this._endPin.id, -this._endPin.voltage);
+            this._startPin.receiveVoltage(null, -this._endPin.voltage, this._endPin.id);
         else
-            this._endPin.receiveVoltage(this._startPin.id, 1);
+            this._endPin.receiveVoltage(null, 1, this._startPin.id);
     }
 
     stopInducting() {
