@@ -142,7 +142,7 @@ export class Component extends EventEmitter {
         console.assert(containerNode, "containerNode is required");
         const node = this.findNode(containerNode);
         if (node) {
-            console.log("undraw node", node.id());
+            console.debug("undraw node", node.id());
             node.destroy();
         }
     }
@@ -154,7 +154,7 @@ export class Component extends EventEmitter {
      */
     removeFromDiagram(layer) {
         console.assert(layer, "layer is required");
-        console.log("removeFromDiagram", this.id);
+        console.debug("removeFromDiagram", this.id);
         const node = this.findNode(layer);
         node.destroy();
         DiagramState.instance.notifyNodeChanged(node);
@@ -194,7 +194,7 @@ export class Component extends EventEmitter {
 
     _subscribeToEvents(componentNode) {
         componentNode.on("dragend transformend", (e) => {
-            console.log(this.constructor.name, this.id, e.type);
+            console.debug(this.constructor.name, this.id, e.type);
             this.state.nodeAttrs = componentNode.attrs;
 
             this._moveAttachedWires(componentNode);
@@ -256,7 +256,7 @@ export class Component extends EventEmitter {
     _moveAttachedWires(node) {
         const layer = node.getLayer();
         this.pinIds.forEach(pinId => {
-            //console.log("checking pin", pinId);
+            console.debug("checking pin", pinId);
             const pin = DiagramState.instance.getComponent(pinId);
             const pinNode = pin.findNode(layer);
             const pinPos = pinNode.getAbsolutePosition();
@@ -349,18 +349,18 @@ export class Pin extends Component {
     }
 
     receiveVoltage(fromWireId, value, fromPinId = null) {
-        console.log(`pin ${this.id} received voltage ${value} from wire ${fromWireId}, from pin ${fromPinId}`);
+        console.info(`pin ${this.id} received voltage ${value} from wire ${fromWireId}, from pin ${fromPinId}`);
         this._setVoltage(value);
 
         const connectedWires = DiagramState.instance.findComponentsOfType(Wire, wire => {
             return wire.id !== fromWireId
                 && (wire.endPinId == this.id || wire.startPinId == this.id)
         });
-        console.log("send to connected wires", connectedWires);
+        console.debug("send to connected wires", connectedWires);
         connectedWires.forEach(wire => wire.receiveVoltage(this.id, value));
 
         if (this.connectedPinId !== null && fromPinId !== this.connectedPinId) {
-            console.log("send to connected pin", this.connectedPinId);
+            console.debug("send to connected pin", this.connectedPinId);
             const connectedPin = DiagramState.instance.getComponent(this.connectedPinId);
             connectedPin.receiveVoltage(fromWireId, value, this.id);
         }
@@ -369,7 +369,7 @@ export class Pin extends Component {
     }
 
     hasVoltage() {
-        console.log(`checking voltage on pin ${this.id}: ${this.voltage}`);
+        console.debug(`checking voltage on pin ${this.id}: ${this.voltage}`);
         return this.voltage !== 0;
     }
 }
@@ -443,7 +443,7 @@ export class Wire extends Component {
     }
 
     receiveVoltage(fromId, value) {
-        console.log(`wire ${this.id} received voltage ${value} from pin ${fromId}`);
+        console.info(`wire ${this.id} received voltage ${value} from pin ${fromId}`);
         this._setVoltage(value);
         this._pinVoltageIsFrom = DiagramState.instance.getComponent(fromId);
         const targetPinId = this.startPinId === fromId ? this.endPinId : this.startPinId;
@@ -456,7 +456,7 @@ export class Wire extends Component {
     }
 
     hasVoltage() {
-        console.log(`checking voltage on wire ${this.id}: ${this.voltage}`);
+        console.debug(`checking voltage on wire ${this.id}: ${this.voltage}`);
         return this.voltage !== 0;
     }
 
@@ -469,7 +469,7 @@ export class Wire extends Component {
 
         const wirePoints = [...this.startPoint, ...this.midPoint, ...this.endPoint];
 
-        //console.log("wire creating", this.id, wirePoints);
+        console.debug("wire creating", this.id, wirePoints);
 
         const line = new Konva.Line({
             points: wirePoints,
@@ -510,7 +510,7 @@ class InductionCoil {
     }
 
     induct() {
-        console.log(this.constructor.name, "received induct message");
+        console.info(this.constructor.name, "received induct message");
         if (this._startPin.hasVoltage())
             this._endPin.receiveVoltage(this._startPin.id, -this._startPin.voltage);
         else if (this._endPin.hasVoltage())
@@ -520,7 +520,7 @@ class InductionCoil {
     }
 
     stopInducting() {
-        console.log("coil received stopInducting message");
+        console.info("coil received stopInducting message");
         if (this._endPin.hasVoltage())
             this._endPin.receiveVoltage(this._startPin, 0);
     }
@@ -627,13 +627,13 @@ export class StratPickup extends Pickup {
     get endPin() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
 
     pickUp() {
-        console.log(this.constructor.name, this.id, "received pickUp message");
+        console.info(this.constructor.name, this.id, "received pickUp message");
         this._coil = new InductionCoil(this.startPin, this.endPin);
         this._coil.induct();
     }
 
     stopPickingUp() {
-        console.log(this.constructor.name, this.id, "received stopPickingUp message");
+        console.info(this.constructor.name, this.id, "received stopPickingUp message");
         if (this._coil)
             this._coil.stopInducting();
     }
@@ -691,12 +691,12 @@ export class MonoJack extends Jack {
         this.pinIds.push(tipPin.id, sleevePin.id);
 
         tipPin.on("voltageChanged", (value) => {
-            console.log(this.constructor.name, "got vc event from tip pin", tipPin.id, value)
+            console.debug(this.constructor.name, "got vc event from tip pin", tipPin.id, value)
             if (!sleevePin.hasVoltage())
                 sleevePin.receiveVoltage(this.id, -value);
         });
         sleevePin.on("voltageChanged", (value) => {
-            console.log(this.constructor.name, "got vc event from sleevePin", sleevePin.id, value)
+            console.debug(this.constructor.name, "got vc event from sleevePin", sleevePin.id, value)
             if (!tipPin.hasVoltage())
                 tipPin.receiveVoltage(this.id, -value);
         });

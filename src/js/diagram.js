@@ -45,7 +45,8 @@ export class DiagramState extends EventEmitter {
     }
 
     notifyNodeChanged(node) {
-        //console.log("notifyNodeChanged", node.name())
+        console.debug("notifyNodeChanged", node.name())
+        
         if (node.name() === "Wire") {
             this._emit("wireChanged", node);
         }
@@ -95,22 +96,22 @@ export class DiagramState extends EventEmitter {
                 return component.state;
             }),
         }
-        console.log({ data: diagramState });
+        console.debug({ data: diagramState });
 
         const encoded = await Compressor.compress(JSON.stringify(diagramState));
-        console.log({ encoded });
+        console.debug({ encoded });
 
         return encoded;
     }
 
     async loadState(encodedDataString) {
-        console.log({ data: encodedDataString });
+        console.debug({ data: encodedDataString });
 
         const decodedDataString = await Compressor.decompress(encodedDataString);
-        console.log({ decoded: decodedDataString });
+        console.debug({ decoded: decodedDataString });
 
         const deserializedState = JSON.parse(decodedDataString);
-        console.log({ deserializedState: deserializedState });
+        console.debug({ deserializedState: deserializedState });
 
         // keep track if ids
         const idsDeserialized = []
@@ -120,7 +121,7 @@ export class DiagramState extends EventEmitter {
             const className = state.className;
             if (className === "Pin") {
                 idsDeserialized.push(state.id);
-                console.log("recreating", className, state.id) ;
+                console.debug("recreating", className, state.id) ;
                 const componentInstance = new componentClassMap[className](state);
                 this.registerComponent(componentInstance);
             }
@@ -132,16 +133,16 @@ export class DiagramState extends EventEmitter {
             const className = state.className;
             if (className !== "Pin") {
                 idsDeserialized.push(state.id);
-                console.log("recreating", className, state.id);
+                console.debug("recreating", className, state.id);
                 const componentInstance = new componentClassMap[className](state);
                 this.registerComponent(componentInstance);
             }
         });
 
         this._lastIssuedId = idsDeserialized.sort((a, b) => b - a).at(0);
-        console.log("reset last issued id", this._lastIssuedId);
+        console.debug("reset last issued id", this._lastIssuedId);
 
-        console.log("loaded diagram state!");
+        console.info("loaded diagram state!");
     }
 
     drawAll(container) {

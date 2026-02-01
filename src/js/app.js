@@ -127,7 +127,7 @@ function enableVisualizerButton() {
             DiagramState.instance.start();
             Visualizer.instance.start();
         }
-        console.log("visualizer", Visualizer.instance.isActive);
+        console.info("visualizer", Visualizer.instance.isActive);
     });
 }
 
@@ -212,7 +212,7 @@ function enableDrawWire(layer) {
         isPaint = true;
         const drawStartPos = stage.getPointerPosition();
 
-        console.log("drawStartPos", drawStartPos);
+        console.debug("drawStartPos", drawStartPos);
 
         // see if we are on or close to a pin
         const startRect = new Konva.Rect({
@@ -323,7 +323,7 @@ function enableDrawWire(layer) {
         ];
 
         if ((wireStart[0] > wireStart[1] && wireMid[0] < wireMid[1]) || (wireStart[0] < wireStart[1] && wireMid[0] > wireMid[1])) {
-            console.log("correcting midpoint");
+            console.debug("correcting midpoint");
             wireMid = [wireMid[1], wireMid[0]];
         }
 
@@ -460,7 +460,7 @@ function enableSelectComponent(transformer) {
         document.getElementById("flip-button").disabled = false;
         //}
 
-        console.log("selected component", transformer.nodes()[0].id(), transformer.nodes()[0].name(), transformer.nodes()[0]);
+        console.debug("selected component", transformer.nodes()[0].id(), transformer.nodes()[0].name(), transformer.nodes()[0]);
     });
 }
 
@@ -471,7 +471,7 @@ function enableKeyboardCommands(transformer) {
     //stage.container().focus();
 
     stage.container().addEventListener("keydown", (e) => {
-        console.log(e.code);
+        console.debug(e.code);
         handleGlobalKeyCode(e);
         handleSelectionKeyCode(transformer, e.code);
         handleToolbarKeyCode(transformer, e.code);
@@ -526,13 +526,13 @@ function cycleWireColors() {
     const newColor = wireColors.at(lastWireColor);
     const colorButton = document.getElementById("wire-color-" + newColor);
     colorButton.click();
-    console.log("new color", DiagramState.instance.wireToolColor);
+    console.debug("new color", DiagramState.instance.wireToolColor);
 }
 
 function changeColor(selectedNode) {
     const component = DiagramState.instance.getComponent(selectedNode.id());
     if (component.changeColor) {
-        console.log("change color", component);
+        console.debug("change color", component);
         component.changeColor(selectedNode, DiagramState.instance.wireToolColor);
     }
 }

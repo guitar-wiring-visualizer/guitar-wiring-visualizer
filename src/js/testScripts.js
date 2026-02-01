@@ -60,8 +60,8 @@ const pickupSwitchJack = (diagramLayer) => {
     const groundPin = pickup.startPin;
     const groundPinPos = groundPin.findNode(diagramLayer).getAbsolutePosition();
 
-    console.log("pickup hot pin", hotPin.id);
-    console.log("pickup ground pin", groundPin.id);
+    console.info("pickup hot pin", hotPin.id);
+    console.info("pickup ground pin", groundPin.id);
 
     const sw = new DPDTOnOn();
     sw.moveTo({ x: 50, y: 110 });
@@ -72,8 +72,8 @@ const pickupSwitchJack = (diagramLayer) => {
     const outPin = sw.pin4;
     const outPinPos = outPin.findNode(diagramLayer).getAbsolutePosition();
 
-    console.log("switch input pin", inPin.id);
-    console.log("switch output pin", outPin.id);
+    console.info("switch input pin", inPin.id);
+    console.info("switch output pin", outPin.id);
 
     const hotWire = new Wire({
         startPoint: [hotPinPos.x, hotPinPos.y],
@@ -84,7 +84,7 @@ const pickupSwitchJack = (diagramLayer) => {
         color: "red"
     });
     hotWire.draw(diagramLayer);
-    console.log("hot wire from pickup", hotWire.id);
+    console.info("hot wire from pickup", hotWire.id);
 
     const jack = new MonoJack();
     jack.moveTo({ x: 10, y: 200 });
@@ -96,8 +96,8 @@ const pickupSwitchJack = (diagramLayer) => {
     const sleevePin = jack.sleevePin;
     const sleevePos = sleevePin.findNode(diagramLayer).getAbsolutePosition();
 
-    console.log("jack tip pin", tipPin.id);
-    console.log("jack sleeve pin", sleevePin.id);
+    console.info("jack tip pin", tipPin.id);
+    console.info("jack sleeve pin", sleevePin.id);
 
 
     const hotWire2 = new Wire({
@@ -110,7 +110,7 @@ const pickupSwitchJack = (diagramLayer) => {
     });
     hotWire2.draw(diagramLayer);
 
-    console.log("hot wire from switch to jack", hotWire2.id);
+    console.info("hot wire from switch to jack", hotWire2.id);
 
     const groundWire = new Wire({
         startPoint: [groundPinPos.x, groundPinPos.y],
@@ -122,7 +122,7 @@ const pickupSwitchJack = (diagramLayer) => {
     });
     groundWire.draw(diagramLayer);
 
-    console.log("ground wire", groundWire.id);
+    console.info("ground wire", groundWire.id);
 
 
 };

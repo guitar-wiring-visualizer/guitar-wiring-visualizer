@@ -31,7 +31,7 @@ export class Visualizer {
         this._createAllAnimations();
 
         DiagramState.instance.on("wireChanged", (_) => {
-            console.log("received wireChanged event");
+            console.debug("received wireChanged event");
             const wasActiveWhenEventReceived = this.isActive;
 
             this.stop();
@@ -41,7 +41,7 @@ export class Visualizer {
         });
 
         DiagramState.instance.on("switchChanged", (_) => {
-            console.log("received switchChanged event");
+            console.debug("received switchChanged event");
             const wasActiveWhenEventReceived = this.isActive;
 
             this.stop();
@@ -93,7 +93,7 @@ export class Visualizer {
                 const activeWireNode = activeWire.findNode(this._diagramLayer);
 
                 let animationWirePoints = activeWireNode.points();
-                console.log({ animationWirePoints });
+                console.debug({ animationWirePoints });
 
                 if (activeWire.voltage > 0) {
                     // Make sure to draw animation with so it shows the direction of signal flow (i.e. sending pin -> receiving pin)
@@ -102,12 +102,12 @@ export class Visualizer {
                     const pinVoltageIsFrom = activeWire.pinVoltageIsFrom;
                     const pinNodeVoltageIsFrom = pinVoltageIsFrom.findNode(this._diagramLayer);
                     const pinPosition = pinNodeVoltageIsFrom.getAbsolutePosition();
-                    console.log({ pinVoltageIsFrom, pinNodeVoltageIsFrom, pinPosition });
+                    console.debug({ pinVoltageIsFrom, pinNodeVoltageIsFrom, pinPosition });
 
                     const wireEndX = animationWirePoints.at(-2);
                     if (areClose(pinPosition.x, wireEndX)) {
                         animationWirePoints = reverseWirePoints(animationWirePoints);
-                        console.log("reversed wire points", activeWireNode.points(), animationWirePoints)
+                        console.debug("reversed wire points", activeWireNode.points(), animationWirePoints)
                     }
                 }
 
@@ -123,8 +123,8 @@ export class Visualizer {
                 }
             });
 
-        console.log("_activeWireNodes", this._activeWireNodes);
-        console.log("_signalWireNodes", this._signalWireNodes);
+        console.debug("_activeWireNodes", this._activeWireNodes);
+        console.debug("_signalWireNodes", this._signalWireNodes);
 
         function areClose(a, b) {
             return Math.abs(a - b) <= RANGE_FOR_CLOSE_POINT_COMPARISON;
@@ -183,9 +183,7 @@ export class Visualizer {
 
             const wirePoints = wireLine.points();
 
-            // console.log({ wirePoints });
             const tensionPoints = wireLine.getTensionPoints();
-            // console.log({ tensionPoints });
 
             // if original and tension are the standard 6 point lines, we can combine, otherwise use original wire points
             const actualPoints = wirePoints.length === 6 && tensionPoints.length === 6 ? [
@@ -195,7 +193,6 @@ export class Visualizer {
                 tensionPoints.at(4), tensionPoints.at(5),
                 wirePoints.at(4), wirePoints.at(5)
             ] : wirePoints;
-            //console.log({ actualPoints });
 
             const startPoint = { x: actualPoints.at(0), y: actualPoints.at(1) };
 
@@ -222,7 +219,7 @@ export class Visualizer {
 
             const steps = SPEED; // number of steps in animation
             const pathLen = wirePath.getLength();
-            console.log({ pathLen });
+            console.debug({ pathLen });
             const step = pathLen / steps;
             let currentPos = 0, pointAtLen;
 
@@ -232,7 +229,6 @@ export class Visualizer {
                 }
                 currentPos = currentPos + 1;
                 pointAtLen = wirePath.getPointAtLength(currentPos * step);
-                //console.log({ currentPos, pointAtLen });
                 electron.position({ x: pointAtLen.x, y: pointAtLen.y });
 
             }, this._visLayer);
