@@ -1,0 +1,1 @@
+export default class EventEmitter{constructor(){this.events={}}on(t,e){return this.events[t]||(this.events[t]=[]),this.events[t].push(e),()=>this.off(t,e)}off(t,e){if(!this.events[t])return;const s=this.events[t].indexOf(e);-1!==s&&this.events[t].splice(s,1)}_emit(t,...e){this.events[t]&&this.events[t].forEach(t=>t(...e))}}
