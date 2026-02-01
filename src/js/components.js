@@ -90,9 +90,39 @@ export class Component extends EventEmitter {
 
         this._drawChildNodes(rootNode);
 
+        //this._drawIDLabel(rootNode);
+
         this.nodeAttrs = rootNode.attrs;
         this._subscribeToEvents(rootNode);
         DiagramState.instance.notifyNodeChanged(rootNode);
+    }
+
+    _drawIDLabel(rootNode) {
+        const simpleLabel = new Konva.Label({
+            x: 0,
+            y: 0,
+            opacity: 0.75
+        });
+
+        simpleLabel.add(
+            new Konva.Tag({
+                fill: 'yellow'
+            })
+        );
+
+        simpleLabel.add(
+            new Konva.Text({
+                text: this.id.toString(),
+                fontFamily: 'Calibri',
+                fontSize: 18,
+                padding: 5,
+                fill: 'black'
+            })
+        );
+
+        if (rootNode.getClassName() === "Group") {
+            rootNode.add(simpleLabel);
+        }
     }
 
     /**
@@ -300,6 +330,10 @@ export class Pin extends Component {
 
     _setVoltage(val) { this._voltage = val; }
 
+    resetVoltage() {
+        this._setVoltage(0);
+    }
+
     _drawChildNodes(parentNode) {
         const pinShape = new Konva.Circle({
             radius: 6,
@@ -314,7 +348,7 @@ export class Pin extends Component {
         //noop
     }
 
-    receiveVoltage(fromWireId, value, fromPinId=null) {
+    receiveVoltage(fromWireId, value, fromPinId = null) {
         console.log(`pin ${this.id} received voltage ${value} from wire ${fromWireId}, from pin ${fromPinId}`);
         this._setVoltage(value);
 
@@ -404,6 +438,10 @@ export class Wire extends Component {
 
     _setVoltage(val) { this._voltage = val; }
 
+    resetVoltage() {
+        this._setVoltage(0);
+    }
+
     receiveVoltage(fromId, value) {
         console.log(`wire ${this.id} received voltage ${value} from pin ${fromId}`);
         this._setVoltage(value);
@@ -482,6 +520,7 @@ class InductionCoil {
     }
 
     stopInducting() {
+        console.log("coil received stopInducting message");
         if (this._endPin.hasVoltage())
             this._endPin.receiveVoltage(this._startPin, 0);
     }
@@ -859,9 +898,15 @@ export class DPDTOnOn extends DPDTSwitch {
 
     _updatePinConnections() {
         if (this.actuatorState === 0) {
+            this.pin2.disconnectFromOtherPin(this.pin3);
+            this.pin5.disconnectFromOtherPin(this.pin6);
+
             this.pin2.connectToOtherPin(this.pin1);
             this.pin5.connectToOtherPin(this.pin4);
         } else {
+            this.pin2.disconnectFromOtherPin(this.pin1);
+            this.pin5.disconnectFromOtherPin(this.pin4);
+
             this.pin2.connectToOtherPin(this.pin3);
             this.pin5.connectToOtherPin(this.pin6);
         }

@@ -30,15 +30,27 @@ export class Visualizer {
 
         this._createAllAnimations();
 
-        DiagramState.instance.on("diagram-state-changed", (_) => {
-            console.log("received diagram-state-changed event");
-            
+        DiagramState.instance.on("wireChanged", (_) => {
+            console.log("received wireChanged event");
             const wasActiveWhenEventReceived = this.isActive;
 
             this.stop();
 
             if (wasActiveWhenEventReceived)
                 this.start();
+        });
+
+        DiagramState.instance.on("switchChanged", (_) => {
+            console.log("received switchChanged event");
+            const wasActiveWhenEventReceived = this.isActive;
+
+            this.stop();
+            DiagramState.instance.stop();
+
+            if (wasActiveWhenEventReceived) {
+                DiagramState.instance.start();
+                this.start();
+            }
         });
 
         Visualizer.instance = this;
@@ -91,7 +103,7 @@ export class Visualizer {
                     const pinNodeVoltageIsFrom = pinVoltageIsFrom.findNode(this._diagramLayer);
                     const pinPosition = pinNodeVoltageIsFrom.getAbsolutePosition();
                     console.log({ pinVoltageIsFrom, pinNodeVoltageIsFrom, pinPosition });
-                    
+
                     const wireEndX = animationWirePoints.at(-2);
                     if (areClose(pinPosition.x, wireEndX)) {
                         animationWirePoints = reverseWirePoints(animationWirePoints);

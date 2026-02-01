@@ -45,16 +45,15 @@ export class DiagramState extends EventEmitter {
     }
 
     notifyNodeChanged(node) {
-        // //console.log("notifyNodeChanged", node.name())
-        // if (node.name() === "Wire") {
-        //     this._emit("wireChanged", node);
-        // }
+        //console.log("notifyNodeChanged", node.name())
+        if (node.name() === "Wire") {
+            this._emit("wireChanged", node);
+        }
 
-        // // TODO: FIX This.... components need to raise events, and diagram state subscribes and just passes a "restart" event to visualizer.
-        // if(node.name() === "DPDTOnOn"){
-        //     this._emit("switchChanged", node);
-        // }
-        this._emit("diagram-state-changed");
+        // TODO: FIX This.... components need to raise events, and diagram state subscribes and just passes a "restart" event to visualizer.
+        if (node.name() === "DPDTOnOn") {
+            this._emit("switchChanged", node);
+        }
     }
 
     getComponent(id) {
@@ -136,6 +135,32 @@ export class DiagramState extends EventEmitter {
         this._allComponentInstances()
             .filter(i => i.constructor.name !== 'Pin') //Pins don't need to be drawn directly.
             .forEach(c => c.draw(container));
+    }
+
+    _findAllPickups() {
+        return this.findComponents((c) => {
+            return typeof c.pickUp === 'function';
+        });
+    }
+
+    _findAllResetVoltageComponents() {
+        return this.findComponents((c) => {
+            return typeof c.resetVoltage === 'function'
+        });
+    }
+
+    start() {
+        this._findAllPickups().forEach(pickup => pickup.pickUp());
+    }
+
+    stop() {
+
+        //TODO: investigate if this is needed.
+        //this._findAllPickups().forEach(pickup => pickup.stopPickingUp());
+
+        this._findAllResetVoltageComponents().forEach(c => {
+            c.resetVoltage();
+        });
     }
 }
 
