@@ -103,29 +103,42 @@ export class DiagramState extends EventEmitter {
         return encoded;
     }
 
-    async loadState(data) {
-        console.log({ data });
+    async loadState(encodedDataString) {
+        console.log({ data: encodedDataString });
 
-        const decoded = await Compressor.decompress(data);
-        console.log({ decoded });
+        const decodedDataString = await Compressor.decompress(encodedDataString);
+        console.log({ decoded: decodedDataString });
 
-        const diagramState = JSON.parse(decoded);
-        console.log({ diagramState });
+        const deserializedState = JSON.parse(decodedDataString);
+        console.log({ deserializedState: deserializedState });
 
-        const idsDeserliazed = []
-        diagramState.componentStates.forEach(state => {
-            idsDeserliazed.push(state.id);
+        // keep track if ids
+        const idsDeserialized = []
 
+        // do all the pins first, since other components depend on them
+        deserializedState.componentStates.forEach(state => {
             const className = state.className;
-            console.log("deserializing", className);
-
-            const componentInstance = new componentClassMap[className](state);
-
-            this.registerComponent(componentInstance);
+            if (className === "Pin") {
+                idsDeserialized.push(state.id);
+                console.log("recreating", className, state.id) ;
+                const componentInstance = new componentClassMap[className](state);
+                this.registerComponent(componentInstance);
+            }
 
         });
 
-        this._lastIssuedId = idsDeserliazed.sort((a, b) => b - a).at(0);
+        // rest of the compoents
+        deserializedState.componentStates.forEach(state => {
+            const className = state.className;
+            if (className !== "Pin") {
+                idsDeserialized.push(state.id);
+                console.log("recreating", className, state.id);
+                const componentInstance = new componentClassMap[className](state);
+                this.registerComponent(componentInstance);
+            }
+        });
+
+        this._lastIssuedId = idsDeserialized.sort((a, b) => b - a).at(0);
         console.log("reset last issued id", this._lastIssuedId);
 
         console.log("loaded diagram state!");
