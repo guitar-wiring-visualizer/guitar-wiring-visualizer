@@ -555,14 +555,14 @@ function clearSelection(transformer) {
     transformer.nodes([]);
 }
 
-function flipSelectedSwitch(switchGroup) {
+function flipSelectedSwitch(selectedNode) {
 
-    const switchComponent = DiagramState.instance.getComponent(switchGroup.id());
+    const switchComponent = DiagramState.instance.getComponent(selectedNode.id());
 
     if (!switchComponent.flip)
         return;
 
-    switchComponent.flip(switchGroup);
+    switchComponent.flip(selectedNode);
 }
 
 function deleteSelectedComponent(nodeToDelete, transformer) {

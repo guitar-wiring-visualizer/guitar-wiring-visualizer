@@ -99,7 +99,7 @@ export class Component extends EventEmitter {
      * Delegates to the normal draw method after destroying any existing node.
      * @param {Konva.Node} containerNode 
      */
-    reDraw(containerNode){
+    reDraw(containerNode) {
         console.assert(containerNode, "containerNode is required");
         this._unDrawIfNeeded(containerNode);
         this.draw(containerNode);
@@ -108,7 +108,7 @@ export class Component extends EventEmitter {
     _unDrawIfNeeded(containerNode) {
         console.assert(containerNode, "containerNode is required");
         const node = this.findNode(containerNode);
-        if (node){
+        if (node) {
             console.log("undraw node", node.id());
             node.destroy();
         }
@@ -643,25 +643,29 @@ export class Switch extends Component {
         this.state.actuatorState = this.state.actuatorState || 0;
     }
 
+    static get actuatorNodeName() { return "switch-actuator"; }
+
     get actuatorState() {
         return this.state.actuatorState;
     }
 
     _setActuatorState(val) {
+        console.assert(val !== null, "val is required");
         this.state.actuatorState = val;
     }
 
 
-    flip(shapeGroup) {
-        this._flipActuator(shapeGroup);
+    flip(componentNode) {
+        console.assert(componentNode, "componentNode is required");
+        this._flipActuator(componentNode);
     }
 
-    _flipActuator() {
+    _flipActuator(componentNode) {
         throw new Error("abstract method call");
     }
 
-    _addActuator(group) {
-        console.warn("_addActuator not implemented");
+    _drawActuator(parentNode) {
+        console.warn("_drawActuator not implemented");
     }
 }
 
@@ -718,7 +722,7 @@ export class DPDTSwitch extends Switch {
             this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
         });
 
-        this._addActuator(parentNode);
+        this._drawActuator(parentNode);
     }
 }
 
@@ -736,31 +740,20 @@ export class DPDTOnOn extends DPDTSwitch {
         return this.actuatorState === 0 ? "/img/bat-small-left.svg" : "/img/bat-small-right.svg";
     }
 
-    _addActuator(group) {
-        Konva.Image.fromURL(this._getActuatorImageURLForState(), (componentNode) => {
-            componentNode.position({ x: 0, y: -35 });
-            componentNode.name("switch-actuator");
-            this._applyGlobalStyling(componentNode);
-            group.add(componentNode);
+    _drawActuator(parentNode) {
+        Konva.Image.fromURL(this._getActuatorImageURLForState(), (actuatorNode) => {
+            actuatorNode.position({ x: 0, y: -35 });
+            actuatorNode.name(Switch.actuatorNodeName);
+            this._applyGlobalStyling(actuatorNode);
+            parentNode.add(actuatorNode);
         });
     }
 
-    _flipActuator(shapeGroup) {
-
+    _flipActuator(componentNode) {
         this._setActuatorState(this.actuatorState === 0 ? 1 : 0);
-
-        const actuatorNode = shapeGroup.getChildren().filter(c => c.name() === "switch-actuator")[0];
-
-        const pos = actuatorNode.position();
-
+        const actuatorNode = componentNode.findOne("." + Switch.actuatorNodeName);
         actuatorNode.destroy();
-
-        Konva.Image.fromURL(this._getActuatorImageURLForState(), (componentNode) => {
-            componentNode.position(pos);
-            this._applyGlobalStyling(componentNode);
-            componentNode.name("switch-actuator");
-            shapeGroup.add(componentNode);
-        });
+        this._drawActuator(componentNode);
 
         //TODO: Update pins state
     }
