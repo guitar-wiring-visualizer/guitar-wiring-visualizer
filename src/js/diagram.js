@@ -135,7 +135,7 @@ export class DiagramState extends EventEmitter {
 
 class Compressor {
 
-    static compress(string) {
+    static async compress(string) {
         const blobToBase64 = blob => new Promise((resolve, _) => {
             const reader = new FileReader();
             reader.onloadend = () => resolve(reader.result.split(',')[1]);
@@ -146,17 +146,17 @@ class Compressor {
         const writer = cs.writable.getWriter();
         writer.write(byteArray);
         writer.close();
-        return new Response(cs.readable).blob().then(blobToBase64);
+        const blob = await new Response(cs.readable).blob();
+        return blobToBase64(blob);
     }
 
-    static decompress(base64string) {
+    static async decompress(base64string) {
         const bytes = Uint8Array.from(atob(base64string), c => c.charCodeAt(0));
         const cs = new DecompressionStream('gzip');
         const writer = cs.writable.getWriter();
         writer.write(bytes);
         writer.close();
-        return new Response(cs.readable).arrayBuffer().then(function (arrayBuffer) {
-            return new TextDecoder().decode(arrayBuffer);
-        });
+        const arrayBuffer = await new Response(cs.readable).arrayBuffer();
+        return new TextDecoder().decode(arrayBuffer);
     }
 }
