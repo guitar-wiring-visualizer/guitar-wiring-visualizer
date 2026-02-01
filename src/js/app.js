@@ -127,7 +127,7 @@ function enableVisualizerButton() {
             DiagramState.instance.start();
             Visualizer.instance.start();
         }
-        console.info("visualizer", Visualizer.instance.isActive);
+        console.debug("visualizer", Visualizer.instance.isActive);
     });
 }
 

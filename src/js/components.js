@@ -31,6 +31,14 @@ export class Component extends EventEmitter {
         }
     }
 
+    get fullName() {
+        if (this.state.label) {
+            return `${this.state.label} ${this.constructor.name} (${this.id})`;
+        } else {
+            return `${this.constructor.name} (${this.id})`;
+        }
+    }
+
     get id() {
         return this._state.id;
     }
@@ -349,7 +357,7 @@ export class Pin extends Component {
     }
 
     receiveVoltage(fromWireId, value, fromPinId = null) {
-        console.info(`pin ${this.id} received voltage ${value} from wire ${fromWireId}, from pin ${fromPinId}`);
+        console.info(`${this.fullName} received voltage ${value} from wire ${DiagramState.instance.getComponent(fromWireId)?.fullName}, from pin ${DiagramState.instance.getComponent(fromPinId)?.fullName}`);
         this._setVoltage(value);
 
         const connectedWires = DiagramState.instance.findComponentsOfType(Wire, wire => {
@@ -443,12 +451,12 @@ export class Wire extends Component {
     }
 
     receiveVoltage(fromId, value) {
-        console.info(`wire ${this.id} received voltage ${value} from pin ${fromId}`);
+        console.info(`${this.fullName} received voltage ${value} from pin ${DiagramState.instance.getComponent(fromId)?.fullName}`);
         this._setVoltage(value);
         this._pinVoltageIsFrom = DiagramState.instance.getComponent(fromId);
         const targetPinId = this.startPinId === fromId ? this.endPinId : this.startPinId;
         const targetPin = DiagramState.instance.getComponent(targetPinId);
-        targetPin.receiveVoltage(this.id, value);
+        targetPin.receiveVoltage(this.id, value, fromId);
     }
 
     get pinVoltageIsFrom() {
@@ -504,13 +512,14 @@ export class Wire extends Component {
 
 class InductionCoil {
 
-    constructor(startPin, endPin) {
+    constructor(name, startPin, endPin) {
         this._startPin = startPin;
         this._endPin = endPin;
+        this._name = name;
     }
 
     induct() {
-        console.info(this.constructor.name, "received induct message");
+        console.info(`${this._name} received induct message`);
 
         if (this._startPin.hasVoltage())
             this._endPin.receiveVoltage(null, -this._startPin.voltage, this._startPin.id);
@@ -521,7 +530,7 @@ class InductionCoil {
     }
 
     stopInducting() {
-        console.info("coil received stopInducting message");
+        console.info(`${this.fullName} received stopInducting message`);
         if (this._endPin.hasVoltage())
             this._endPin.receiveVoltage(this._startPin, 0);
     }
@@ -553,30 +562,30 @@ export class Humbucker extends Pickup {
     }
 
     pickUp() {
-        console.info(this.constructor.name, this.id, "received pickUp message");
-        this._northCoil = new InductionCoil(this.northCoilEndPin, this.northCoilStartPin);
-        this._southCoil = new InductionCoil(this.southCoilStartPin, this.southCoilEndPin);
+
+        console.info(`${this.fullName} received pickUp message`);
+        this._northCoil = new InductionCoil(`${this.fullName}, North Coil`, this.northCoilFinishPin, this.northCoilStartPin);
+        this._southCoil = new InductionCoil(`${this.fullName}, South Coil`, this.southCoilStartPin, this.southCoilFinishPin);
         this._northCoil.induct();
         this._southCoil.induct();
     }
 
     stopPickingUp() {
-        console.warn("Humbuker stopPickingUp not yet implemented");
     }
 
     get northCoilStartPin() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
-    get northCoilEndPin() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
-    get southCoilEndPin() { return DiagramState.instance.getComponent(this.pinIds.at(2)); }
+    get northCoilFinishPin() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
+    get southCoilFinishPin() { return DiagramState.instance.getComponent(this.pinIds.at(2)); }
     get southCoilStartPin() { return DiagramState.instance.getComponent(this.pinIds.at(3)); }
     get groundPin() { return DiagramState.instance.getComponent(this.pinIds.at(4)); }
 
     _createChildComponents() {
-        const northCoilStartPin = new Pin();
-        const northCoilEndPin = new Pin();
-        const southCoilEndPin = new Pin();
-        const southCoilStartPin = new Pin();
-        const groundPin = new Pin();
-        this.pinIds.push(northCoilEndPin.id, northCoilStartPin.id, southCoilEndPin.id, southCoilStartPin.id, groundPin.id);
+        const northCoilStartPin = new Pin({ label: `${this.fullName} north coil start` });
+        const northCoilFinishPin = new Pin({ label: `${this.fullName} north coil finish` });
+        const southCoilFinishPin = new Pin({ label: `${this.fullName} south coil finish` });
+        const southCoilStartPin = new Pin({ label: `${this.fullName} south coil start` });
+        const groundPin = new Pin({ label: `${this.fullName} ground` });
+        this.pinIds.push(northCoilStartPin.id, northCoilFinishPin.id, southCoilFinishPin.id, southCoilStartPin.id, groundPin.id);
     }
 
     _drawChildNodes(parentNode) {
@@ -587,17 +596,17 @@ export class Humbucker extends Pickup {
         });
         this.northCoilStartPin.draw(parentNode);
 
-        this.northCoilEndPin.moveTo({
+        this.northCoilFinishPin.moveTo({
             x: 19,
             y: 181
         });
-        this.northCoilEndPin.draw(parentNode);
+        this.northCoilFinishPin.draw(parentNode);
 
-        this.southCoilEndPin.moveTo({
+        this.southCoilFinishPin.moveTo({
             x: 38,
             y: 182
         });
-        this.southCoilEndPin.draw(parentNode);
+        this.southCoilFinishPin.draw(parentNode);
 
         this.southCoilStartPin.moveTo({
             x: 55,
@@ -634,13 +643,13 @@ export class StratPickup extends Pickup {
     get endPin() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
 
     pickUp() {
-        console.info(this.constructor.name, this.id, "received pickUp message");
-        this._coil = new InductionCoil(this.startPin, this.endPin);
+        console.info(`${this.fullName} received pickUp message`);
+        this._coil = new InductionCoil(`${this.fullName} Coil`, this.startPin, this.endPin);
         this._coil.induct();
     }
 
     stopPickingUp() {
-        console.info(this.constructor.name, this.id, "received stopPickingUp message");
+        console.info(`${this.fullName} received stopPickingUp message`);
         if (this._coil)
             this._coil.stopInducting();
     }
@@ -692,20 +701,20 @@ export class MonoJack extends Jack {
     get sleevePin() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
 
     _createChildComponents() {
-        const tipPin = new Pin();
-        const sleevePin = new Pin();
+        const tipPin = new Pin({ label: `${this.fullName} tip` });
+        const sleevePin = new Pin({ label: `${this.fullName} sleeve` });
 
         this.pinIds.push(tipPin.id, sleevePin.id);
 
         tipPin.on("voltageChanged", (value) => {
-            console.debug(this.constructor.name, "got vc event from tip pin", tipPin.id, value)
+            console.debug(this.fullName, "got vc event from tip pin", tipPin.id, value)
             if (!sleevePin.hasVoltage())
-                sleevePin.receiveVoltage(this.id, -value);
+                sleevePin.receiveVoltage(null, -value, tipPin.id);
         });
         sleevePin.on("voltageChanged", (value) => {
-            console.debug(this.constructor.name, "got vc event from sleevePin", sleevePin.id, value)
+            console.debug(this.fullName, "got vc event from sleevePin", sleevePin.id, value)
             if (!tipPin.hasVoltage())
-                tipPin.receiveVoltage(this.id, -value);
+                tipPin.receiveVoltage(null, -value, sleevePin.id);
         });
     }
 

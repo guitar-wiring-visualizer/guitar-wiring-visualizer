@@ -51,7 +51,7 @@ const stratPickupAndJack = (diagramLayer) => {
 
 const humbuckerInSeries = (diagramLayer) => {
 
-    const pickup = new Humbucker();
+    const pickup = new Humbucker({label: "Test"});
     pickup.moveTo({ x: 10, y: 10 });
     pickup.draw(diagramLayer);
 
@@ -60,13 +60,14 @@ const humbuckerInSeries = (diagramLayer) => {
     const groundPin = pickup.southCoilStartPin;
     const groundPinPos = groundPin.findNode(diagramLayer).getAbsolutePosition();
 
-    const northEndPin = pickup.northCoilEndPin;
+    const northEndPin = pickup.northCoilFinishPin;
     const northEndPinPos = northEndPin.findNode(diagramLayer).getAbsolutePosition();
 
-    const southCoilEndPin = pickup.southCoilEndPin;
+    const southCoilEndPin = pickup.southCoilFinishPin;
     const southCoilEndPinPos = southCoilEndPin.findNode(diagramLayer).getAbsolutePosition();
 
     const jumper = new Wire({
+        label: "Jumper",
         startPoint: [northEndPinPos.x, northEndPinPos.y],
         midPoint: [45, 185],
         endPoint: [southCoilEndPinPos.x, southCoilEndPinPos.y],
@@ -87,6 +88,7 @@ const humbuckerInSeries = (diagramLayer) => {
     const sleevePos = sleevePin.findNode(diagramLayer).getAbsolutePosition();
 
     const hotWire = new Wire({
+        label: "Hot",
         startPoint: [hotPinPos.x, hotPinPos.y],
         midPoint: [20, 200],
         endPoint: [tipPos.x, tipPos.y],
@@ -97,6 +99,7 @@ const humbuckerInSeries = (diagramLayer) => {
     hotWire.draw(diagramLayer);
 
     const groundWire = new Wire({
+        label: "Ground",
         startPoint: [groundPinPos.x, groundPinPos.y],
         midPoint: [90, 270],
         endPoint: [sleevePos.x, sleevePos.y],
