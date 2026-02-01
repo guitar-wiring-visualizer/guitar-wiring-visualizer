@@ -4,7 +4,7 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 The Guitar Wiring Visualizer Authors
  */
 
-import { StratPickup, MonoJack, Wire, DPDTOnOn, componentClassMap } from "./components.js";
+import { StratPickup, MonoJack, Wire, DPDTOnOn, componentClassMap, Humbucker } from "./components.js";
 
 const stratPickupAndJack = (diagramLayer) => {
 
@@ -44,6 +44,65 @@ const stratPickupAndJack = (diagramLayer) => {
         startPinId: groundPin.id,
         endPinId: sleevePin.id,
         color: "black"
+    });
+    groundWire.draw(diagramLayer);
+
+};
+
+const humbuckerInSeries = (diagramLayer) => {
+
+    const pickup = new Humbucker();
+    pickup.moveTo({ x: 10, y: 10 });
+    pickup.draw(diagramLayer);
+
+    const hotPin = pickup.northCoilStartPin;
+    const hotPinPos = hotPin.findNode(diagramLayer).getAbsolutePosition();
+    const groundPin = pickup.southCoilStartPin;
+    const groundPinPos = groundPin.findNode(diagramLayer).getAbsolutePosition();
+
+    const northEndPin = pickup.northCoilEndPin;
+    const northEndPinPos = northEndPin.findNode(diagramLayer).getAbsolutePosition();
+
+    const southCoilEndPin = pickup.southCoilEndPin;
+    const southCoilEndPinPos = southCoilEndPin.findNode(diagramLayer).getAbsolutePosition();
+
+    const jumper = new Wire({
+        startPoint: [northEndPinPos.x, northEndPinPos.y],
+        midPoint: [45, 185],
+        endPoint: [southCoilEndPinPos.x, southCoilEndPinPos.y],
+        startPinId: northEndPin.id,
+        endPinId: southCoilEndPin.id,
+        color: "blue"
+    });
+    jumper.draw(diagramLayer);
+
+    const jack = new MonoJack();
+    jack.moveTo({ x: 10, y: 300 });
+    jack.draw(diagramLayer);
+
+    const tipPin = jack.tipPin;
+    const tipPos = tipPin.findNode(diagramLayer).getAbsolutePosition();
+
+    const sleevePin = jack.sleevePin;
+    const sleevePos = sleevePin.findNode(diagramLayer).getAbsolutePosition();
+
+    const hotWire = new Wire({
+        startPoint: [hotPinPos.x, hotPinPos.y],
+        midPoint: [20, 200],
+        endPoint: [tipPos.x, tipPos.y],
+        startPinId: hotPin.id,
+        endPinId: tipPin.id,
+        color: "black"
+    });
+    hotWire.draw(diagramLayer);
+
+    const groundWire = new Wire({
+        startPoint: [groundPinPos.x, groundPinPos.y],
+        midPoint: [90, 270],
+        endPoint: [sleevePos.x, sleevePos.y],
+        startPinId: groundPin.id,
+        endPinId: sleevePin.id,
+        color: "green"
     });
     groundWire.draw(diagramLayer);
 
@@ -159,4 +218,4 @@ const testDrawAll = (diagramLayer) => {
     });
 }
 
-export default { stratPickupAndJack, testDrawAll, dpdtOnOn, pickupSwitchJack };
+export default { stratPickupAndJack, testDrawAll, dpdtOnOn, pickupSwitchJack, humbuckerInSeries };
