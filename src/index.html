@@ -37,13 +37,8 @@
     </div>
 
     <div id="app-root" class="container-fluid">
-        <div class="row">
+        <div class="row mt-2">
             <div class="col">
-                <hr>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col ">
                 <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
                     <div class="btn-group me-2" role="group">
                         <button type="button" class="btn btn-success" id="vis-button">Start Visualizer</button>
@@ -125,61 +120,93 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="row mt-2">
+        <div class="col-2 text-center border p-0">
 
-    </div>
-    <div class="row">
-        <div class="col">
-            <hr>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-2 text-center border">
-            <!-- <h4>Component Library</h4>
-                <hr> -->
-            <div id="library-items" style="height: 800px;">
-                <div class="mt-5">
-                    <h5>Pickups</h5>
+            <div class="accordion accordion-flush" id="library-items">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#pickups-section" aria-expanded="false" aria-controls="pickups-section">
+                            Pickups
+                        </button>
+                    </h2>
+                    <div id="pickups-section" class="accordion-collapse collapse show" data-bs-parent="#library-items">
+                        <div class="accordion-body">
+                            <div>
+                                <img data-component-class="StratPickup" src="" draggable="true" width="175">
+                                <p>Strat</p>
+                            </div>
+                            <div>
+                                <img data-component-class="Humbucker" src="" draggable="true" width="175">
+                                <p>Humbucker</p>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <img data-component-class="StratPickup" src="" draggable="true" width="175">
-                    <p>Strat</p>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#pots-section" aria-expanded="false" aria-controls="pots-section">
+                            Potentiometers
+                        </button>
+                    </h2>
+                    <div id="pots-section" class="accordion-collapse collapse" data-bs-parent="#library-items">
+                        <div class="accordion-body">
+                            <div>
+                                <img data-component-class="Potentiometer" src="" draggable="true">
+                                <p>Standard Pot</p>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <img data-component-class="Humbucker" src="" draggable="true" width="175">
-                    <p>Humbucker</p>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#jacks-section" aria-expanded="false" aria-controls="jacks-section">
+                            Jacks
+                        </button>
+                    </h2>
+                    <div id="jacks-section" class="accordion-collapse collapse" data-bs-parent="#library-items">
+                        <div class="accordion-body">
+                            <div>
+                                <img data-component-class="MonoJack" src="" draggable="true">
+                                <p>Mono Jack</p>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <h5>Potentiometers</h5>
-                </div>
-                <div>
-                    <img data-component-class="Potentiometer" src="" draggable="true">
-                    <p>Standard Pot</p>
-                </div>
-                <div class="mt-5">
-                    <h5>Switches</h5>
-                </div>
-                <div>
-                    <img data-component-class="DPDTOnOn" src="" draggable="true">
-                    <p>DPDT On-On</p>
-                </div>
-                <div>
-                    <img data-component-class="DPDTOnOffOn" src="" draggable="true">
-                    <p>DPDT On-Off-On</p>
-                </div>
-                <div>
-                    <img data-component-class="DPDTOnOnOn" src="" draggable="true">
-                    <p>DPDT On-On-On</p>
-                </div>
-                <div class="mt-5">
-                    <h5>Jacks</h5>
-                </div>
-                <div>
-                    <img data-component-class="MonoJack" src="" draggable="true">
-                    <p>Mono Jack</p>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#switches-section" aria-expanded="false" aria-controls="switches-section">
+                            Switches
+                        </button>
+                    </h2>
+                    <div id="switches-section" class="accordion-collapse collapse" data-bs-parent="#library-items">
+                        <div class="accordion-body">
+                            <div>
+                                <img data-component-class="DPDTOnOn" src="" draggable="true">
+                                <p>DPDT On-On</p>
+                            </div>
+                            <div>
+                                <img data-component-class="DPDTOnOffOn" src="" draggable="true">
+                                <p>DPDT On-Off-On</p>
+                            </div>
+                            <div>
+                                <img data-component-class="DPDTOnOnOn" src="" draggable="true">
+                                <p>DPDT On-On-On</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col border" style="overflow-x: auto">
+        <div class="col border p-0" style="overflow-x: auto">
             <div id="loader">Loading...</div>
             <div id="diagram" class="bg-secondary-subtle"></div>
         </div>
