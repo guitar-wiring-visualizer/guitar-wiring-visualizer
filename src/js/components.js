@@ -937,6 +937,7 @@ export class Potentiometer extends Component {
 
     constructor(state = {}) {
         super(state);
+        this._setupPinConnections();
     }
 
     static get ImageURL() {
@@ -955,7 +956,6 @@ export class Potentiometer extends Component {
     get endPin() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
     get wiperPin() { return DiagramState.instance.getComponent(this.pinIds.at(2)); }
 
-
     _createChildComponents() {
 
         const pinCount = 3;
@@ -970,6 +970,11 @@ export class Potentiometer extends Component {
                 y: Potentiometer._pinsStartAtY,
             });
         }
+    }
+
+    _setupPinConnections(){
+        this.startPin.connectToOtherPin(this.wiperPin);
+        this.wiperPin.connectToOtherPin(this.endPin);
     }
 
     _drawChildNodes(parentNode) {
