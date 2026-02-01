@@ -49,6 +49,69 @@ const stratPickupAndJack = (diagramLayer) => {
 
 };
 
+const pickupSwitchJack = (diagramLayer) => {
+
+    const pickup = new StratPickup();
+    pickup.moveTo({ x: 10, y: 10 });
+    pickup.draw(diagramLayer);
+
+    const hotPin = pickup.endPin;
+    const hotPinPos = hotPin.findNode(diagramLayer).getAbsolutePosition();
+    const groundPin = pickup.startPin;
+    const groundPinPos = groundPin.findNode(diagramLayer).getAbsolutePosition();
+
+
+    const sw = new DPDTOnOn();
+    sw.moveTo({x: 50, y: 110});
+    sw.draw(diagramLayer);
+
+    const inPin = sw.pin5;
+    const inPinPos = inPin.findNode(diagramLayer).getAbsolutePosition();
+    const outPin = sw.pin4;
+    const outPinPos = outPin.findNode(diagramLayer).getAbsolutePosition();
+
+    const hotWire = new Wire({
+        startPoint: [hotPinPos.x, hotPinPos.y],
+        midPoint: [75, 120],
+        endPoint: [inPinPos.x, inPinPos.y],
+        startPinId: hotPin.id,
+        endPinId: inPin.id,
+        color: "red"
+    });
+    hotWire.draw(diagramLayer);
+
+    const jack = new MonoJack();
+    jack.moveTo({ x: 10, y: 200 });
+    jack.draw(diagramLayer);
+
+    const tipPin = jack.tipPin;
+    const tipPos = tipPin.findNode(diagramLayer).getAbsolutePosition();
+
+    const sleevePin = jack.sleevePin;
+    const sleevePos = sleevePin.findNode(diagramLayer).getAbsolutePosition();
+
+    const hotWire2 = new Wire({
+        startPoint: [outPinPos.x, outPinPos.y],
+        midPoint: [75, 175],
+        endPoint: [tipPos.x, tipPos.y],
+        startPinId: outPin.id,
+        endPinId: tipPin.id,
+        color: "red"
+    });
+    hotWire2.draw(diagramLayer);
+
+    const groundWire = new Wire({
+        startPoint: [groundPinPos.x, groundPinPos.y],
+        midPoint: [160, 160],
+        endPoint: [sleevePos.x, sleevePos.y],
+        startPinId: groundPin.id,
+        endPinId: sleevePin.id,
+        color: "black"
+    });
+    groundWire.draw(diagramLayer);
+
+};
+
 const dpdtOnOn = (diagramLayer) => {
     const sw = new DPDTOnOn();
     sw.moveTo({x: 50, y: 50});
@@ -81,4 +144,4 @@ const testDrawAll = (diagramLayer) => {
     });
 }
 
-export default { stratPickupAndJack, testDrawAll, dpdtOnOn };
+export default { stratPickupAndJack, testDrawAll, dpdtOnOn, pickupSwitchJack };
