@@ -92,7 +92,7 @@ export class DiagramState extends EventEmitter {
         }
         console.log({ data: diagramState });
 
-        const encoded = await compress(JSON.stringify(diagramState));
+        const encoded = await Compressor.compress(JSON.stringify(diagramState));
         console.log({ encoded });
 
         return encoded;
@@ -101,7 +101,7 @@ export class DiagramState extends EventEmitter {
     async loadState(data) {
         console.log({ data });
 
-        const decoded = await decompress(data);
+        const decoded = await Compressor.decompress(data);
         console.log({ decoded });
 
         const diagramState = JSON.parse(decoded);
@@ -133,30 +133,30 @@ export class DiagramState extends EventEmitter {
     }
 }
 
+class Compressor {
 
-// Compreses string to GZIP. Retruns a Promise with Base64 string
-const compress = string => {
-    const blobToBase64 = blob => new Promise((resolve, _) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result.split(',')[1]);
-        reader.readAsDataURL(blob);
-    });
-    const byteArray = new TextEncoder().encode(string);
-    const cs = new CompressionStream('gzip');
-    const writer = cs.writable.getWriter();
-    writer.write(byteArray);
-    writer.close();
-    return new Response(cs.readable).blob().then(blobToBase64);
-};
+    static compress(string) {
+        const blobToBase64 = blob => new Promise((resolve, _) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result.split(',')[1]);
+            reader.readAsDataURL(blob);
+        });
+        const byteArray = new TextEncoder().encode(string);
+        const cs = new CompressionStream('gzip');
+        const writer = cs.writable.getWriter();
+        writer.write(byteArray);
+        writer.close();
+        return new Response(cs.readable).blob().then(blobToBase64);
+    }
 
-// Decompresses base64 encoded GZIP string. Retruns a string with original text.
-const decompress = base64string => {
-    const bytes = Uint8Array.from(atob(base64string), c => c.charCodeAt(0));
-    const cs = new DecompressionStream('gzip');
-    const writer = cs.writable.getWriter();
-    writer.write(bytes);
-    writer.close();
-    return new Response(cs.readable).arrayBuffer().then(function (arrayBuffer) {
-        return new TextDecoder().decode(arrayBuffer);
-    });
+    static decompress(base64string) {
+        const bytes = Uint8Array.from(atob(base64string), c => c.charCodeAt(0));
+        const cs = new DecompressionStream('gzip');
+        const writer = cs.writable.getWriter();
+        writer.write(bytes);
+        writer.close();
+        return new Response(cs.readable).arrayBuffer().then(function (arrayBuffer) {
+            return new TextDecoder().decode(arrayBuffer);
+        });
+    }
 }
