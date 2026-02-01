@@ -546,7 +546,7 @@ export class Humbucker extends Pickup {
     }
 
     static get ImageURL() {
-        return "/img/pu-humbucker4.svg";
+        return "/img/pu-humbucker.svg";
     }
 
     startPickingUp() {
@@ -574,33 +574,35 @@ export class Humbucker extends Pickup {
 
     _drawChildNodes(parentNode) {
 
-        this.topCoilEndPin.moveTo({
+        this.topCoilStartPin.moveTo({
             x: 5,
             y: 165
         });
-        this.topCoilEndPin.draw(parentNode);
-
-        this.topCoilStartPin.moveTo({
-            x: 17,
-            y: 180
-        });
         this.topCoilStartPin.draw(parentNode);
 
+
+        this.topCoilEndPin.moveTo({
+            x: 19,
+            y: 181
+        });
+        this.topCoilEndPin.draw(parentNode);
+
+
         this.bottomCoilEndPin.moveTo({
-            x: 33,
+            x: 38,
             y: 182
         });
         this.bottomCoilEndPin.draw(parentNode);
 
         this.bottomCoilStartPin.moveTo({
-            x: 50,
-            y: 173
+            x: 55,
+            y: 172
         });
         this.bottomCoilStartPin.draw(parentNode);
 
         this.groundPin.moveTo({
-            x: 60,
-            y: 158
+            x: 62,
+            y: 155
         });
         this.groundPin.draw(parentNode);
 
