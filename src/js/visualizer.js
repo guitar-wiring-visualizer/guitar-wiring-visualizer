@@ -31,7 +31,7 @@ export class Visualizer {
         this._createAllAnimations();
 
         DiagramState.instance.on("wireChanged", (_) => {
-            console.log("received wireChanged event");
+           // console.log("received wireChanged event");
             const wasActiveWhenEventReceived = this.isActive;
 
             this.stop();

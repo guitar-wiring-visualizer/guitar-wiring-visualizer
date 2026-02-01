@@ -45,7 +45,7 @@ export class DiagramState extends EventEmitter {
     }
 
     notifyNodeChanged(node) {
-        console.log("notifyNodeChanged", node.name())
+        //console.log("notifyNodeChanged", node.name())
         if (node.name() === "Wire") {
             this._emit("wireChanged", node);
         }

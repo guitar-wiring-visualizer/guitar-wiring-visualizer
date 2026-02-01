@@ -314,16 +314,22 @@ export class Pin extends Component {
         //noop
     }
 
-    receiveVoltage(fromId, value) {
-        console.log(`pin ${this.id} received voltage ${value} from wire ${fromId}`);
+    receiveVoltage(fromWireId, value, fromPinId=null) {
+        console.log(`pin ${this.id} received voltage ${value} from wire ${fromWireId}, from pin ${fromPinId}`);
         this._setVoltage(value);
 
         const connectedWires = DiagramState.instance.findComponentsOfType(Wire, wire => {
-            return wire.id !== fromId
+            return wire.id !== fromWireId
                 && (wire.endPinId == this.id || wire.startPinId == this.id)
         });
         console.log("send to connected wires", connectedWires);
         connectedWires.forEach(wire => wire.receiveVoltage(this.id, value));
+
+        if (this.connectedPinId !== null && fromPinId !== this.connectedPinId) {
+            console.log("send to connected pin", this.connectedPinId);
+            const connectedPin = DiagramState.instance.getComponent(this.connectedPinId);
+            connectedPin.receiveVoltage(fromWireId, value, this.id);
+        }
 
         this._emit("voltageChanged", this.voltage);
     }
@@ -425,7 +431,7 @@ export class Wire extends Component {
 
         const wirePoints = [...this.startPoint, ...this.midPoint, ...this.endPoint];
 
-        console.log("wire creating", this.id, wirePoints);
+        //console.log("wire creating", this.id, wirePoints);
 
         const line = new Konva.Line({
             points: wirePoints,
