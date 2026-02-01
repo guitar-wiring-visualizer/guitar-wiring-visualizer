@@ -71,8 +71,14 @@ function enableSave() {
 async function saveStateToURL() {
     const serializedState = await DiagramState.instance.serializeState();
     if (serializedState === "") {
-        console.warn("mo state to save");
+        console.warn("no state to save");
         return "";
+    }
+
+    const practicalSizeLimit = 2000;
+
+    if (serializedState.length > practicalSizeLimit) {
+        alert("Uh Oh! This diagram may be too large to be saved. The link generated may not work in all browsers. Consider removing some components. The practical limit is around 40 items, including wires. Please submit an issue if this limits your ability to use the app.  You might want to take a screenshot of the diagram.")
     }
 
     const url = new URL(window.location);
