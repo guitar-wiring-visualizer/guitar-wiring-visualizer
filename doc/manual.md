@@ -70,7 +70,7 @@ Flipping a switch moves it's actuator through the available positions.  This wil
 
 To save a link to the the diagram, click the "Save" button.  This will update the URL of the browser with the state of the diagram.  You may copy the current window URL and send to a friend!
 
-Alternatively, simply click the "Save and Copy URL" button to save as well as copy the link  to your clipboard in one action.
+Turn on "Copy to clipboard on Save" to automatically copy the link to your clipboard when saving.
 
 #### Load
 
