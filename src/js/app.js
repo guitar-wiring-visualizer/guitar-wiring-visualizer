@@ -52,13 +52,24 @@ const setupApp = async () => {
 
     enableSave();
 
-    enableImportFromURL(diagramLayer);
+    await enableImportFromURL(diagramLayer);
 
     await enableTestScript(diagramLayer);
 }
 
-function saveStateToURL() {
-    const serializedState = DiagramState.instance.serializeState();
+function enableSave() {
+    document.getElementById("save-url").addEventListener("click", async (e) => {
+        const url = await saveStateToURL();
+        if (url) {
+            if (document.getElementById("check-copy-to-clipboard").checked) {
+                await copyToClipboard(url);
+            }
+        }
+    });
+}
+
+async function saveStateToURL() {
+    const serializedState = await DiagramState.instance.serializeState();
     if (serializedState === "") {
         console.warn("mo state to save");
         return "";
@@ -70,26 +81,15 @@ function saveStateToURL() {
     return url;
 }
 
-function enableSave() {
-    document.getElementById("save-url").addEventListener("click", async (e) => {
-        const url = saveStateToURL();
-        if (url) {
-            if (document.getElementById("check-copy-to-clipboard").checked) {
-                await copyToClipboard(url);
-            }
-        }
-    });
-}
-
 async function copyToClipboard(str) {
     await navigator.clipboard.writeText(str);
 }
 
-function enableImportFromURL(diagramLayer) {
+async function enableImportFromURL(diagramLayer) {
     const params = new URLSearchParams(window.location.search);
     if (params.has(SERIALIZED_DIAGRAM_STATE_PARAM)) {
         const serializedState = params.get(SERIALIZED_DIAGRAM_STATE_PARAM);
-        DiagramState.instance.loadState(serializedState);
+        await DiagramState.instance.loadState(serializedState);
         DiagramState.instance.drawAll(diagramLayer);
     }
 }
