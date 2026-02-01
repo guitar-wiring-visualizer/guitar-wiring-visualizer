@@ -85,8 +85,11 @@ export class Component extends EventEmitter {
         console.assert(containerNode, "containerNode is required");
         const positionInContainer = this._getPosition();
         const rootNode = this._createRootNode(positionInContainer);
-        this._drawChildNodes(rootNode);
+
         containerNode.add(rootNode);
+
+        this._drawChildNodes(rootNode);
+
         this.nodeAttrs = rootNode.attrs;
         this._subscribeToEvents(rootNode);
         DiagramState.instance.notifyNodeChanged(rootNode);
@@ -250,9 +253,48 @@ export class Pin extends Component {
         super(state);
 
         this._voltage = 0;
+        this.state.connectedPinId = null;
+        this.state.isConnectedPinSource = false;
     }
 
     static get IsDraggable() { return false; }
+
+    get connectedPinId() {
+        return this.state.connectedPinId;
+    }
+    _setConnectedPinId(otherPinId) {
+        console.assert(typeof otherPinId !== 'undefined', "otherPinId is required");
+        this.state.connectedPinId = otherPinId;
+    }
+
+    /**
+     * Inidicates if this was the pin that initiated the connection to the other pin.
+     * This does not affect voltage flow - it is only used for drawing.
+     */
+    get isConnectedPinSource() {
+        return this.state.isConnectedPinSource;
+    }
+    _setIsConnectedPinSource(val) {
+        this.state.isConnectedPinSource = val;
+    }
+
+    connectToOtherPin(otherPin) {
+        console.assert(otherPin, "otherPin is required");
+        this._setIsConnectedPinSource(true);
+        this._setConnectedPinId(otherPin.id);
+        otherPin._setConnectedPinId(this.id);
+        otherPin._setIsConnectedPinSource(false);
+    }
+
+    disconnectFromOtherPin() {
+        if (this.connectedPinId !== null) {
+            const otherPin = DiagramState.instance.getComponent(this.connectedPinId);
+            otherPin._setConnectedPinId(null);
+            otherPin._setIsConnectedPinSource(false);
+        }
+        this._setConnectedPinId(null);
+        this._setIsConnectedPinSource(false);
+    }
 
     get voltage() { return this._voltage };
 
@@ -641,9 +683,11 @@ export class Switch extends Component {
     constructor(state = {}) {
         super(state);
         this.state.actuatorState = this.state.actuatorState || 0;
+        this._updatePinConnections();
     }
 
     static get actuatorNodeName() { return "switch-actuator"; }
+    static get pinConnectionNodeName() { return "switch-pin-connection"; }
 
     get actuatorState() {
         return this.state.actuatorState;
@@ -654,18 +698,47 @@ export class Switch extends Component {
         this.state.actuatorState = val;
     }
 
-
     flip(componentNode) {
         console.assert(componentNode, "componentNode is required");
-        this._flipActuator(componentNode);
+        this._flipActuatorAndSetState();
+        this._reDrawActuator(componentNode);
+        this._updatePinConnections();
+        this._reDrawPinConnections(componentNode);
     }
 
-    _flipActuator(componentNode) {
+    _flipActuatorAndSetState() {
         throw new Error("abstract method call");
     }
 
     _drawActuator(parentNode) {
         console.warn("_drawActuator not implemented");
+    }
+
+    _reDrawActuator(componentNode) {
+        console.assert(componentNode, "componentNode is required");
+        const actuatorNode = componentNode.findOne("." + Switch.actuatorNodeName);
+        actuatorNode.destroy();
+        this._drawActuator(componentNode);
+    }
+
+    _updatePinConnections() {
+        console.warn("_updatePinConnections not implemented");
+    }
+
+    _drawPinConnections(componentNode) {
+        console.warn("_drawPinConnections not implemented");
+    }
+
+    _getAllPins() {
+        return [];
+    }
+
+    _reDrawPinConnections(componentNode) {
+        componentNode.find("." + Switch.pinConnectionNodeName).forEach(connectionNode => {
+            connectionNode.destroy();
+        });
+
+        this._drawPinConnections(componentNode);
     }
 }
 
@@ -720,9 +793,33 @@ export class DPDTSwitch extends Switch {
             this._applyGlobalStyling(componentNode);
             parentNode.add(componentNode);
             this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
+            this._drawActuator(parentNode);
+            this._drawPinConnections(parentNode);
         });
+    }
 
-        this._drawActuator(parentNode);
+    _getAllPins() {
+        return [this.pin1, this.pin2, this.pin3, this.pin4, this.pin5, this.pin6];
+    }
+
+    _drawPinConnections(parentNode) {
+        this._getAllPins().forEach(pin => {
+            if (pin.connectedPinId !== null && pin.isConnectedPinSource) {
+                const pinShape = pin.findNode(parentNode);
+                const pinPos = pinShape.position();
+                const otherPin = DiagramState.instance.getComponent(pin.connectedPinId);
+                const otherPinNode = otherPin.findNode(parentNode);
+                const otherPinPos = otherPinNode.position();
+                const connector = new Konva.Line({
+                    name: Switch.pinConnectionNodeName,
+                    strokeWidth: 5,
+                    stroke: "#696969",
+                    draggable: false,
+                    points: [pinPos.x, pinPos.y, otherPinPos.x, otherPinPos.y],
+                });
+                parentNode.add(connector);
+            }
+        });
     }
 }
 
@@ -749,15 +846,19 @@ export class DPDTOnOn extends DPDTSwitch {
         });
     }
 
-    _flipActuator(componentNode) {
+    _flipActuatorAndSetState() {
         this._setActuatorState(this.actuatorState === 0 ? 1 : 0);
-        const actuatorNode = componentNode.findOne("." + Switch.actuatorNodeName);
-        actuatorNode.destroy();
-        this._drawActuator(componentNode);
-
-        //TODO: Update pins state
     }
 
+    _updatePinConnections() {
+        if (this.actuatorState === 0) {
+            this.pin2.connectToOtherPin(this.pin1);
+            this.pin5.connectToOtherPin(this.pin4);
+        } else {
+            this.pin2.connectToOtherPin(this.pin3);
+            this.pin5.connectToOtherPin(this.pin6);
+        }
+    }
 }
 
 export class DPDTOnOffOn extends DPDTSwitch {

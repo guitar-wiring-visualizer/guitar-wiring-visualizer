@@ -455,7 +455,7 @@ function enableSelectComponent(transformer) {
         const node = e.target;
 
         let selectableNode;
-        if (node.getClassName() === "Line") {
+        if (node.name() === "Wire") {
             selectableNode = node;
         } else {
             selectableNode = e.target.getParent();

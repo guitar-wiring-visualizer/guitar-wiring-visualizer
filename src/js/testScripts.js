@@ -4,7 +4,7 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 The Guitar Wiring Visualizer Authors
  */
 
-import { StratPickup, MonoJack, Wire, componentClassMap } from "./components.js";
+import { StratPickup, MonoJack, Wire, DPDTOnOn, componentClassMap } from "./components.js";
 
 const stratPickupAndJack = (diagramLayer) => {
 
@@ -49,6 +49,12 @@ const stratPickupAndJack = (diagramLayer) => {
 
 };
 
+const dpdtOnOn = (diagramLayer) => {
+    const sw = new DPDTOnOn();
+    sw.moveTo({x: 50, y: 50});
+    sw.draw(diagramLayer);
+}
+
 const testDrawAll = (diagramLayer) => {
 
     const startX = 10;
@@ -75,4 +81,4 @@ const testDrawAll = (diagramLayer) => {
     });
 }
 
-export default { stratPickupAndJack, testDrawAll };
+export default { stratPickupAndJack, testDrawAll, dpdtOnOn };
