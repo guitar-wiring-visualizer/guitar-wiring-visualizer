@@ -941,7 +941,7 @@ export class Potentiometer extends Component {
     }
 
     static get ImageURL() {
-        return "/img/pot1.svg";
+        return "/img/pot-gr.svg";
     }
 
     static get _pinsStartAtX() {
@@ -955,6 +955,7 @@ export class Potentiometer extends Component {
     get startPin() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
     get endPin() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
     get wiperPin() { return DiagramState.instance.getComponent(this.pinIds.at(2)); }
+    get groundPin() { return DiagramState.instance.getComponent(this.pinIds.at(3)); }
 
     _createChildComponents() {
 
@@ -970,9 +971,15 @@ export class Potentiometer extends Component {
                 y: Potentiometer._pinsStartAtY,
             });
         }
+
+        const groundPin = new Pin();
+        this.pinIds.push(groundPin.id);
+        groundPin.moveTo({
+            x: 77, y: 64
+        });
     }
 
-    _setupPinConnections(){
+    _setupPinConnections() {
         this.startPin.connectToOtherPin(this.wiperPin);
         this.wiperPin.connectToOtherPin(this.endPin);
     }
@@ -981,6 +988,7 @@ export class Potentiometer extends Component {
         this.startPin.draw(parentNode);
         this.endPin.draw(parentNode);
         this.wiperPin.draw(parentNode);
+        this.groundPin.draw(parentNode);
         Konva.Image.fromURL(Potentiometer.ImageURL, (componentNode) => {
             this._applyGlobalStyling(componentNode);
             parentNode.add(componentNode);
