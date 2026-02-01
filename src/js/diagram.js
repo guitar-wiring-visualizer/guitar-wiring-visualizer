@@ -45,10 +45,16 @@ export class DiagramState extends EventEmitter {
     }
 
     notifyNodeChanged(node) {
-        //console.log("notifyNodeChanged", node.name())
-        if (node.name() === "Wire") {
-            this._emit("wireChanged", node);
-        }
+        // //console.log("notifyNodeChanged", node.name())
+        // if (node.name() === "Wire") {
+        //     this._emit("wireChanged", node);
+        // }
+
+        // // TODO: FIX This.... components need to raise events, and diagram state subscribes and just passes a "restart" event to visualizer.
+        // if(node.name() === "DPDTOnOn"){
+        //     this._emit("switchChanged", node);
+        // }
+        this._emit("diagram-state-changed");
     }
 
     getComponent(id) {

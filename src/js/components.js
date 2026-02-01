@@ -710,6 +710,7 @@ export class Switch extends Component {
         this._reDrawActuator(componentNode);
         this._updatePinConnections();
         this._reDrawPinConnections(componentNode);
+        DiagramState.instance.notifyNodeChanged(componentNode);
     }
 
     _flipActuatorAndSetState() {
