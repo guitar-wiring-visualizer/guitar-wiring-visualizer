@@ -4,7 +4,7 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 The Guitar Wiring Visualizer Authors
  */
 
-import { DiagramState } from "./diagram.js";
+import { DiagramState, WIRE_COLOR_BLACK, WIRE_COLOR_BLUE, WIRE_COLOR_GREEN, WIRE_COLOR_RED, WIRE_COLOR_YELLOW } from "./diagram.js";
 import { Wire } from './components.js';
 
 const RANGE_FOR_CLOSE_POINT_COMPARISON = 2.0;
@@ -196,12 +196,13 @@ export class Visualizer {
 
             const startPoint = { x: actualPoints.at(0), y: actualPoints.at(1) };
 
+            const { fill, shadow } = getElectronColors();
             const electron = new Konva.Circle({
                 x: startPoint.x,
                 y: startPoint.y,
                 radius: 4,
-                fill: 'cyan',
-                shadowColor: "#35FF1F",
+                fill: fill,
+                shadowColor: shadow,
                 shadowBlur: 10,
                 shadowOffset: { x: -5, y: 0 },
                 shadowOpacity: 1,
@@ -240,12 +241,24 @@ export class Visualizer {
                 }
                 return path;
             }
+
+            function getElectronColors() {
+                let fill, shadow;
+                switch (wireLine.stroke()) {
+                    //TODO: pick different shadow and stroke based on line
+                    default:
+                        shadow = "#35FF1F";
+                        fill = "cyan";
+                        break;
+                }
+
+                console.debug(`set fill ${fill}, shadow ${shadow} for wire ${wireLine.stroke()}`);
+                return { fill, shadow };
+            }
         }
 
         return this._signalWireNodes.map(wireNode => {
             return createAnimationForWire(wireNode);
         });
-
     }
-
 }
