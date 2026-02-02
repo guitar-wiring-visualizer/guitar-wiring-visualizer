@@ -690,6 +690,17 @@ export class Jack extends Component {
 export class MonoJack extends Jack {
     constructor(state = {}) {
         super(state);
+
+        this.tipPin.on("voltageChanged", (value) => {
+            console.debug(this.fullName, "got voltageChanged event from tip pin", this.tipPin.id, value)
+            if (!this.sleevePin.hasVoltage())
+                this.sleevePin.receiveVoltage(null, -value, this.tipPin.id);
+        });
+        this.sleevePin.on("voltageChanged", (value) => {
+            console.debug(this.fullName, "got voltageChanged event from sleevePin", this.sleevePin.id, value)
+            if (!this.tipPin.hasVoltage())
+                this.tipPin.receiveVoltage(null, -value, this.sleevePin.id);
+        });
     }
 
     static get ImageURL() {
@@ -705,17 +716,6 @@ export class MonoJack extends Jack {
         const sleevePin = new Pin({ label: `${this.fullName} sleeve` });
 
         this.pinIds.push(tipPin.id, sleevePin.id);
-
-        tipPin.on("voltageChanged", (value) => {
-            console.debug(this.fullName, "got vc event from tip pin", tipPin.id, value)
-            if (!sleevePin.hasVoltage())
-                sleevePin.receiveVoltage(null, -value, tipPin.id);
-        });
-        sleevePin.on("voltageChanged", (value) => {
-            console.debug(this.fullName, "got vc event from sleevePin", sleevePin.id, value)
-            if (!tipPin.hasVoltage())
-                tipPin.receiveVoltage(null, -value, sleevePin.id);
-        });
     }
 
     _drawChildNodes(parentNode) {
