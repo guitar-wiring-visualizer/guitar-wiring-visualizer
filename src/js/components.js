@@ -505,7 +505,7 @@ export class Wire extends Component {
     }
 
     changeColor(node, color) {
-        this.color = color;
+        this.state.color = color;
         node.stroke(color);
     }
 }
