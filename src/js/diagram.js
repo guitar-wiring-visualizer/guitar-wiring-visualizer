@@ -51,8 +51,8 @@ export class DiagramState extends EventEmitter {
             this._emit("wireChanged", node);
         }
 
-        // TODO: FIX This.... components need to raise events, and diagram state subscribes and just passes a "restart" event to visualizer.
-        if (node.name() === "DPDTOnOn") {
+        //TOD0: refactor how events are bubbled out
+        if (["DPDTOnOn", "DPDTOnOffOn", "DPDTOnOnOn"].includes(node.name())) {
             this._emit("switchChanged", node);
         }
     }
@@ -85,6 +85,7 @@ export class DiagramState extends EventEmitter {
             });
         }
         delete this._componenetMap[component.id];
+
     }
 
     async serializeState() {
