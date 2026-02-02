@@ -754,8 +754,14 @@ export class Switch extends Component {
         return this.state.actuatorState;
     }
 
+    _getValidActuatorStates() {
+        return [0, 1];
+    }
+
     _setActuatorState(val) {
         console.assert(val !== null, "val is required");
+        if (!this._getValidActuatorStates().includes(val))
+            throw new Error(`invalid actuator state ${val}`);
         this.state.actuatorState = val;
     }
 
@@ -860,6 +866,19 @@ export class DPDTSwitch extends Switch {
         });
     }
 
+    _getActuatorImageURLForState() {
+        throw new Error("abstract method call");
+    }
+
+    _drawActuator(parentNode) {
+        Konva.Image.fromURL(this._getActuatorImageURLForState(), (actuatorNode) => {
+            actuatorNode.position({ x: 0, y: -35 });
+            actuatorNode.name(Switch.actuatorNodeName);
+            this._applyGlobalStyling(actuatorNode);
+            parentNode.add(actuatorNode);
+        });
+    }
+
     _getAllPins() {
         return [this.pin1, this.pin2, this.pin3, this.pin4, this.pin5, this.pin6];
     }
@@ -899,29 +918,20 @@ export class DPDTOnOn extends DPDTSwitch {
         return this.actuatorState === 0 ? "/img/bat-small-left.svg" : "/img/bat-small-right.svg";
     }
 
-    _drawActuator(parentNode) {
-        Konva.Image.fromURL(this._getActuatorImageURLForState(), (actuatorNode) => {
-            actuatorNode.position({ x: 0, y: -35 });
-            actuatorNode.name(Switch.actuatorNodeName);
-            this._applyGlobalStyling(actuatorNode);
-            parentNode.add(actuatorNode);
-        });
-    }
-
     _flipActuatorAndSetState() {
         this._setActuatorState(this.actuatorState === 0 ? 1 : 0);
     }
 
     _updatePinConnections() {
         if (this.actuatorState === 0) {
-            this.pin2.disconnectFromOtherPin(this.pin3);
-            this.pin5.disconnectFromOtherPin(this.pin6);
+            this.pin2.disconnectFromOtherPin();
+            this.pin5.disconnectFromOtherPin();
 
             this.pin2.connectToOtherPin(this.pin1);
             this.pin5.connectToOtherPin(this.pin4);
         } else {
-            this.pin2.disconnectFromOtherPin(this.pin1);
-            this.pin5.disconnectFromOtherPin(this.pin4);
+            this.pin2.disconnectFromOtherPin();
+            this.pin5.disconnectFromOtherPin();
 
             this.pin2.connectToOtherPin(this.pin3);
             this.pin5.connectToOtherPin(this.pin6);
@@ -929,7 +939,47 @@ export class DPDTOnOn extends DPDTSwitch {
     }
 }
 
-export class DPDTOnOffOn extends DPDTSwitch {
+export class DPDT3Position extends DPDTSwitch {
+    constructor(state = {}) {
+        super(state);
+
+        this._prevActuatorState = this.actuatorState === -1 ? 0 : this.actuatorState === 1 ? 0 : -1;
+    }
+
+    _getValidActuatorStates() {
+        return [-1, 0, 1];
+    }
+
+    _getActuatorImageURLForState() {
+        if (this.actuatorState === -1)
+            return "/img/bat-small-left.svg"
+        else if (this.actuatorState === 0)
+            return "/img/bat-small-center.svg"
+        else if (this.actuatorState === 1)
+            return "/img/bat-small-right.svg";
+    }
+
+    _flipActuatorAndSetState() {
+        let nextState;
+
+        if (this.actuatorState === -1) {
+            nextState = 0;
+        } else if (this.actuatorState === 0) {
+            if (this._prevActuatorState === -1)
+                nextState = 1
+            else
+                nextState = -1
+        }
+        else if (this.actuatorState === 1) {
+            nextState = 0;
+        }
+        
+        this._prevActuatorState = this.actuatorState;
+        this._setActuatorState(nextState);
+    }
+}
+
+export class DPDTOnOffOn extends DPDT3Position {
     constructor(state = {}) {
         super(state);
     }
@@ -937,15 +987,51 @@ export class DPDTOnOffOn extends DPDTSwitch {
     static get ImageURL() {
         return "/img/dpdt-purple.svg";
     }
+
+    _updatePinConnections() {
+        if (this.actuatorState === -1) {
+            this.pin2.disconnectFromOtherPin();
+            this.pin5.disconnectFromOtherPin();
+            this.pin2.connectToOtherPin(this.pin3);
+            this.pin5.connectToOtherPin(this.pin6)
+        } else if (this.actuatorState === 0) {
+            this.pin2.disconnectFromOtherPin();
+            this.pin5.disconnectFromOtherPin();
+        } else if (this.actuatorState === 1) {
+            this.pin2.disconnectFromOtherPin();
+            this.pin5.disconnectFromOtherPin();
+            this.pin2.connectToOtherPin(this.pin1);
+            this.pin5.connectToOtherPin(this.pin4);
+        }
+    }
 }
 
-export class DPDTOnOnOn extends DPDTSwitch {
+export class DPDTOnOnOn extends DPDT3Position {
     constructor(state = {}) {
         super(state);
     }
 
     static get ImageURL() {
         return "/img/dpdt-red.svg";
+    }
+
+    _updatePinConnections() {
+        if (this.actuatorState === -1) {
+            this.pin2.disconnectFromOtherPin();
+            this.pin5.disconnectFromOtherPin();
+            this.pin2.connectToOtherPin(this.pin3);
+            this.pin5.connectToOtherPin(this.pin6)
+        } else if (this.actuatorState === 0) {
+            this.pin2.disconnectFromOtherPin();
+            this.pin5.disconnectFromOtherPin();
+            this.pin2.connectToOtherPin(this.pin3);
+            this.pin5.connectToOtherPin(this.pin4)
+        } else if (this.actuatorState === 1) {
+            this.pin2.disconnectFromOtherPin();
+            this.pin5.disconnectFromOtherPin();
+            this.pin2.connectToOtherPin(this.pin1);
+            this.pin5.connectToOtherPin(this.pin4);
+        }
     }
 }
 
