@@ -1,0 +1,6 @@
+/**
+ * @license AGPLv3
+ * SPDX-License-Identifier: AGPLv3
+ * SPDX-FileCopyrightText: Copyright (c) 2026 The Guitar Wiring Visualizer Authors
+ */
+import{DiagramState}from"./diagram.js";import{Component,Pin}from"./coreComponents.js";class Jack extends Component{constructor(e={}){super(e)}}export class MonoJack extends Jack{constructor(e={}){super(e),this.tipPin.on("voltageChanged",e=>{this.sleevePin.hasVoltage()||this.sleevePin.receiveVoltage(null,-e,this.tipPin.id)}),this.sleevePin.on("voltageChanged",e=>{this.tipPin.hasVoltage()||this.tipPin.receiveVoltage(null,-e,this.sleevePin.id)})}static get ImageURL(){return"/img/jack-mono.svg"}get tipPin(){return DiagramState.instance.getComponent(this.pinIds.at(0))}get sleevePin(){return DiagramState.instance.getComponent(this.pinIds.at(1))}_createChildComponents(){const e=new Pin({label:`${this.fullName} tip`}),t=new Pin({label:`${this.fullName} sleeve`});this.pinIds.push(e.id,t.id)}_drawChildNodes(e){this.tipPin.moveTo({x:47,y:10}),this.tipPin.draw(e),this.sleevePin.moveTo({x:48,y:31}),this.sleevePin.draw(e),Konva.Image.fromURL(MonoJack.ImageURL,t=>{this._applyGlobalStyling(t),e.add(t),this._getPinNodes(e).forEach(e=>e.zIndex(t.zIndex()))})}}

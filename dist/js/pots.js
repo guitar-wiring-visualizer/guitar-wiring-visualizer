@@ -1,0 +1,6 @@
+/**
+ * @license AGPLv3
+ * SPDX-License-Identifier: AGPLv3
+ * SPDX-FileCopyrightText: Copyright (c) 2026 The Guitar Wiring Visualizer Authors
+ */
+import{DiagramState}from"./diagram.js";import{Component,Pin}from"./coreComponents.js";export class Potentiometer extends Component{constructor(t={}){super(t),this._setupPinConnections()}static get ImageURL(){return"/img/pot-gr.svg"}static get _pinsStartAtX(){return 25}static get _pinsStartAtY(){return 110}get startPin(){return DiagramState.instance.getComponent(this.pinIds.at(0))}get endPin(){return DiagramState.instance.getComponent(this.pinIds.at(1))}get wiperPin(){return DiagramState.instance.getComponent(this.pinIds.at(2))}get groundPin(){return DiagramState.instance.getComponent(this.pinIds.at(3))}_createChildComponents(){for(let t=0;t<3;t++){const n=new Pin;this.pinIds.push(n.id),n.moveTo({x:Potentiometer._pinsStartAtX+24*t,y:Potentiometer._pinsStartAtY})}const t=new Pin;this.pinIds.push(t.id),t.moveTo({x:77,y:64})}_setupPinConnections(){this.startPin.connectToOtherPin(this.wiperPin),this.wiperPin.connectToOtherPin(this.endPin)}_drawChildNodes(t){this.startPin.draw(t),this.endPin.draw(t),this.wiperPin.draw(t),this.groundPin.draw(t),Konva.Image.fromURL(Potentiometer.ImageURL,n=>{this._applyGlobalStyling(n),t.add(n),this._getPinNodes(t).forEach(t=>t.zIndex(n.zIndex()))})}}
