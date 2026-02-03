@@ -4,7 +4,7 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 The Guitar Wiring Visualizer Authors
  */
 
-import { StratPickup, MonoJack, Wire, DPDTOnOn, componentClassMap, Humbucker } from "./components.js";
+import { StratPickup, MonoJack, Wire, DPDTOnOn, componentClassMap, Humbucker, Potentiometer } from "./components.js";
 
 const stratPickupAndJack = (diagramLayer) => {
 
@@ -51,7 +51,7 @@ const stratPickupAndJack = (diagramLayer) => {
 
 const humbuckerInSeries = (diagramLayer) => {
 
-    const pickup = new Humbucker({label: "Test"});
+    const pickup = new Humbucker({ label: "Test" });
     pickup.moveTo({ x: 10, y: 10 });
     pickup.draw(diagramLayer);
 
@@ -185,8 +185,99 @@ const pickupSwitchJack = (diagramLayer) => {
     groundWire.draw(diagramLayer);
 
     console.info("ground wire", groundWire.id);
+};
+
+const pickupPotJack = (diagramLayer) => {
+
+    const pickup = new StratPickup({ label: "Pickup" });
+    pickup.moveTo({ x: 10, y: 10 });
+    pickup.draw(diagramLayer);
+
+    const pickupHotPin = pickup.endPin;
+    const pickupHotPinPos = pickupHotPin.findNode(diagramLayer).getAbsolutePosition();
+    const pickupGroundPin = pickup.startPin;
+    const pickupGroundPinPos = pickupGroundPin.findNode(diagramLayer).getAbsolutePosition();
 
 
+    const pot = new Potentiometer({ label: "Volume" });
+    pot.moveTo({ x: 200, y: 180 });
+    pot.draw(diagramLayer);
+
+    const potPin3 = pot.pin3;
+    const potPin3Pos = potPin3.findNode(diagramLayer).getAbsolutePosition();
+    const potWiperPin = pot.wiperPin;
+    const potWiperPinPos = potWiperPin.findNode(diagramLayer).getAbsolutePosition();
+    const potPin1 = pot.pin1;
+    const potPin1Pos = potPin1.findNode(diagramLayer).getAbsolutePosition();
+    const potGroundPin = pot.groundPin;
+    const potGroundPinPos = potGroundPin.findNode(diagramLayer).getAbsolutePosition();
+
+    const hotWire = new Wire({
+        label: "hotwire from pickup",
+        startPoint: [pickupHotPinPos.x, pickupHotPinPos.y],
+        midPoint: [100, 180],
+        endPoint: [potPin3Pos.x, potPin3Pos.y],
+        startPinId: pickupHotPin.id,
+        endPinId: potPin3.id,
+        color: "red"
+    });
+    hotWire.draw(diagramLayer);
+
+    const jack = new MonoJack({ label: "Jack" });
+    jack.moveTo({ x: 100, y: 300 });
+    jack.draw(diagramLayer);
+
+    const tipPin = jack.tipPin;
+    const tipPos = tipPin.findNode(diagramLayer).getAbsolutePosition();
+
+    const sleevePin = jack.sleevePin;
+    const sleevePos = sleevePin.findNode(diagramLayer).getAbsolutePosition();
+
+    const hotWire2 = new Wire({
+        label: "outwire",
+        startPoint: [potWiperPinPos.x, potWiperPinPos.y],
+        midPoint: [150, 250],
+        endPoint: [tipPos.x, tipPos.y],
+        startPinId: potWiperPin.id,
+        endPinId: tipPin.id,
+        color: "red"
+    });
+    hotWire2.draw(diagramLayer);
+
+    const jumperWire = new Wire({
+        label: "pot jumper",
+        startPoint: [potPin1Pos.x, potPin1Pos.y],
+        midPoint: [300, 300],
+        endPoint: [potGroundPinPos.x, potGroundPinPos.y],
+        startPinId: potPin1.id,
+        endPinId: potGroundPin.id,
+        color: "black"
+    });
+    jumperWire.draw(diagramLayer);
+
+    const groundWire = new Wire({
+        label: "groundwire from pot",
+        startPoint: [potGroundPinPos.x, potGroundPinPos.y],
+        midPoint: [250, 250],
+        endPoint: [sleevePos.x, sleevePos.y],
+        startPinId: potGroundPin.id,
+        endPinId: sleevePin.id,
+        color: "black"
+    });
+    groundWire.draw(diagramLayer);
+
+    const groundWireFromPickup = new Wire({
+        label: "groundwire from pickup",
+        startPoint: [pickupGroundPinPos.x, pickupGroundPinPos.y],
+        midPoint: [250, 250],
+        endPoint: [potGroundPinPos.x, potGroundPinPos.y],
+        startPinId: pickupGroundPin.id,
+        endPinId: potGroundPin.id,
+        color: "black"
+    });
+    groundWireFromPickup.draw(diagramLayer);
+
+    console.info("ground wire", groundWire.id);
 };
 
 const dpdtOnOn = (diagramLayer) => {
@@ -208,7 +299,7 @@ const testDrawAll = (diagramLayer) => {
     let x = startX, y = startY, count = 0;
 
     Object.keys(componentClassMap).forEach(kind => {
-        if(kind === "Wire" || kind === "Pin")
+        if (kind === "Wire" || kind === "Pin")
             return;
 
         const component = new componentClassMap[kind]();
@@ -224,4 +315,4 @@ const testDrawAll = (diagramLayer) => {
     });
 }
 
-export default { stratPickupAndJack, testDrawAll, dpdtOnOn, pickupSwitchJack, humbuckerInSeries };
+export default { stratPickupAndJack, testDrawAll, dpdtOnOn, pickupSwitchJack, humbuckerInSeries, pickupPotJack };

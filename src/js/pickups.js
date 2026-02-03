@@ -173,8 +173,8 @@ export class StratPickup extends Pickup {
     }
 
     _createChildComponents() {
-        const pin1 = new Pin();
-        const pin2 = new Pin();
+        const pin1 = new Pin({label: `${this.fullName} coil end pin` });
+        const pin2 = new Pin({label: `${this.fullName} coil start pin` });
         this.pinIds.push(pin1.id, pin2.id);
     }
 

@@ -293,6 +293,65 @@ export class Component extends EventEmitter {
     }
 }
 
+// export class ResistiveElement extends Component {
+//     constructor(state = {}) {
+//         super(state);
+//         console.assert(state.startPinId, "startPinId is required");
+//         console.assert(state.endPinId, "endPinId is required");
+//         this.state.resistance = state.resistance || 0;
+//         this._lastVoltageReceived = 0;
+//     }
+
+//     get startPinId() {
+//         return this.state.startPinId;
+//     }
+
+//     get endPinId() {
+//         return this.state.endPinId;
+//     }
+
+//     get resistance() { return this.state.resistance };
+
+//     set resistance(value) {
+//         console.assert(value !== null && typeof value !== "undefined", "value is required");
+//         this.state.resistance = value;
+//     }
+
+//     receiveVoltage(fromPinId, value) {
+//         console.info(`${this.fullName} received voltage ${value} from pin ${DiagramState.instance.getComponent(fromPinId)?.fullName}`);
+//         if (this._lastVoltageReceived === value) {
+//             console.debug(`${this.fullName} already has voltage ${value}. not propagating`);
+//             return;
+//         }
+//         this._lastVoltageReceived = value;
+
+//         console.debug(`${this.fullName} applying resistance ${this.resistance} to incoming value ${value}`);
+//         // TODO: what here...
+//         //value -= this.resistance
+
+//         const targetPinId = this.startPinId === fromPinId ? this.endPinId : this.startPinId;
+//         const targetPin = DiagramState.instance.getComponent(targetPinId);
+//         targetPin.receiveVoltage(this.id, value, fromPinId);
+//     }
+
+//     get pinVoltageIsFrom() {
+//         return this._pinVoltageIsFrom;
+//     }
+
+//     _createRootNode() {
+//         // noop - invisible
+//     }
+//     draw() {
+//         // noop-  invisible
+//     }
+//     reDraw() {
+//         // noop-  invisible
+//     }
+//     moveTo() {
+//         // noop-  invisible
+//     }
+// }
+
 /**
  * Pin. Represents a connection point on a component.
  * Pins are created as child components on other components.
@@ -313,6 +372,7 @@ export class Pin extends Component {
     get connectedPinId() {
         return this.state.connectedPinId;
     }
+
     _setConnectedPinId(otherPinId) {
         console.assert(typeof otherPinId !== 'undefined', "otherPinId is required");
         this.state.connectedPinId = otherPinId;
@@ -371,6 +431,18 @@ export class Pin extends Component {
 
     receiveVoltage(fromWireId, value, fromPinId = null) {
         console.info(`${this.fullName} received voltage ${value} from wire ${DiagramState.instance.getComponent(fromWireId)?.fullName}, from pin ${DiagramState.instance.getComponent(fromPinId)?.fullName}`);
+
+        if (this.voltage === value) {
+            // avoid infinite loop
+            console.debug(`${this.fullName} already has voltage ${value}. Not propagating`);
+            return;
+        }
+
+        if (this.voltage < 0 && value > 0) {
+            console.debug(`${this.fullName} grounded. Not propagating.`);
+            return;
+        }
+
         this._setVoltage(value);
 
         const connectedWires = DiagramState.instance.findComponentsOfType(Wire, wire => {
@@ -470,6 +542,11 @@ export class Wire extends Component {
 
     receiveVoltage(fromId, value) {
         console.info(`${this.fullName} received voltage ${value} from pin ${DiagramState.instance.getComponent(fromId)?.fullName}`);
+        if (this.voltage === value) {
+            console.debug(`${this.fullName} already has voltage ${value}. not propagating`);
+            return;
+        }
+
         this._setVoltage(value);
         this._pinVoltageIsFrom = DiagramState.instance.getComponent(fromId);
         const targetPinId = this.startPinId === fromId ? this.endPinId : this.startPinId;
@@ -533,9 +610,10 @@ export class Wire extends Component {
  * and behave as voltage pass through.
  * @abstract
  */
-export class TwoPinPassThroughComponenet extends Component{
-       constructor(state) {
+export class TwoPinPassThroughComponenet extends Component {
+    constructor(state) {
         super(state);
+        this._setupPinConnections();
     }
 
     static get _pin1Position() { throw new Error("abstract method call"); }
@@ -561,6 +639,10 @@ export class TwoPinPassThroughComponenet extends Component{
             parentNode.add(componentNode);
             this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
         });
+    }
+
+    _setupPinConnections() {
+        this.pin1.connectToOtherPin(this.pin2);
     }
 }
 

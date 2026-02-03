@@ -11,7 +11,9 @@ export class Potentiometer extends Component {
 
     constructor(state = {}) {
         super(state);
-        this._setupPinConnections();
+
+        this.state.rotation = this.state.rotation || -1;
+        this._updatePinConnections();
     }
 
     static get ImageURL() {
@@ -26,10 +28,28 @@ export class Potentiometer extends Component {
         return 110;
     }
 
-    get startPin() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
-    get endPin() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
-    get wiperPin() { return DiagramState.instance.getComponent(this.pinIds.at(2)); }
+    get rotation() { return this.state.rotation; }
+    set rotation(val) {
+        console.assert(val, "val is required.");
+        this.state.rotation = val;
+        this._updatePinConnections();
+    }
+
+    get pin3() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
+
+    get wiperPin() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
+
+    get pin1() { return DiagramState.instance.getComponent(this.pinIds.at(2)); }
+
     get groundPin() { return DiagramState.instance.getComponent(this.pinIds.at(3)); }
+
+    rotate(componentNode) {
+        console.assert(componentNode, "componentNode is required");
+        this.rotation = -this.rotation;
+        console.debug(`${this.fullName} changed rotation to ${this.rotation}`);
+        this._updatePinConnections();
+        DiagramState.instance.notifyNodeChanged(componentNode);
+    }
 
     _createChildComponents() {
 
@@ -53,14 +73,22 @@ export class Potentiometer extends Component {
         });
     }
 
-    _setupPinConnections() {
-        this.startPin.connectToOtherPin(this.wiperPin);
-        this.wiperPin.connectToOtherPin(this.endPin);
+    _updatePinConnections() {
+        this.wiperPin.disconnectFromOtherPin();
+
+        if (this.rotation === -1) {
+            this.wiperPin.connectToOtherPin(this.pin3);
+        } else if (this.rotation === 1) {
+            this.wiperPin.connectToOtherPin(this.pin1);
+        } else {
+            console.warn(`${this.fullName}: invalid rotation ${this.rotation}`);
+        }
+
     }
 
     _drawChildNodes(parentNode) {
-        this.startPin.draw(parentNode);
-        this.endPin.draw(parentNode);
+        this.pin1.draw(parentNode);
+        this.pin3.draw(parentNode);
         this.wiperPin.draw(parentNode);
         this.groundPin.draw(parentNode);
         Konva.Image.fromURL(Potentiometer.ImageURL, (componentNode) => {

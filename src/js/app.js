@@ -137,7 +137,7 @@ function enableFlipSwitchButton(transformer) {
         if (transformer.nodes().length === 0)
             return;
         const selectedNode = transformer.nodes()[0];
-        flipSelectedSwitch(selectedNode);
+        flipSelectedComponent(selectedNode);
     });
 }
 
@@ -494,7 +494,7 @@ function handleSelectionKeyCode(transformer, code) {
     if (code === "Delete" || code === "Backspace") {
         deleteSelectedComponent(selectedNode, transformer);
     } else if (code === "KeyF") {
-        flipSelectedSwitch(selectedNode);
+        flipSelectedComponent(selectedNode);
     } else if (code === "Escape") {
         clearSelection(transformer);
     } else if (code === "KeyC") {
@@ -542,14 +542,14 @@ function clearSelection(transformer) {
     transformer.nodes([]);
 }
 
-function flipSelectedSwitch(selectedNode) {
+function flipSelectedComponent(selectedNode) {
 
-    const switchComponent = DiagramState.instance.getComponent(selectedNode.id());
+    const component = DiagramState.instance.getComponent(selectedNode.id());
 
-    if (!switchComponent.flip)
-        return;
-
-    switchComponent.flip(selectedNode);
+    if (typeof component.flip === "function")
+        component.flip(selectedNode);
+    else if(typeof component.rotate === "function")
+        component.rotate(selectedNode);
 }
 
 function deleteSelectedComponent(nodeToDelete, transformer) {
