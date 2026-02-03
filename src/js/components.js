@@ -1154,7 +1154,42 @@ class BumbleBeeCap extends Capacitor {
     static get _pin2Position() { return { x: 105, y: 14 }; }
 }
 
+class CeramicDiscExtraSmall extends Capacitor {
+    constructor(state = {}) {
+        super(state);
+    }
+    static get ImageURL() {
+        return "/img/cap-cd-xs.svg";
+    }
+    static get _pin1Position() { return { x: 0, y: 13 }; }
+    static get _pin2Position() { return { x: 13, y: 13 }; }
+}
+
+class OrangeDropCap extends Capacitor {
+    constructor(state = {}) {
+        super(state);
+    }
+    static get ImageURL() {
+        return "/img/cap-od.svg";
+    }
+    static get _pin1Position() { return { x: 1, y: 42 }; }
+    static get _pin2Position() { return { x: 62, y: 42 }; }
+}
+
 /**
  * Map of components for dynamic creation.
  */
-export const componentClassMap = { Potentiometer, DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Humbucker, StratPickup, MonoJack, Wire, Pin, BumbleBeeCap };
+export const componentClassMap = {
+    Potentiometer,
+    DPDTOnOn,
+    DPDTOnOffOn,
+    DPDTOnOnOn,
+    Humbucker,
+    StratPickup,
+    MonoJack,
+    Wire,
+    Pin,
+    BumbleBeeCap,
+    OrangeDropCap,
+    CeramicDiscExtraSmall
+};
