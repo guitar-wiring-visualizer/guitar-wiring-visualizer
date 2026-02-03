@@ -7,6 +7,11 @@
 import { DiagramState } from "./diagram.js";
 import { Component, Pin } from "./coreComponents.js";
 
+/**
+ * Represents 1 coil in a pickup, which handles generating current.
+ * This is not a component itself, but is instantiated transiently
+ * by pickups when induction is needed.
+ */
 class InductionCoil {
 
     constructor(name, startPin, endPin) {
@@ -45,6 +50,10 @@ class InductionCoil {
     }
 }
 
+/**
+ * Base class for pickups.
+ * @abstract
+ */
 class Pickup extends Component {
     constructor(state = {}) {
         super(state);

@@ -18,6 +18,10 @@ export const WIRE_COLOR_BLUE = "blue";
 
 export const WIRE_COLOR_DEFAULT = WIRE_COLOR_BLACK;
 
+/**
+ * Tracks all component instances on the diagram.
+ * Can serialize and deserialize entire state of all components on the diagram.
+ */
 export class DiagramState extends EventEmitter {
 
     constructor() {

@@ -9,6 +9,9 @@ import { DiagramState, TOOL_MODE_WIRE } from "./diagram.js";
 
 /**
  * Base class for all components.
+ * All component instances are tracked in the DiagramState.
+ * Each compoment stores its persistable state in an internal state object.  All other instance fields will be transient.
+ * Each component renders itself as a Konva.Node.
  * @abstract
  */
 export class Component extends EventEmitter {
@@ -292,6 +295,7 @@ export class Component extends EventEmitter {
 
 /**
  * Pin. Represents a connection point on a component.
+ * Pins are created as child components on other components.
  * Can be connected to 0-* wires.
  * Can also be connected to 0-1 other pin.
  */
