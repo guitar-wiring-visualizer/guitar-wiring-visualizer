@@ -521,12 +521,24 @@ class InductionCoil {
     induct() {
         console.info(`${this._name} received induct message`);
 
+        //TODO: Fix this.
+        // It should not send voltage if it is not grounded.
+        // The current design relies on negative voltage coming back from the jack shield pin.
+        // but the jack only sends negative voltage from the shield pin if it is receiving
+        // positive voltage on the tip pin.
+        // One idea is for the inductor to check if any of its pins "could" receive (-) voltage,
+        // and then send the opposite (+) from the other pin.  Similar to the current design, but
+        // instead of checking for actual voltage, check that it "could", by tracing the connections
+        // to a ground (-) pin.
+        // Alternatively, we can assume a jack is grounded on its shield pin, and always send (-) voltage
+        // from it when we start the simulation.
+
         if (this._startPin.hasVoltage())
             this._endPin.receiveVoltage(null, -this._startPin.voltage, this._startPin.id);
         else if (this._endPin.hasVoltage())
             this._startPin.receiveVoltage(null, -this._endPin.voltage, this._endPin.id);
         else
-            this._endPin.receiveVoltage(null, 1, this._startPin.id);
+            this._endPin.receiveVoltage(null, 1, this._startPin.id); // this is a hack to get things going
     }
 
     stopInducting() {
