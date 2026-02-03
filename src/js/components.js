@@ -1111,9 +1111,8 @@ export class Potentiometer extends Component {
     }
 }
 
-class Capacitor extends Component {
-
-    constructor(state = {}) {
+class TwoPinPassThroughComponenet extends Component{
+       constructor(state) {
         super(state);
     }
 
@@ -1140,6 +1139,38 @@ class Capacitor extends Component {
             parentNode.add(componentNode);
             this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
         });
+    }
+}
+
+class Resistor extends TwoPinPassThroughComponenet {
+    constructor(state) {
+        super(state);
+    }
+    static get _pin1Position() { return { x: 0, y: 3 }; }
+    static get _pin2Position() { return { x: 25, y: 3 }; }
+}
+
+class CarbonResistor extends Resistor {
+     constructor(state = {}) {
+        super(state);
+    }
+    static get ImageURL() {
+        return "/img/res-carb.svg";
+    }
+}
+
+class MetalResistor extends Resistor {
+     constructor(state = {}) {
+        super(state);
+    }
+    static get ImageURL() {
+        return "/img/res-metal.svg";
+    }
+}
+
+class Capacitor extends TwoPinPassThroughComponenet {
+    constructor(state) {
+        super(state);
     }
 }
 
@@ -1280,6 +1311,8 @@ export const componentClassMap = {
     PolystyreneBlue,
     PolystyreneRed,
     VitaminQ,
+    CarbonResistor,
+    MetalResistor,
     Potentiometer,
     DPDTOnOn,
     DPDTOnOffOn,
