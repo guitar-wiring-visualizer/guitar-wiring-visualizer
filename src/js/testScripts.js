@@ -208,6 +208,9 @@ const testDrawAll = (diagramLayer) => {
     let x = startX, y = startY, count = 0;
 
     Object.keys(componentClassMap).forEach(kind => {
+        if(kind === "Wire" || kind === "Pin")
+            return;
+
         const component = new componentClassMap[kind]();
         component.moveTo({ x, y });
         component.draw(diagramLayer);

@@ -1154,17 +1154,6 @@ class BumbleBeeCap extends Capacitor {
     static get _pin2Position() { return { x: 105, y: 14 }; }
 }
 
-class CeramicDiscExtraSmall extends Capacitor {
-    constructor(state = {}) {
-        super(state);
-    }
-    static get ImageURL() {
-        return "/img/cap-cd-xs.svg";
-    }
-    static get _pin1Position() { return { x: 0, y: 13 }; }
-    static get _pin2Position() { return { x: 13, y: 13 }; }
-}
-
 class OrangeDropCap extends Capacitor {
     constructor(state = {}) {
         super(state);
@@ -1176,10 +1165,121 @@ class OrangeDropCap extends Capacitor {
     static get _pin2Position() { return { x: 62, y: 42 }; }
 }
 
+class CeramicDiscExtraSmall extends Capacitor {
+    constructor(state = {}) {
+        super(state);
+    }
+    static get ImageURL() {
+        return "/img/cap-cd-xs.svg";
+    }
+    static get _pin1Position() { return { x: 0, y: 13 }; }
+    static get _pin2Position() { return { x: 13, y: 13 }; }
+}
+
+class CeramicDiscSmall extends Capacitor {
+    constructor(state = {}) {
+        super(state);
+    }
+    static get ImageURL() {
+        return "/img/cap-cd-sm.svg";
+    }
+    static get _pin1Position() { return { x: 2, y: 23 }; }
+    static get _pin2Position() { return { x: 20, y: 23 }; }
+}
+
+class CeramicDiscMedium extends Capacitor {
+    constructor(state = {}) {
+        super(state);
+    }
+    static get ImageURL() {
+        return "/img/cap-cd-md.svg";
+    }
+    static get _pin1Position() { return { x: 5, y: 35 }; }
+    static get _pin2Position() { return { x: 30, y: 35 }; }
+}
+
+class CeramicDiscLarge extends Capacitor {
+    constructor(state = {}) {
+        super(state);
+    }
+    static get ImageURL() {
+        return "/img/cap-cd-lg.svg";
+    }
+    static get _pin1Position() { return { x: 7, y: 48 }; }
+    static get _pin2Position() { return { x: 37, y: 48 }; }
+}
+
+class Chiclet extends Capacitor {
+    constructor(state = {}) {
+        super(state);
+    }
+    static get ImageURL() {
+        return "/img/cap-chic.svg";
+    }
+    static get _pin1Position() { return { x: 2, y: 41 }; }
+    static get _pin2Position() { return { x: 22, y: 41 }; }
+}
+
+class MalloryMustard extends Capacitor {
+    constructor(state = {}) {
+        super(state);
+    }
+    static get ImageURL() {
+        return "/img/cap-mal.svg";
+    }
+    static get _pin1Position() { return { x: 0, y: 7 }; }
+    static get _pin2Position() { return { x: 58, y: 7 }; }
+}
+
+class PolystyreneBlue extends Capacitor {
+    constructor(state = {}) {
+        super(state);
+    }
+    static get ImageURL() {
+        return "/img/cap-poly-blue.svg";
+    }
+    static get _pin1Position() { return { x: 0, y: 10 }; }
+    static get _pin2Position() { return { x: 50, y: 10 }; }
+}
+
+class PolystyreneRed extends Capacitor {
+    constructor(state = {}) {
+        super(state);
+    }
+    static get ImageURL() {
+        return "/img/cap-poly-red.svg";
+    }
+    static get _pin1Position() { return { x: 0, y: 10 }; }
+    static get _pin2Position() { return { x: 50, y: 10 }; }
+}
+
+class VitaminQ extends Capacitor {
+    constructor(state = {}) {
+        super(state);
+    }
+    static get ImageURL() {
+        return "/img/cap-vitq.svg";
+    }
+    static get _pin1Position() { return { x: 1, y: 14 }; }
+    static get _pin2Position() { return { x: 84, y: 14 }; }
+}
+
+
 /**
  * Map of components for dynamic creation.
  */
 export const componentClassMap = {
+    BumbleBeeCap,
+    OrangeDropCap,
+    CeramicDiscSmall,
+    CeramicDiscMedium,
+    CeramicDiscLarge,
+    CeramicDiscExtraSmall,
+    Chiclet,
+    MalloryMustard,
+    PolystyreneBlue,
+    PolystyreneRed,
+    VitaminQ,
     Potentiometer,
     DPDTOnOn,
     DPDTOnOffOn,
@@ -1189,7 +1289,4 @@ export const componentClassMap = {
     MonoJack,
     Wire,
     Pin,
-    BumbleBeeCap,
-    OrangeDropCap,
-    CeramicDiscExtraSmall
 };
