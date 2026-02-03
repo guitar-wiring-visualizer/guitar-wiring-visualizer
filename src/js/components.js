@@ -9,7 +9,7 @@ import { StratPickup, Humbucker } from "./pickups.js";
 import { MonoJack } from "./jacks.js";
 import { DPDTOnOn, DPDTOnOnOn, DPDTOnOffOn } from "./switches.js";
 import { Potentiometer } from "./pots.js";
-import { BumbleBeeCap, CeramicDiscExtraSmall, CeramicDiscSmall, CeramicDiscMedium, CeramicDiscLarge, Chiclet, MalloryMustard, OrangeDropCap, PolystyreneBlue, PolystyreneRed, VitaminQ } from "./caps.js";
+import { BumbleBeeCap, CeramicDiscCap, ChicletCap, MalloryMustardCap, OrangeDropCap, PolystyreneBlueCap, PolystyreneRedCap, VitaminQCap } from "./caps.js";
 import { CarbonResistor, MetalResistor } from "./resistors.js";
 
 // Re-export all components through components.js
@@ -27,15 +27,12 @@ export * from './resistors.js';
 export const componentClassMap = {
     BumbleBeeCap,
     OrangeDropCap,
-    CeramicDiscSmall,
-    CeramicDiscMedium,
-    CeramicDiscLarge,
-    CeramicDiscExtraSmall,
-    Chiclet,
-    MalloryMustard,
-    PolystyreneBlue,
-    PolystyreneRed,
-    VitaminQ,
+    CeramicDiscCap,
+    ChicletCap,
+    MalloryMustardCap,
+    PolystyreneBlueCap,
+    PolystyreneRedCap,
+    VitaminQCap,
     CarbonResistor,
     MetalResistor,
     Potentiometer,

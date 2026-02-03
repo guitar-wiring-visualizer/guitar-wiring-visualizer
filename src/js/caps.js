@@ -38,51 +38,18 @@ export class OrangeDropCap extends Capacitor {
     static get _pin2Position() { return { x: 62, y: 42 }; }
 }
 
-export class CeramicDiscExtraSmall extends Capacitor {
+export class CeramicDiscCap extends Capacitor {
     constructor(state = {}) {
         super(state);
     }
     static get ImageURL() {
-        return "/img/cap-cd-xs.svg";
+        return "/img/cap-cd.svg";
     }
-    static get _pin1Position() { return { x: 0, y: 13 }; }
-    static get _pin2Position() { return { x: 13, y: 13 }; }
+    static get _pin1Position() { return { x: 3, y: 18 }; }
+    static get _pin2Position() { return { x: 17, y: 18 }; }
 }
 
-export class CeramicDiscSmall extends Capacitor {
-    constructor(state = {}) {
-        super(state);
-    }
-    static get ImageURL() {
-        return "/img/cap-cd-sm.svg";
-    }
-    static get _pin1Position() { return { x: 2, y: 23 }; }
-    static get _pin2Position() { return { x: 20, y: 23 }; }
-}
-
-export class CeramicDiscMedium extends Capacitor {
-    constructor(state = {}) {
-        super(state);
-    }
-    static get ImageURL() {
-        return "/img/cap-cd-md.svg";
-    }
-    static get _pin1Position() { return { x: 5, y: 35 }; }
-    static get _pin2Position() { return { x: 30, y: 35 }; }
-}
-
-export class CeramicDiscLarge extends Capacitor {
-    constructor(state = {}) {
-        super(state);
-    }
-    static get ImageURL() {
-        return "/img/cap-cd-lg.svg";
-    }
-    static get _pin1Position() { return { x: 7, y: 48 }; }
-    static get _pin2Position() { return { x: 37, y: 48 }; }
-}
-
-export class Chiclet extends Capacitor {
+export class ChicletCap extends Capacitor {
     constructor(state = {}) {
         super(state);
     }
@@ -93,7 +60,7 @@ export class Chiclet extends Capacitor {
     static get _pin2Position() { return { x: 22, y: 41 }; }
 }
 
-export class MalloryMustard extends Capacitor {
+export class MalloryMustardCap extends Capacitor {
     constructor(state = {}) {
         super(state);
     }
@@ -104,7 +71,7 @@ export class MalloryMustard extends Capacitor {
     static get _pin2Position() { return { x: 58, y: 7 }; }
 }
 
-export class PolystyreneBlue extends Capacitor {
+export class PolystyreneBlueCap extends Capacitor {
     constructor(state = {}) {
         super(state);
     }
@@ -115,7 +82,7 @@ export class PolystyreneBlue extends Capacitor {
     static get _pin2Position() { return { x: 50, y: 10 }; }
 }
 
-export class PolystyreneRed extends Capacitor {
+export class PolystyreneRedCap extends Capacitor {
     constructor(state = {}) {
         super(state);
     }
@@ -126,7 +93,7 @@ export class PolystyreneRed extends Capacitor {
     static get _pin2Position() { return { x: 50, y: 10 }; }
 }
 
-export class VitaminQ extends Capacitor {
+export class VitaminQCap extends Capacitor {
     constructor(state = {}) {
         super(state);
     }
