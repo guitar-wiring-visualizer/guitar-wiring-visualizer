@@ -985,7 +985,7 @@ export class DPDT3Position extends DPDTSwitch {
         else if (this.actuatorState === 1) {
             nextState = 0;
         }
-        
+
         this._prevActuatorState = this.actuatorState;
         this._setActuatorState(nextState);
     }
@@ -1111,7 +1111,50 @@ export class Potentiometer extends Component {
     }
 }
 
+class Capacitor extends Component {
+
+    constructor(state = {}) {
+        super(state);
+    }
+
+    static get _pin1Position() { throw new Error("abstract method call"); }
+    static get _pin2Position() { throw new Error("abstract method call"); }
+
+    get pin1() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
+    get pin2() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
+
+    _createChildComponents() {
+        const pin1 = new Pin();
+        pin1.moveTo(this.constructor._pin1Position);
+        this.pinIds.push(pin1.id);
+        const pin2 = new Pin();
+        pin2.moveTo(this.constructor._pin2Position);
+        this.pinIds.push(pin2.id);
+    }
+
+    _drawChildNodes(parentNode) {
+        this.pin1.draw(parentNode);
+        this.pin2.draw(parentNode);
+        Konva.Image.fromURL(this.constructor.ImageURL, (componentNode) => {
+            this._applyGlobalStyling(componentNode);
+            parentNode.add(componentNode);
+            this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
+        });
+    }
+}
+
+class BumbleBeeCap extends Capacitor {
+    constructor(state = {}) {
+        super(state);
+    }
+    static get ImageURL() {
+        return "/img/cap-bb.svg";
+    }
+    static get _pin1Position() { return { x: 2, y: 14 }; }
+    static get _pin2Position() { return { x: 105, y: 14 }; }
+}
+
 /**
  * Map of components for dynamic creation.
  */
-export const componentClassMap = { Potentiometer, DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Humbucker, StratPickup, MonoJack, Wire, Pin };
+export const componentClassMap = { Potentiometer, DPDTOnOn, DPDTOnOffOn, DPDTOnOnOn, Humbucker, StratPickup, MonoJack, Wire, Pin, BumbleBeeCap };
