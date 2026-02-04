@@ -105,7 +105,8 @@ export class Component extends EventEmitter {
 
         this._drawChildNodes(rootNode);
 
-        //this._drawIDLabel(rootNode);
+        if(DiagramState.instance.debugMode)
+            this._drawIDLabel(rootNode);
 
         this.nodeAttrs = rootNode.attrs;
         this._subscribeToEvents(rootNode);

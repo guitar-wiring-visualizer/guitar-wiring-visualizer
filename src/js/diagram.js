@@ -24,7 +24,7 @@ export const WIRE_COLOR_DEFAULT = WIRE_COLOR_BLACK;
  */
 export class DiagramState extends EventEmitter {
 
-    constructor() {
+    constructor(options = {}) {
         super()
         if (DiagramState.instance) {
             return DiagramState.instance;
@@ -36,6 +36,7 @@ export class DiagramState extends EventEmitter {
         this.showConnectors = false;
         this.toolMode = TOOL_MODE_SELECT;
         this.wireToolColor = WIRE_COLOR_DEFAULT;
+        this.debugMode = options.debugMode || false;
 
         DiagramState.instance = this;
     }

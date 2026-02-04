@@ -26,10 +26,11 @@ const wireColors = [
 ];
 
 const SERIALIZED_DIAGRAM_STATE_PARAM = "d";
+const DEBUG_MODE_PARAM = "debug";
 
 const setupApp = async () => {
 
-    window.GWVDiagramState = new DiagramState();
+    initializeDiagramState();
 
     initializeComponentLibrary();
 
@@ -55,6 +56,17 @@ const setupApp = async () => {
     await enableImportFromURL(diagramLayer);
 
     await enableTestScript(diagramLayer);
+}
+
+function initializeDiagramState() {
+
+    const diagramOptions = {};
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.has(DEBUG_MODE_PARAM))
+        diagramOptions.debugMode = params.get(DEBUG_MODE_PARAM).toLowerCase() === 'true';
+
+    window.GWVDiagramState = new DiagramState(diagramOptions);
 }
 
 function enableSave() {
@@ -548,7 +560,7 @@ function flipSelectedComponent(selectedNode) {
 
     if (typeof component.flip === "function")
         component.flip(selectedNode);
-    else if(typeof component.rotate === "function")
+    else if (typeof component.rotate === "function")
         component.rotate(selectedNode);
 }
 
