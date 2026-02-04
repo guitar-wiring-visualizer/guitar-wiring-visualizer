@@ -105,7 +105,7 @@ export class Component extends EventEmitter {
 
         this._drawChildNodes(rootNode);
 
-        if(DiagramState.instance.debugMode)
+        if (DiagramState.instance.debugMode)
             this._drawIDLabel(rootNode);
 
         this.nodeAttrs = rootNode.attrs;
@@ -122,7 +122,10 @@ export class Component extends EventEmitter {
 
         simpleLabel.add(
             new Konva.Tag({
-                fill: 'yellow'
+                fill: 'yellow',
+                pointerDirection: 'down',
+                pointerWidth: 10,
+                pointerHeight: 10,
             })
         );
 
@@ -138,6 +141,10 @@ export class Component extends EventEmitter {
 
         if (rootNode.getClassName() === "Group") {
             rootNode.add(simpleLabel);
+        } else if (rootNode.getClassName() === "Line") {
+            simpleLabel.x(rootNode.points().at(2));
+            simpleLabel.y(rootNode.points().at(3));
+            rootNode.getLayer().add(simpleLabel);
         }
     }
 
@@ -663,13 +670,15 @@ export class TwoPinPositivePassThroughComponent extends TwoPinComponenet {
         this.pin1.on("voltageChanged", (val) => {
             console.info(`${this.fullName} received voltageChanged event with value ${val} from ${this.pin1.fullName}`);
             if (val > 0) {
-                this.pin2.receiveVoltage(null, val, this.pin1.id);
+                if(!this.pin2.hasVoltage())
+                    this.pin2.receiveVoltage(null, val, this.pin1.id);
             }
         });
         this.pin2.on("voltageChanged", (val) => {
             console.info(`${this.fullName} received voltageChanged event with value ${val} from ${this.pin2.fullName}`);
             if (val > 0) {
-                this.pin1.receiveVoltage(null, val, this.pin2.id);
+                if(!this.pin1.hasVoltage())
+                    this.pin1.receiveVoltage(null, val, this.pin2.id);
             }
         });
     }
