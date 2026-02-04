@@ -648,6 +648,10 @@ export class TwoPinComponenet extends Component {
     }
 }
 
+/**
+ * Base class for two-pin components that only allow positive voltage to pass through them.
+ * @abstract
+ */
 export class TwoPinPositivePassThroughComponent extends TwoPinComponenet {
     constructor(state) {
         super(state);
