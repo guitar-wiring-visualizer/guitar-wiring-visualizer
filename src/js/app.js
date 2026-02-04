@@ -295,7 +295,7 @@ function enableDrawWire(layer) {
 
         isPaint = false;
 
-        const linePoints = lastLine.points();
+        let linePoints = lastLine.points();
 
         // add nearest pin to lastLine points, or don't create wire
 
@@ -325,6 +325,8 @@ function enableDrawWire(layer) {
         const endPinPos = endPin.getAbsolutePosition();
         const newPoints = lastLine.points().concat([endPinPos.x, endPinPos.y]);
         lastLine.points(newPoints);
+
+        linePoints = lastLine.points();
 
         const wireStart = [linePoints.at(0), linePoints.at(1)];
         const wireEnd = [linePoints.at(-2), linePoints.at(-1)];
