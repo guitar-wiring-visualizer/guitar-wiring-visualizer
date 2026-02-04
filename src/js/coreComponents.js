@@ -301,65 +301,6 @@ export class Component extends EventEmitter {
     }
 }
 
-// export class ResistiveElement extends Component {
-//     constructor(state = {}) {
-//         super(state);
-//         console.assert(state.startPinId, "startPinId is required");
-//         console.assert(state.endPinId, "endPinId is required");
-//         this.state.resistance = state.resistance || 0;
-//         this._lastVoltageReceived = 0;
-//     }
-
-//     get startPinId() {
-//         return this.state.startPinId;
-//     }
-
-//     get endPinId() {
-//         return this.state.endPinId;
-//     }
-
-//     get resistance() { return this.state.resistance };
-
-//     set resistance(value) {
-//         console.assert(value !== null && typeof value !== "undefined", "value is required");
-//         this.state.resistance = value;
-//     }
-
-//     receiveVoltage(fromPinId, value) {
-//         console.info(`${this.fullName} received voltage ${value} from pin ${DiagramState.instance.getComponent(fromPinId)?.fullName}`);
-//         if (this._lastVoltageReceived === value) {
-//             console.debug(`${this.fullName} already has voltage ${value}. not propagating`);
-//             return;
-//         }
-//         this._lastVoltageReceived = value;
-
-//         console.debug(`${this.fullName} applying resistance ${this.resistance} to incoming value ${value}`);
-//         // TODO: what here...
-//         //value -= this.resistance
-
-//         const targetPinId = this.startPinId === fromPinId ? this.endPinId : this.startPinId;
-//         const targetPin = DiagramState.instance.getComponent(targetPinId);
-//         targetPin.receiveVoltage(this.id, value, fromPinId);
-//     }
-
-//     get pinVoltageIsFrom() {
-//         return this._pinVoltageIsFrom;
-//     }
-
-//     _createRootNode() {
-//         // noop - invisible
-//     }
-//     draw() {
-//         // noop-  invisible
-//     }
-//     reDraw() {
-//         // noop-  invisible
-//     }
-//     moveTo() {
-//         // noop-  invisible
-//     }
-// }
-
 /**
  * Pin. Represents a connection point on a component.
  * Pins are created as child components on other components.
