@@ -607,10 +607,10 @@ export class Wire extends Component {
 
 /**
  * Base class for components that have exactly two pins
- * and behave as voltage pass through.
+ * and have behavior for passing voltage between the pins.
  * @abstract
  */
-export class TwoPinPassThroughComponenet extends Component {
+export class TwoPinComponenet extends Component {
     constructor(state) {
         super(state);
         this._setupPinConnections();
@@ -641,8 +641,32 @@ export class TwoPinPassThroughComponenet extends Component {
         });
     }
 
+    /**
+     * Allows concrete Component type to set up how to pass voltage between pins.
+     */
     _setupPinConnections() {
-        this.pin1.connectToOtherPin(this.pin2);
+    }
+}
+
+export class TwoPinPositivePassThroughComponent extends TwoPinComponenet {
+    constructor(state) {
+        super(state);
+        this._setupPinConnections();
+    }
+
+    _setupPinConnections() {
+        this.pin1.on("voltageChanged", (val) => {
+            console.info(`${this.fullName} received voltageChanged event with value ${val} from ${this.pin1.fullName}`);
+            if (val > 0) {
+                this.pin2.receiveVoltage(null, val, this.pin1.id);
+            }
+        });
+        this.pin2.on("voltageChanged", (val) => {
+            console.info(`${this.fullName} received voltageChanged event with value ${val} from ${this.pin2.fullName}`);
+            if (val > 0) {
+                this.pin1.receiveVoltage(null, val, this.pin2.id);
+            }
+        });
     }
 }
 

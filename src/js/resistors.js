@@ -4,13 +4,13 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 The Guitar Wiring Visualizer Authors
  */
 
-import { TwoPinPassThroughComponenet} from "./coreComponents.js";
+import { TwoPinPositivePassThroughComponent } from "./coreComponents.js";
 
 /**
  * Base class for resistors
  * @abstract
  */
-class Resistor extends TwoPinPassThroughComponenet {
+class Resistor extends TwoPinPositivePassThroughComponent {
     constructor(state) {
         super(state);
     }

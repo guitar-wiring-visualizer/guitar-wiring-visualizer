@@ -4,13 +4,13 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 The Guitar Wiring Visualizer Authors
  */
 
-import { TwoPinPassThroughComponenet} from "./coreComponents.js";
+import { TwoPinPositivePassThroughComponent } from "./coreComponents.js";
 
 /**
  * Base class for capacitors.
  * @abstract
  */
-class Capacitor extends TwoPinPassThroughComponenet {
+class Capacitor extends TwoPinPositivePassThroughComponent {
     constructor(state) {
         super(state);
     }
