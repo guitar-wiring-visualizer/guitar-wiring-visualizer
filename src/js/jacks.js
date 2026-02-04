@@ -24,17 +24,17 @@ class Jack extends Component {
             this.sleevePin.receiveVoltage(null, -1, null);
         }
 
-        this._unsubscribeToEvents();
-        this._subscribeToEvents();
+        this._unsubscribeToPinEvents();
+        this._subscribeToPinEvents();
     }
 
-    _subscribeToEvents() {
+    _subscribeToPinEvents() {
         this._tipPinListenerOff = this.tipPin.on("voltageChanged", (val) => {
             console.info(`**** ${this.fullName} received voltage ${val} on tip pin ****`);
         });
     }
 
-    _unsubscribeToEvents() {
+    _unsubscribeToPinEvents() {
         if (typeof this._tipPinListenerOff === "function")
             this._tipPinListenerOff();
     }
