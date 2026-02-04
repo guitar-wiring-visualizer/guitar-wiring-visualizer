@@ -18,35 +18,43 @@ class InductionCoil {
         this._startPin = startPin;
         this._endPin = endPin;
         this._name = name;
+        
+        this._startPinListenerOff = null;
+        this._endPinListenerOff = null;
     }
 
     induct() {
         console.info(`${this._name} received induct message`);
-
-        //TODO: Fix this.
-        // It should not send voltage if it is not grounded.
-        // The current design relies on negative voltage coming back from the jack shield pin.
-        // but the jack only sends negative voltage from the shield pin if it is receiving
-        // positive voltage on the tip pin.
-        // One idea is for the inductor to check if any of its pins "could" receive (-) voltage,
-        // and then send the opposite (+) from the other pin.  Similar to the current design, but
-        // instead of checking for actual voltage, check that it "could", by tracing the connections
-        // to a ground (-) pin.
-        // Alternatively, we can assume a jack is grounded on its shield pin, and always send (-) voltage
-        // from it when we start the simulation.
-
-        if (this._startPin.hasVoltage())
-            this._endPin.receiveVoltage(null, -this._startPin.voltage, this._startPin.id);
-        else if (this._endPin.hasVoltage())
-            this._startPin.receiveVoltage(null, -this._endPin.voltage, this._endPin.id);
-        else
-            this._endPin.receiveVoltage(null, 1, this._startPin.id); // this is a hack to get things going
+        this._unsubscribeToEvents();
+        this._subscribeToEvents();
     }
 
     stopInducting() {
-        console.info(`${this.fullName} received stopInducting message`);
-        if (this._endPin.hasVoltage())
-            this._endPin.receiveVoltage(this._startPin, 0);
+        console.info(`${this._name} received stopInducting message`);
+        this._unsubscribeToEvents();
+    }
+
+    _unsubscribeToEvents() {
+        if (typeof this._endPinListenerOff === "function")
+            this._endPinListenerOff();
+        if (typeof this._startPinListenerOff === "function")
+            this._startPinListenerOff();
+    }
+
+    _subscribeToEvents() {
+        this._startPinListenerOff = this._startPin.on("voltageChanged", (_) => {
+            if (this._startPin.hasVoltage()) {
+                console.info(`${this._name} start pin has voltage, sending to end pin`);
+                this._endPin.receiveVoltage(null, 1, this._startPin.id);
+            }
+        });
+
+        this._endPinListenerOff = this._endPin.on("voltageChanged", (_) => {
+            if (this._endPin.hasVoltage()) {
+                console.info(`${this._name} end pin has voltage, sending to start pin`);
+                this._startPin.receiveVoltage(null, 1, this._endPin.id);
+            }
+        });
     }
 }
 
@@ -82,10 +90,12 @@ export class Humbucker extends Pickup {
     pickUp() {
 
         console.info(`${this.fullName} received pickUp message`);
-        this._northCoil = new InductionCoil(`${this.fullName}, North Coil`, this.northCoilFinishPin, this.northCoilStartPin);
-        this._southCoil = new InductionCoil(`${this.fullName}, South Coil`, this.southCoilStartPin, this.southCoilFinishPin);
-        this._northCoil.induct();
+
+        this._southCoil = new InductionCoil(`${this.fullName}, South Coil`, this.southCoilFinishPin, this.southCoilStartPin);
         this._southCoil.induct();
+
+        this._northCoil = new InductionCoil(`${this.fullName}, North Coil`, this.northCoilStartPin, this.northCoilFinishPin);
+        this._northCoil.induct();
     }
 
     stopPickingUp() {
@@ -173,8 +183,8 @@ export class StratPickup extends Pickup {
     }
 
     _createChildComponents() {
-        const pin1 = new Pin({label: `${this.fullName} coil end pin` });
-        const pin2 = new Pin({label: `${this.fullName} coil start pin` });
+        const pin1 = new Pin({ label: `${this.fullName} coil end pin` });
+        const pin2 = new Pin({ label: `${this.fullName} coil start pin` });
         this.pinIds.push(pin1.id, pin2.id);
     }
 

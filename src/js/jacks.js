@@ -14,23 +14,35 @@ import { Component, Pin } from "./coreComponents.js";
 class Jack extends Component {
     constructor(state = {}) {
         super(state);
+
+        this._tipPinListenerOff = null;
+    }
+
+    jackIn() {
+        if (!this.sleevePin.hasVoltage()) {
+            console.debug(`${this.fullName} connecting to ground.`);
+            this.sleevePin.receiveVoltage(null, -1, null);
+        }
+
+        this._unsubscribeToEvents();
+        this._subscribeToEvents();
+    }
+
+    _subscribeToEvents() {
+        this._tipPinListenerOff = this.tipPin.on("voltageChanged", (val) => {
+            console.info(`**** ${this.fullName} received voltage ${val} on tip pin ****`);
+        });
+    }
+
+    _unsubscribeToEvents() {
+        if (typeof this._tipPinListenerOff === "function")
+            this._tipPinListenerOff();
     }
 }
 
 export class MonoJack extends Jack {
     constructor(state = {}) {
         super(state);
-
-        this.tipPin.on("voltageChanged", (value) => {
-            console.debug(this.fullName, "got voltageChanged event from tip pin", this.tipPin.id, value)
-            if (!this.sleevePin.hasVoltage())
-                this.sleevePin.receiveVoltage(null, -value, this.tipPin.id);
-        });
-        this.sleevePin.on("voltageChanged", (value) => {
-            console.debug(this.fullName, "got voltageChanged event from sleevePin", this.sleevePin.id, value)
-            if (!this.tipPin.hasVoltage())
-                this.tipPin.receiveVoltage(null, -value, this.sleevePin.id);
-        });
     }
 
     static get ImageURL() {

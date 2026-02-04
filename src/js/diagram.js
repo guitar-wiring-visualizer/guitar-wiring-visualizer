@@ -50,7 +50,7 @@ export class DiagramState extends EventEmitter {
 
     notifyNodeChanged(node) {
         console.debug("notifyNodeChanged", node.name())
-        
+
         if (node.name() === "Wire") {
             this._emit("wireChanged", node);
         }
@@ -126,7 +126,7 @@ export class DiagramState extends EventEmitter {
             const className = state.className;
             if (className === "Pin") {
                 idsDeserialized.push(state.id);
-                console.debug("recreating", className, state.id) ;
+                console.debug("recreating", className, state.id);
                 const componentInstance = new componentClassMap[className](state);
                 this.registerComponent(componentInstance);
             }
@@ -168,18 +168,25 @@ export class DiagramState extends EventEmitter {
         });
     }
 
+    _findAllJacks() {
+        return this.findComponents((c) => {
+            return typeof c.jackIn === 'function';
+        });
+    }
+
     start() {
+        // note: the order of starting these is important.
         this._findAllPickups().forEach(pickup => pickup.pickUp());
+        this._findAllJacks().forEach(jack => jack.jackIn());
     }
 
     stop() {
-
-        //TODO: investigate if this is needed.
-        //this._findAllPickups().forEach(pickup => pickup.stopPickingUp());
-
         this._findAllResetVoltageComponents().forEach(c => {
             c.resetVoltage();
         });
+        this._findAllPickups().forEach(
+            pickup => pickup.stopPickingUp()
+        );
     }
 }
 
