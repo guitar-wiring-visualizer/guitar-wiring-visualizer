@@ -6,6 +6,7 @@
 
 import EventEmitter from "./eventEmitter.js";
 import { DiagramState, TOOL_MODE_WIRE } from "./diagram.js";
+import Geometry from "./geometry.js";
 
 /**
  * Base class for all components.
@@ -463,12 +464,11 @@ export class Wire extends Component {
     updateStartPoint(newPoint) {
         console.assert(newPoint, "newPoint is required");
         console.assert(Array.isArray(newPoint) && newPoint.length === 2, "newPoint must be a flat array of two values");
-        const vector = this._calculateTranslationVector(this.startPoint, newPoint);
-        this.state.midPoint = this._applyTranslationVector(vector, this.midPoint);
+        const vector = Geometry.translationVector(this.startPoint, newPoint);
+        this.state.midPoint = Geometry.applyTranslationVector(vector, this.midPoint, this._getTranslationVectorAdjustment());
         console.debug("moved midpoint", this.state.midPoint);
         this.state.startPoint = newPoint;
         console.debug("moved startpoint", this.startPoint);
-
     }
 
     /**
@@ -478,26 +478,17 @@ export class Wire extends Component {
     updateEndPoint(newPoint) {
         console.assert(newPoint, "newPoint is required");
         console.assert(Array.isArray(newPoint) && newPoint.length === 2, "newPoint must be a flat array of two values");
-        const vector = this._calculateTranslationVector(this.endPoint, newPoint);
-        this.state.midPoint = this._applyTranslationVector(vector, this.midPoint);
+        const vector = Geometry.translationVector(this.endPoint, newPoint);
+        this.state.midPoint = Geometry.applyTranslationVector(vector, this.midPoint, this._getTranslationVectorAdjustment());
         console.debug("moved midpoint", this.state.midPoint);
         this.state.endPoint = newPoint;
         console.debug("moved endpoint", this.endPoint);
     }
 
-    _calculateTranslationVector(originalPoint, newPoint) {
-        const tVector = [newPoint.at(0) - originalPoint.at(0), newPoint.at(1) - originalPoint.at(1)];
-        const adjustmentFactor = this._getTranslationVectorAdjustment();
-        console.debug({adjustmentFactor});
-        const adjustedVector = [tVector.at(0) / adjustmentFactor, tVector.at(1) / adjustmentFactor];
-        console.debug({adjustedVector});
-        return adjustedVector;
-    }
-
-    _getTranslationVectorAdjustment(){
+    _getTranslationVectorAdjustment() {
         // const distance = Math.hypot(this.endPoint.at(0) - this.startPoint.at(0), this.endPoint.at(1) - this.startPoint.at(1));   
         // console.debug("moved distance", distance);
-        
+
         // if (distance < 50)
         //     return 1;
         // else if (distance < 300)
@@ -505,13 +496,6 @@ export class Wire extends Component {
         // else
         //     return 4;
         return 1;
-    }
-
-    _applyTranslationVector(vector, point) {
-        return [
-            point.at(0) + vector.at(0),
-            point.at(1) + vector.at(1)
-        ];
     }
 
     moveTo(position) {
