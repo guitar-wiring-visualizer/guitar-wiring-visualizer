@@ -84,15 +84,26 @@ export class DiagramState extends EventEmitter {
     }
 
     removeComponentById(componentId) {
-        const component = this.getComponent(componentId);
-        if (component.pinIds) {
-            component.pinIds.forEach(pinId => {
-                this.removeComponentById(pinId);
-            });
-        }
-        delete this._componenetMap[component.id];
-
+        this._removeComponentInternal(componentId);
         this._emit("componentRemoved", componentId);
+    }
+
+    _removeComponentInternal(componentId) {
+        const component = this.getComponent(componentId);
+        if (component) {
+            component.pinIds?.forEach(pinId => {
+                this._removeComponentInternal(pinId);
+            });
+            delete this._componenetMap[component.id];
+        }
+    }
+
+    removeAllComponents() {
+        const allIds = Object.keys(this._componenetMap);
+        allIds.forEach(componentId => {
+            this._removeComponentInternal(componentId);
+        });
+        this._emit("allComponentsRemoved");
     }
 
     async serializeState() {

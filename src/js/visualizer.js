@@ -47,23 +47,28 @@ export class Visualizer {
 
         DiagramState.instance.on("switchChanged", (_) => {
             console.debug("received switchChanged event");
-            this._restartAfterDiagramUpdate();
+            this._restartAfterDiagramChange();
         });
 
         DiagramState.instance.on("componentAdded", (_) => {
             console.debug("received componentAdded event");
-            this._restartAfterDiagramUpdate();
+            this._restartAfterDiagramChange();
         });
 
         DiagramState.instance.on("componentRemoved", (_) => {
             console.debug("received componentRemoved event");
-            this._restartAfterDiagramUpdate();
+            this._restartAfterDiagramChange();
+        });
+
+        DiagramState.instance.on("allComponentsRemoved", (_) => {
+            console.debug("received allComponentsRemoved event");
+            // app handles stopping visualizer
         });
 
         Visualizer.instance = this;
     }
 
-    _restartAfterDiagramUpdate() {
+    _restartAfterDiagramChange() {
         const wasActiveWhenEventReceived = this.isActive;
 
         this.stop();

@@ -181,7 +181,6 @@ export class Component extends EventEmitter {
         console.debug("removeFromDiagram", this.id);
         const node = this.findNode(layer);
         node.destroy();
-        DiagramState.instance.notifyNodeChanged(node);
         DiagramState.instance.removeComponentById(this.id);
     }
 

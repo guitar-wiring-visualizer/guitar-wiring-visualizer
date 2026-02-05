@@ -582,9 +582,11 @@ function enableClearDiagram(layer) {
                 .filter(child => child.getClassName() !== "Transformer")
                 .forEach(child => {
                     child.destroy();
-                    DiagramState.instance.notifyNodeChanged(child);
-                    DiagramState.instance.removeComponentById(child.id());
+                    DiagramState.instance.removeAllComponents();
                 });
+
+            if (Visualizer.instance.isActive)
+                document.getElementById("vis-button").click();
 
             const url = new URL(window.location);
             url.searchParams.delete(SERIALIZED_DIAGRAM_STATE_PARAM);
