@@ -65,4 +65,17 @@ export default class Geometry {
     static distance(startPoint, endPoint) {
         return Math.hypot(endPoint.at(0) - startPoint.at(0), endPoint.at(1) - startPoint.at(1));
     }
+
+    /**
+     * Determines if the rectangles overlap.
+     * @param {Konva.Rect} rect1
+     * @param {Konva.Rect} rect2
+     * @returns boolean
+     */
+    static rectanglesOverlap(rect1, rect2) {
+        return rect1.x() < rect2.x() + rect2.width() &&
+            rect1.x() + rect1.width() > rect2.x() &&
+            rect1.y() < rect2.y() + rect2.height() &&
+            rect1.y() + rect1.height() > rect2.y();
+    }
 }

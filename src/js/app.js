@@ -16,6 +16,7 @@ import {
 } from "./diagram.js"
 import { componentClassMap, Wire } from "./components.js";
 import { Visualizer } from "./visualizer.js";
+import Geometry from "./geometry.js";
 
 const wireColors = [
     WIRE_COLOR_BLACK,
@@ -368,17 +369,10 @@ function findPinsInRect(layer, targetRect) {
             width: pinRectAttrs.width,
             height: pinRectAttrs.height
         });
-        const intersects = rectanglesOverlap(targetRect, pinRect);
+        const intersects = Geometry.rectanglesOverlap(targetRect, pinRect);
         return intersects;
     });
     return foundPins;
-}
-
-function rectanglesOverlap(rect1, rect2) {
-    return rect1.x() < rect2.x() + rect2.width() &&
-        rect1.x() + rect1.width() > rect2.x() &&
-        rect1.y() < rect2.y() + rect2.height() &&
-        rect1.y() + rect1.height() > rect2.y();
 }
 
 function createDiagramLayer() {
