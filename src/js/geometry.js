@@ -24,11 +24,11 @@ export default class Geometry {
      * Applies a vector to a point.
      * @param {[]} vector 2-element flat array representing the vector
      * @param {[]} point 2-element flat array of x,y
-     * @param {[]} adjustmentFactor amount to increase/reduce the movement
+     * @param {number} adjustmentFactor amount to increase/reduce the movement
      * @returns [] new 2-element flat array of x,y
      */
     static applyTranslationVector(vector, point, adjustmentFactor = 1) {
-        let vectorToApply = adjustmentFactor === 1 ? vector : [vector.at(0) / adjustmentFactor, vector.at(1) / adjustmentFactor];
+        const vectorToApply = adjustmentFactor === 1 ? vector : [vector.at(0) / adjustmentFactor, vector.at(1) / adjustmentFactor];
         return [
             point.at(0) + vectorToApply.at(0),
             point.at(1) + vectorToApply.at(1)
@@ -45,5 +45,15 @@ export default class Geometry {
         const midX = (startPoint.at(0) + endPoint.at(0)) / 2;
         const midY = (startPoint.at(1) + endPoint.at(1)) / 2;
         return [midX, midY];
+    }
+
+    /**
+     * Gets the Euclidean distance between two points.
+     * @param {[]} startPoint 2-element flat array of x,y
+     * @param {[]} endPoint 2-element flat array of x,y
+     * @returns number
+     */
+    static distance(startPoint, endPoint) {
+        return Math.hypot(endPoint.at(0) - startPoint.at(0), endPoint.at(1) - startPoint.at(1));
     }
 }

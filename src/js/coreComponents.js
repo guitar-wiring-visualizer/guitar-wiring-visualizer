@@ -465,7 +465,7 @@ export class Wire extends Component {
         console.assert(newPoint, "newPoint is required");
         console.assert(Array.isArray(newPoint) && newPoint.length === 2, "newPoint must be a flat array of two values");
         const vector = Geometry.translationVector(this.startPoint, newPoint);
-        this.state.midPoint = Geometry.applyTranslationVector(vector, this.midPoint, this._getTranslationVectorAdjustment());
+        this.state.midPoint = Geometry.applyTranslationVector(vector, this.midPoint, this._getTranslationVectorAdjustment(newPoint, this.endPoint));
         console.debug("moved midpoint", this.state.midPoint);
         this.state.startPoint = newPoint;
         console.debug("moved startpoint", this.startPoint);
@@ -479,23 +479,25 @@ export class Wire extends Component {
         console.assert(newPoint, "newPoint is required");
         console.assert(Array.isArray(newPoint) && newPoint.length === 2, "newPoint must be a flat array of two values");
         const vector = Geometry.translationVector(this.endPoint, newPoint);
-        this.state.midPoint = Geometry.applyTranslationVector(vector, this.midPoint, this._getTranslationVectorAdjustment());
+        this.state.midPoint = Geometry.applyTranslationVector(vector, this.midPoint, this._getTranslationVectorAdjustment(this.startPoint, newPoint));
         console.debug("moved midpoint", this.state.midPoint);
         this.state.endPoint = newPoint;
         console.debug("moved endpoint", this.endPoint);
     }
 
-    _getTranslationVectorAdjustment() {
-        // const distance = Math.hypot(this.endPoint.at(0) - this.startPoint.at(0), this.endPoint.at(1) - this.startPoint.at(1));   
-        // console.debug("moved distance", distance);
+    _getTranslationVectorAdjustment(startPoint, endPoint) {
+        const distance = Geometry.distance(startPoint, endPoint);
+        console.debug({distance});
 
-        // if (distance < 50)
-        //     return 1;
-        // else if (distance < 300)
-        //     return 2;
-        // else
-        //     return 4;
-        return 1;
+        let adj;
+        if (distance < 100)
+            adj= 1;
+        else
+            adj= 2;
+
+        console.debug({adj});
+
+        return adj;
     }
 
     moveTo(position) {
