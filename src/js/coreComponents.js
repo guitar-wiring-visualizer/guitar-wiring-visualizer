@@ -463,6 +463,8 @@ export class Wire extends Component {
     updateStartPoint(newPoint) {
         console.assert(newPoint, "newPoint is required");
         console.assert(Array.isArray(newPoint) && newPoint.length === 2, "newPoint must be a flat array of two values");
+        const vector = this._calculateTranslationVector(this.startPoint, newPoint);
+        this.state.midPoint = this._applyTranslationVector(vector, this.midPoint);
         this.state.startPoint = newPoint;
     }
 
@@ -473,7 +475,20 @@ export class Wire extends Component {
     updateEndPoint(newPoint) {
         console.assert(newPoint, "newPoint is required");
         console.assert(Array.isArray(newPoint) && newPoint.length === 2, "newPoint must be a flat array of two values");
+        const vector = this._calculateTranslationVector(this.endPoint, newPoint);
+        this.state.midPoint = this._applyTranslationVector(vector, this.midPoint);
         this.state.endPoint = newPoint;
+    }
+
+    _calculateTranslationVector(originalPoint, newPoint){
+        return [newPoint.at(0) - originalPoint.at(0), newPoint.at(1) - originalPoint.at(1)];
+    }
+
+    _applyTranslationVector(vector, point) {
+        return [
+            point.at(0) + vector.at(0),
+            point.at(1) + vector.at(1)
+        ];
     }
 
     moveTo(position) {
@@ -530,7 +545,7 @@ export class Wire extends Component {
             lineCap: 'butt',
             lineJoin: 'round',
             draggable: Wire.IsDraggable,
-            tension: .7,
+            tension: .7, // higher tension == more curvy
             id: this.id.toString(),
             name: this.constructor.name,
         });
@@ -611,14 +626,14 @@ export class TwoPinPositivePassThroughComponent extends TwoPinComponenet {
         this.pin1.on("voltageChanged", (val) => {
             console.info(`${this.fullName} received voltageChanged event with value ${val} from ${this.pin1.fullName}`);
             if (val > 0) {
-                if(!this.pin2.hasVoltage())
+                if (!this.pin2.hasVoltage())
                     this.pin2.receiveVoltage(null, val, this.pin1.id);
             }
         });
         this.pin2.on("voltageChanged", (val) => {
             console.info(`${this.fullName} received voltageChanged event with value ${val} from ${this.pin2.fullName}`);
             if (val > 0) {
-                if(!this.pin1.hasVoltage())
+                if (!this.pin1.hasVoltage())
                     this.pin1.receiveVoltage(null, val, this.pin2.id);
             }
         });
