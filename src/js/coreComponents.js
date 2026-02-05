@@ -465,7 +465,10 @@ export class Wire extends Component {
         console.assert(Array.isArray(newPoint) && newPoint.length === 2, "newPoint must be a flat array of two values");
         const vector = this._calculateTranslationVector(this.startPoint, newPoint);
         this.state.midPoint = this._applyTranslationVector(vector, this.midPoint);
+        console.debug("moved midpoint", this.state.midPoint);
         this.state.startPoint = newPoint;
+        console.debug("moved startpoint", this.startPoint);
+
     }
 
     /**
@@ -477,11 +480,31 @@ export class Wire extends Component {
         console.assert(Array.isArray(newPoint) && newPoint.length === 2, "newPoint must be a flat array of two values");
         const vector = this._calculateTranslationVector(this.endPoint, newPoint);
         this.state.midPoint = this._applyTranslationVector(vector, this.midPoint);
+        console.debug("moved midpoint", this.state.midPoint);
         this.state.endPoint = newPoint;
+        console.debug("moved endpoint", this.endPoint);
     }
 
-    _calculateTranslationVector(originalPoint, newPoint){
-        return [newPoint.at(0) - originalPoint.at(0), newPoint.at(1) - originalPoint.at(1)];
+    _calculateTranslationVector(originalPoint, newPoint) {
+        const tVector = [newPoint.at(0) - originalPoint.at(0), newPoint.at(1) - originalPoint.at(1)];
+        const adjustmentFactor = this._getTranslationVectorAdjustment();
+        console.debug({adjustmentFactor});
+        const adjustedVector = [tVector.at(0) / adjustmentFactor, tVector.at(1) / adjustmentFactor];
+        console.debug({adjustedVector});
+        return adjustedVector;
+    }
+
+    _getTranslationVectorAdjustment(){
+        // const distance = Math.hypot(this.endPoint.at(0) - this.startPoint.at(0), this.endPoint.at(1) - this.startPoint.at(1));   
+        // console.debug("moved distance", distance);
+        
+        // if (distance < 50)
+        //     return 1;
+        // else if (distance < 300)
+        //     return 2;
+        // else
+        //     return 4;
+        return 1;
     }
 
     _applyTranslationVector(vector, point) {
