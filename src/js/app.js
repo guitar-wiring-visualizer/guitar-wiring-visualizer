@@ -15,7 +15,7 @@ import {
     WIRE_COLOR_BLUE
 } from "./diagram.js"
 import { componentClassMap, Wire } from "./components.js";
-import { Visualizer } from "./visualizer.js";
+import { Visualizer, VISUALIZER_WIRE_LINE_NAME, VISUALIZER_SIGNAL_PATH_NAME } from "./visualizer.js";
 import Geometry from "./geometry.js";
 
 const wireColors = [
@@ -452,6 +452,13 @@ function enableSelectComponent(transformer) {
         let selectableNode;
         if (node.name() === "Wire") {
             selectableNode = node;
+        }
+        else if ([VISUALIZER_WIRE_LINE_NAME, VISUALIZER_SIGNAL_PATH_NAME].includes(node.name())) {
+            const wireNodeId = node.id()
+                .replace(VISUALIZER_WIRE_LINE_NAME + ".", "")
+                .replace(VISUALIZER_SIGNAL_PATH_NAME + ".", "");
+            console.debug({ wireNodeId });
+            selectableNode = layer.findOne("#" + wireNodeId);
         } else {
             selectableNode = e.target.getParent();
             while (selectableNode.getParent().getClassName() !== "Layer") {

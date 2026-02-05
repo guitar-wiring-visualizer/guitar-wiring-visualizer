@@ -9,6 +9,9 @@ import { Wire } from './components.js';
 
 const RANGE_FOR_CLOSE_POINT_COMPARISON = 2.0;
 
+export const VISUALIZER_WIRE_LINE_NAME = "vis-wire";
+export const VISUALIZER_SIGNAL_PATH_NAME = "vis-path"
+
 export class Visualizer {
 
     constructor(diagramLayer) {
@@ -112,6 +115,8 @@ export class Visualizer {
                 }
 
                 const clonedWireNode = activeWireNode.clone({
+                    name: VISUALIZER_WIRE_LINE_NAME,
+                    id: VISUALIZER_WIRE_LINE_NAME + "." + activeWire.id,
                     points: animationWirePoints,
                     shadowColor: activeWireNode.stroke()
                 });
@@ -212,6 +217,8 @@ export class Visualizer {
             const wirePathData = linePointsToSVGData(actualPoints);
 
             const wirePath = new Konva.Path({
+                name: VISUALIZER_SIGNAL_PATH_NAME,
+                id: VISUALIZER_SIGNAL_PATH_NAME + "." + wireLine.id().replace(VISUALIZER_WIRE_LINE_NAME + ".", ""),
                 data: wirePathData,
                 stroke: 'cyan',
                 strokeWidth: 1,
