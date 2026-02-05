@@ -464,11 +464,9 @@ export class Wire extends Component {
     updateStartPoint(newPoint) {
         console.assert(newPoint, "newPoint is required");
         console.assert(Array.isArray(newPoint) && newPoint.length === 2, "newPoint must be a flat array of two values");
-        const vector = Geometry.translationVector(this.startPoint, newPoint);
-        this.state.midPoint = Geometry.applyTranslationVector(vector, this.midPoint, this._getTranslationVectorAdjustment(newPoint, this.endPoint));
-        console.debug("moved midpoint", this.state.midPoint);
         this.state.startPoint = newPoint;
         console.debug("moved startpoint", this.startPoint);
+        this._updateMidPoint();
     }
 
     /**
@@ -478,30 +476,52 @@ export class Wire extends Component {
     updateEndPoint(newPoint) {
         console.assert(newPoint, "newPoint is required");
         console.assert(Array.isArray(newPoint) && newPoint.length === 2, "newPoint must be a flat array of two values");
-        const vector = Geometry.translationVector(this.endPoint, newPoint);
-        this.state.midPoint = Geometry.applyTranslationVector(vector, this.midPoint, this._getTranslationVectorAdjustment(this.startPoint, newPoint));
-        console.debug("moved midpoint", this.state.midPoint);
         this.state.endPoint = newPoint;
         console.debug("moved endpoint", this.endPoint);
+        this._updateMidPoint();
     }
 
-    _getTranslationVectorAdjustment(startPoint, endPoint) {
+    /**
+     * Updates the midpoint to a reasonable position, preserving the spline.
+     * This needs to be called AFTER moving the start or end points.
+     */
+    _updateMidPoint() {
+        const trueMidpoint = Geometry.midPoint(this.startPoint, this.endPoint);
+        console.debug("trueMidpoint", trueMidpoint);
+        const midPointVector = Geometry.translationVector(this.midPoint, trueMidpoint);
+        const reductionFactor = this._getMidPointVectorReduction(this.startPoint, this.endPoint);
+        console.debug({ reductionFactor });
+        const reducedVector = Geometry.reduceVector(midPointVector, reductionFactor);
+        this.state.midPoint = Geometry.applyVector(reducedVector, this.midPoint);
+        console.debug("moved midpoint", this.state.midPoint);
+    }
+
+    /**
+     * Gets a number for midpoint translation vector reduction based on the distance from startpoint to endpoint.
+     *
+     * This is so we can move a midpoint to almost where it would normally move to based on the vector, but slightly less
+     * in order to approximate/preserve the curve of the original spline.
+     *
+     * The greater the distance, the more reduction.
+     * Longer lines should keep more of their curve, and short lines get less curvy.
+     */
+    _getMidPointVectorReduction(startPoint, endPoint) {
         const distance = Geometry.distance(startPoint, endPoint);
-        console.debug({distance});
+        console.debug({ distance });
 
-        let adj;
-        if (distance < 100)
-            adj= 1;
+        let amount;
+        if (distance > 300)
+            amount = 2;
+        else if (distance > 100)
+            amount = 1.5;
         else
-            adj= 2;
+            amount = 1.25;
 
-        console.debug({adj});
-
-        return adj;
+        return amount;
     }
 
     moveTo(position) {
-        console.warn("_moveTo called on a Wire.  You probably want to set the startPoint, midPoint, and endPoint instead.");
+        console.warn("_moveTo called on a Wire.  You probably want to call updateStartPoint or updateEndpoint instead.");
         super.moveTo(position);
     }
 

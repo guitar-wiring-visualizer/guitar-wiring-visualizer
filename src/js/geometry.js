@@ -21,17 +21,26 @@ export default class Geometry {
     }
 
     /**
+     * Reduces the vector by the supplied factor.
+     * Factor of 1 does not change it.  The higher the factor the more it is reduced.
+     * @param {*} vector 2-element flat array representing the vector
+     * @param {*} reductionFactor number
+     * @returns new vector
+     */
+    static reduceVector(vector, reductionFactor) {
+        return [vector.at(0) / reductionFactor, vector.at(1) / reductionFactor];
+    }
+
+    /**
      * Applies a vector to a point.
      * @param {[]} vector 2-element flat array representing the vector
      * @param {[]} point 2-element flat array of x,y
-     * @param {number} adjustmentFactor amount to increase/reduce the movement
      * @returns [] new 2-element flat array of x,y
      */
-    static applyTranslationVector(vector, point, adjustmentFactor = 1) {
-        const vectorToApply = adjustmentFactor === 1 ? vector : [vector.at(0) / adjustmentFactor, vector.at(1) / adjustmentFactor];
+    static applyVector(vector, point) {
         return [
-            point.at(0) + vectorToApply.at(0),
-            point.at(1) + vectorToApply.at(1)
+            point.at(0) + vector.at(0),
+            point.at(1) + vector.at(1)
         ];
     }
 
