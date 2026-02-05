@@ -99,11 +99,9 @@ export class Component extends EventEmitter {
      */
     draw(containerNode) {
         console.assert(containerNode, "containerNode is required");
-        const positionInContainer = this._getPosition();
-        const rootNode = this._createRootNode(positionInContainer);
 
+        const rootNode = this._createRootNode();
         containerNode.add(rootNode);
-
         this._drawChildNodes(rootNode);
 
         if (DiagramState.instance.debugMode)
@@ -195,14 +193,6 @@ export class Component extends EventEmitter {
     }
 
     /**
-     * Utility function to get the x,y position based on the node attrs.
-     * @returns {x,y}
-     */
-    _getPosition() {
-        return { x: this.nodeAttrs.x, y: this.nodeAttrs.y };
-    }
-
-    /**
      * Utility function to get a list of nodes of the component.
      * @param {Konva.Node} container 
      * @returns [{Konva.Node}]
@@ -217,9 +207,8 @@ export class Component extends EventEmitter {
 
     _subscribeToEvents(componentNode) {
         componentNode.on("dragend transformend", (e) => {
-            console.debug(this.constructor.name, this.id, e.type);
-            this.state.nodeAttrs = componentNode.attrs;
-
+            console.debug(this.constructor.name, this.id, e.type, e);
+            this.state.nodeAttrs = e.target.attrs;
             this._moveAttachedWires(componentNode);
         });
 
@@ -249,6 +238,11 @@ export class Component extends EventEmitter {
         return new Konva.Group({
             x: this.nodeAttrs.x,
             y: this.nodeAttrs.y,
+            rotation: this.nodeAttrs.rotation,
+            scaleX: this.nodeAttrs.scaleX,
+            scaleY: this.nodeAttrs.scaleY,
+            skewX: this.nodeAttrs.skewX,
+            skewY: this.nodeAttrs.skewY,
             draggable: this.constructor.IsDraggable,
             name: this.constructor.name,
             id: this.id.toString()
@@ -560,7 +554,7 @@ export class Wire extends Component {
      * No position arg is needed since it draws based on start/mid/endpoints.
      * This just creates a Line node, not a group, since no child nodes are used.
      */
-    _createRootNode(_) {
+    _createRootNode() {
 
         const wirePoints = [...this.startPoint, ...this.midPoint, ...this.endPoint];
 
