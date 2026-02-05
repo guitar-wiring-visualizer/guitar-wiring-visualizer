@@ -35,6 +35,8 @@ export class Visualizer {
 
         DiagramState.instance.on("wireChanged", (_) => {
             console.debug("received wireChanged event");
+            //TODO: can we just use _restartAfterDiagramUpdate here, too?
+
             const wasActiveWhenEventReceived = this.isActive;
 
             this.stop();
@@ -45,18 +47,32 @@ export class Visualizer {
 
         DiagramState.instance.on("switchChanged", (_) => {
             console.debug("received switchChanged event");
-            const wasActiveWhenEventReceived = this.isActive;
+            this._restartAfterDiagramUpdate();
+        });
 
-            this.stop();
-            DiagramState.instance.stop();
+        DiagramState.instance.on("componentAdded", (_) => {
+            console.debug("received componentAdded event");
+            this._restartAfterDiagramUpdate();
+        });
 
-            if (wasActiveWhenEventReceived) {
-                DiagramState.instance.start();
-                this.start();
-            }
+        DiagramState.instance.on("componentRemoved", (_) => {
+            console.debug("received componentRemoved event");
+            this._restartAfterDiagramUpdate();
         });
 
         Visualizer.instance = this;
+    }
+
+    _restartAfterDiagramUpdate() {
+        const wasActiveWhenEventReceived = this.isActive;
+
+        this.stop();
+        DiagramState.instance.stop();
+
+        if (wasActiveWhenEventReceived) {
+            DiagramState.instance.start();
+            this.start();
+        }
     }
 
     _createAllAnimations() {

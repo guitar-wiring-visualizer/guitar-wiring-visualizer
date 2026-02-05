@@ -47,6 +47,7 @@ export class DiagramState extends EventEmitter {
 
     registerComponent(componentInstance) {
         this._addToComponentMap(componentInstance.id, componentInstance);
+        this._emit("componentAdded", componentInstance.id);
     }
 
     notifyNodeChanged(node) {
@@ -91,6 +92,7 @@ export class DiagramState extends EventEmitter {
         }
         delete this._componenetMap[component.id];
 
+        this._emit("componentRemoved", componentId);
     }
 
     async serializeState() {
