@@ -588,6 +588,7 @@ export class Wire extends Component {
     changeColor(node, color) {
         this.state.color = color;
         node.stroke(color);
+        DiagramState.instance.notifyNodeChanged(node);
     }
 }
 
