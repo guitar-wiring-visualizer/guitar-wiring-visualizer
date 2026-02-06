@@ -329,6 +329,8 @@ function enableDrawWire(layer) {
 
         linePoints = lastLine.points();
 
+        lastLine.destroy();
+
         const wireStart = [linePoints.at(0), linePoints.at(1)];
         const wireEnd = [linePoints.at(-2), linePoints.at(-1)];
 
@@ -351,10 +353,7 @@ function enableDrawWire(layer) {
             color: DiagramState.instance.wireToolColor
         });
 
-        setTimeout(() => {
-            wire.draw(layer);
-            lastLine.destroy();
-        }, 200);
+        wire.draw(layer);
 
         enterSelectMode();
     });
