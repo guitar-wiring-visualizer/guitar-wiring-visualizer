@@ -52,7 +52,11 @@ export class Visualizer {
 
         DiagramState.instance.on("componentAdded", (_) => {
             console.debug("received componentAdded event");
-            this._restartAfterDiagramChange();
+
+            // delay to account for timing issue between new component being added (and firing event), and it getting drawn.
+            setTimeout(() => {
+                this._restartAfterDiagramChange();
+            }, 250);
         });
 
         DiagramState.instance.on("componentRemoved", (_) => {
