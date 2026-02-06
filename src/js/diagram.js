@@ -172,19 +172,19 @@ export class DiagramState extends EventEmitter {
 
     _findAllPickups() {
         return this.findComponents((c) => {
-            return typeof c.pickUp === 'function';
+            return c.can("pickUp");
         });
     }
 
     _findAllResetVoltageComponents() {
         return this.findComponents((c) => {
-            return typeof c.resetVoltage === 'function'
+            return c.can("resetVoltage");
         });
     }
 
     _findAllJacks() {
         return this.findComponents((c) => {
-            return typeof c.jackIn === 'function';
+            return c.can("jackIn");
         });
     }
 

@@ -76,6 +76,10 @@ export class Component extends EventEmitter {
         return true;
     }
 
+    can(action) {
+        return typeof this[action] === "function";
+    }
+
     /**
      * Sets the X,Y position of this component, relative to its container.
      * @param {x, y} position 

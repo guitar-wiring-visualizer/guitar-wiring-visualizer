@@ -28,6 +28,12 @@ export class Potentiometer extends Component {
         return 110;
     }
 
+    static get _centerPoint() {
+        return [50, 50];
+    }
+
+    static get pinConnectionNodeName() { return "pot-pin-connection"; }
+
     get rotation() { return this.state.rotation; }
     set rotation(val) {
         console.assert(val, "val is required.");
@@ -48,6 +54,7 @@ export class Potentiometer extends Component {
         this.rotation = -this.rotation;
         console.debug(`${this.fullName} changed rotation to ${this.rotation}`);
         this._updatePinConnections();
+        this._reDrawPinConnections(componentNode);
         DiagramState.instance.notifyNodeChanged(componentNode);
     }
 
@@ -95,6 +102,51 @@ export class Potentiometer extends Component {
             this._applyGlobalStyling(componentNode);
             parentNode.add(componentNode);
             this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
+            this._drawPinConnections(parentNode);
         });
+    }
+
+    _reDrawPinConnections(componentNode) {
+        componentNode.find("." + Potentiometer.pinConnectionNodeName).forEach(connectionNode => {
+            connectionNode.destroy();
+        });
+        this._drawPinConnections(componentNode);
+    }
+
+    _getOuterPinById(id) {
+        if (id === this.pin1.id)
+            return this.pin1;
+        else if (id === this.pin3.id);
+        return this.pin3;
+    }
+
+    _drawPinConnections(parentNode) {
+
+        const wiperPos = this.wiperPin.findNode(parentNode).position();
+        const connectedPin = this._getOuterPinById(this.wiperPin.connectedPinId)
+        const connectedPinPos = connectedPin.findNode(parentNode).position();
+
+        const wiperOffset = 16
+        const outerPinOffset = wiperOffset + 7;
+
+        const linePoints = [
+            wiperPos.x,
+            wiperPos.y - wiperOffset,
+            ...this.constructor._centerPoint,
+            connectedPinPos.x,
+            connectedPinPos.y - outerPinOffset
+        ];
+
+        const connector = new Konva.Line({
+            name: Potentiometer.pinConnectionNodeName,
+            strokeWidth: 5,
+            stroke: "#939393",
+            lineJoin: 'round',
+            lineCap: 'round',
+            points: linePoints
+        });
+
+        parentNode.add(connector);
+
     }
 }
