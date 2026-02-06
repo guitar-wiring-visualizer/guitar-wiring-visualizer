@@ -568,8 +568,9 @@ function flipSelectedComponent(selectedNode) {
 
 function deleteSelectedComponent(nodeToDelete, transformer) {
     if (confirm("Delete selected component?")) {
-        nodeToDelete.destroy();
-        DiagramState.instance.removeComponentById(nodeToDelete.id());
+        const component = DiagramState.instance.getComponent(nodeToDelete.id());
+        const layer = transformer.getLayer();
+        component.removeFromDiagram(layer);
         clearSelection(transformer);
     }
 }

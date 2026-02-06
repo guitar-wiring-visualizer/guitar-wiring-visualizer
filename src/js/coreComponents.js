@@ -177,8 +177,12 @@ export class Component extends EventEmitter {
     removeFromDiagram(layer) {
         console.assert(layer, "layer is required");
         console.debug("removeFromDiagram", this.id);
+
+        this._removeAttachedWires(layer);
+
         const node = this.findNode(layer);
         node.destroy();
+
         DiagramState.instance.removeComponentById(this.id);
     }
 
@@ -290,6 +294,24 @@ export class Component extends EventEmitter {
             wiresEndingOnPin.forEach(oldWire => {
                 oldWire.updateEndPoint([pinPos.x, pinPos.y]);
                 oldWire.reDraw(layer);
+            });
+        });
+    }
+
+    _removeAttachedWires(layer) {
+        console.debug("remove attached wires");
+        this.pinIds.forEach(pinId => {
+            const wiresStartingOnPin = DiagramState.instance.findComponentsOfType(Wire, (w) => {
+                return w.startPinId === pinId
+            });
+            wiresStartingOnPin.forEach(wire => {
+                wire.removeFromDiagram(layer);
+            });
+            const wiresEndingOnPin = DiagramState.instance.findComponentsOfType(Wire, (w) => {
+                return w.endPinId === pinId
+            });
+            wiresEndingOnPin.forEach(wire => {
+                wire.removeFromDiagram(layer);
             });
         });
     }
