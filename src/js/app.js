@@ -50,6 +50,7 @@ const setupApp = async () => {
     enableToolbar(transformer);
     enableDrawWire(diagramLayer);
     enableFlipSwitchButton(transformer);
+    enableRotatePotButton(transformer);
     enableVisualizerButton();
 
     enableSave();
@@ -149,10 +150,21 @@ function enableFlipSwitchButton(transformer) {
     flipButton.addEventListener("click", (e) => {
         if (transformer.nodes().length === 0)
             return;
-        const selectedNode = transformer.nodes()[0];
-        flipSelectedComponent(selectedNode);
+        const selectedNode = transformer.nodes().at(0);
+        flipSelectedSwitch(selectedNode);
     });
 }
+
+function enableRotatePotButton(transformer) {
+    const rotateButton = document.getElementById("rotate-button");
+    rotateButton.addEventListener("click", (e) => {
+        if (transformer.nodes().length === 0)
+            return;
+        const selectedNode = transformer.nodes().at(0);
+        rotateSelectedPot(selectedNode);
+    });
+}
+
 
 function initializeComponentLibrary() {
     document.querySelectorAll('[data-component-class]')
@@ -475,9 +487,15 @@ function enableSelectComponent(transformer) {
             transformer.nodes([selectableNode]);
         }
 
-        //if (isSwitch) {
-        document.getElementById("flip-button").disabled = false;
-        //}
+        const component = DiagramState.instance.getComponent(selectableNode.id());
+
+        document.getElementById("flip-button").disabled = true;
+        document.getElementById("rotate-button").disabled = true;
+        if (component.can("flip"))
+            document.getElementById("flip-button").disabled = false;
+        else if (component.can("rotate")) {
+            document.getElementById("rotate-button").disabled = false;
+        }
 
         console.debug("selected component", transformer.nodes()[0].id(), transformer.nodes()[0].name(), transformer.nodes()[0]);
     });
@@ -508,12 +526,14 @@ function handleSelectionKeyCode(transformer, code) {
     if (transformer.nodes().length === 0)
         return;
 
-    const selectedNode = transformer.nodes()[0];
+    const selectedNode = transformer.nodes().at(0);
 
     if (code === "Delete" || code === "Backspace") {
         deleteSelectedComponent(selectedNode, transformer);
     } else if (code === "KeyF") {
-        flipSelectedComponent(selectedNode);
+        flipSelectedSwitch(selectedNode);
+    } else if (code === "KeyR") {
+        rotateSelectedPot(selectedNode);
     } else if (code === "Escape") {
         clearSelection(transformer);
     } else if (code === "KeyC") {
@@ -558,16 +578,19 @@ function changeColor(selectedNode) {
 
 function clearSelection(transformer) {
     document.getElementById("flip-button").disabled = true;
+    document.getElementById("rotate-button").disabled = true;
     transformer.nodes([]);
 }
 
-function flipSelectedComponent(selectedNode) {
-
+function flipSelectedSwitch(selectedNode) {
     const component = DiagramState.instance.getComponent(selectedNode.id());
-
-    if (typeof component.flip === "function")
+    if (component.can("flip"))
         component.flip(selectedNode);
-    else if (typeof component.rotate === "function")
+}
+
+function rotateSelectedPot(selectedNode) {
+    const component = DiagramState.instance.getComponent(selectedNode.id());
+    if (component.can("rotate"))
         component.rotate(selectedNode);
 }
 
