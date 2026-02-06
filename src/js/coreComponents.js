@@ -211,12 +211,16 @@ export class Component extends EventEmitter {
 
     _subscribeToEvents(componentNode) {
         componentNode.on("dragend transformend", (e) => {
-            console.debug(this.constructor.name, this.id, e.type, e);
+            console.debug("onevent", e);
+            if (DiagramState.instance.toolMode === TOOL_MODE_WIRE) {
+                return;
+            }
             this.state.nodeAttrs = e.target.attrs;
             this._moveAttachedWires(componentNode);
         });
 
         componentNode.on("dragstart", (e) => {
+            console.debug("onevent", e);
             if (DiagramState.instance.toolMode === TOOL_MODE_WIRE) {
                 componentNode.stopDrag();
             }
@@ -275,25 +279,25 @@ export class Component extends EventEmitter {
     }
 
     _moveAttachedWires(node) {
+        console.debug("remove attached wires");
         const layer = node.getLayer();
         this.pinIds.forEach(pinId => {
-            console.debug("checking pin", pinId);
             const pin = DiagramState.instance.getComponent(pinId);
             const pinNode = pin.findNode(layer);
             const pinPos = pinNode.getAbsolutePosition();
             const wiresStartingOnPin = DiagramState.instance.findComponentsOfType(Wire, (w) => {
                 return w.startPinId === pinId
             });
-            wiresStartingOnPin.forEach(oldWire => {
-                oldWire.updateStartPoint([pinPos.x, pinPos.y]);
-                oldWire.reDraw(layer);
+            wiresStartingOnPin.forEach(wire => {
+                wire.updateStartPoint([pinPos.x, pinPos.y]);
+                wire.reDraw(layer);
             });
             const wiresEndingOnPin = DiagramState.instance.findComponentsOfType(Wire, (w) => {
                 return w.endPinId === pinId
             });
-            wiresEndingOnPin.forEach(oldWire => {
-                oldWire.updateEndPoint([pinPos.x, pinPos.y]);
-                oldWire.reDraw(layer);
+            wiresEndingOnPin.forEach(wire => {
+                wire.updateEndPoint([pinPos.x, pinPos.y]);
+                wire.reDraw(layer);
             });
         });
     }

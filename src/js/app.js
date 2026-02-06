@@ -218,6 +218,7 @@ function enableDrawWire(layer) {
      * begin drawing line
      */
     stage.on("mousedown touchstart", (e) => {
+        console.debug("onevent", e);
         if (DiagramState.instance.toolMode === TOOL_MODE_SELECT) {
             isPaint = false;
             return;
@@ -262,33 +263,36 @@ function enableDrawWire(layer) {
             points: [startPinPos.x, startPinPos.y],
         });
         layer.add(lastLine);
-    });
 
-    /**
-     * while drawing line, add points
-     */
-    stage.on('mousemove touchmove', function (e) {
-        if (DiagramState.instance.toolMode === TOOL_MODE_SELECT) {
-            isPaint = false;
-            return;
-        }
+        // while drawing line, add points
+        stage.on('mousemove touchmove', function (moveEvent) {
+            console.debug("onevent", moveEvent);
+            if (DiagramState.instance.toolMode === TOOL_MODE_SELECT) {
+                isPaint = false;
+                return;
+            }
 
-        if (!isPaint) {
-            return;
-        }
+            if (!isPaint) {
+                return;
+            }
 
-        // prevent scrolling on touch devices
-        e.evt.preventDefault();
+            // prevent scrolling on touch devices
+            moveEvent.evt.preventDefault();
 
-        const pos = stage.getPointerPosition();
-        const newPoints = lastLine.points().concat([pos.x, pos.y]);
-        lastLine.points(newPoints);
+            const pos = stage.getPointerPosition();
+            const newPoints = lastLine.points().concat([pos.x, pos.y]);
+            lastLine.points(newPoints);
+        });
     });
 
     /**
      * Done drawing line, convert to a wire
      */
-    stage.on('mouseup touchend', function () {
+    stage.on('mouseup touchend', function (upEvent) {
+        console.debug("onevent", upEvent);
+
+        // unwire events
+        stage.off('mousemove touchmove');
 
         if (!isPaint) {
             return;
@@ -436,6 +440,7 @@ function enableSelectComponent(transformer) {
     const stage = layer.getStage();
 
     stage.on("click tap", function (e) {
+        console.debug("onevent", e);
 
         if (DiagramState.instance.toolMode === TOOL_MODE_WIRE) {
             return;
