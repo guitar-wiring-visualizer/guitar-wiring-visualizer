@@ -181,6 +181,9 @@ function enablePropertiesButton(transformer) {
         document.getElementById("input-component-id").value = component.id.toString();
         document.getElementById("input-component-type").value = component.constructor.name;
         document.getElementById("input-component-label").value = component.label;
+        
+        // why doesn't this work?
+        //document.getElementById("input-component-label").focus();
 
         propertiesOffCanvas.show();
     });

@@ -12,6 +12,7 @@
 - `C` Cycle through color swatches. If a wire is selected the color of just that wire will be changed.
 - `F` Flip selected switch
 - `R` Rotate selected potentiometer
+- `P` View properties of selected component
 
 ### Adding Components
 
@@ -81,7 +82,18 @@ For the purposes of signal flow visualization, zero resistance equates to a pin-
 #### To alternate between rotational positions:
 
 - Select a pot
-- Hit `R` or click the "Rotate Pot" button.
+- Hit `R` or click the "Rotate Pot" button
+
+
+### Properties
+
+- Select a Component
+- Hit `P` or click the "Properties" button
+
+This will open a side drawer showing the properties of the component.  You may edit the Label.
+The text of the label will show next to the component on the diagram.
+
+To close the Properties drawer, click out of it, click the "X", or hit `Escape`.
 
 
 ### Visualizer
