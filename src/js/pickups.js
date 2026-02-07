@@ -116,7 +116,7 @@ export class Humbucker extends Pickup {
         this.pinIds.push(northCoilStartPin.id, northCoilFinishPin.id, southCoilFinishPin.id, southCoilStartPin.id, groundPin.id);
     }
 
-    _drawChildNodes(parentNode) {
+    async _drawChildNodes(parentNode) {
 
         this.northCoilStartPin.moveTo({
             x: 6,
@@ -152,6 +152,7 @@ export class Humbucker extends Pickup {
             this._applyGlobalStyling(componentNode);
             parentNode.add(componentNode);
             this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
+            return Promise.resolve();
         });
     }
 }
@@ -188,7 +189,7 @@ export class StratPickup extends Pickup {
         this.pinIds.push(pin1.id, pin2.id);
     }
 
-    _drawChildNodes(parentNode) {
+    async _drawChildNodes(parentNode) {
         this.endPin.moveTo({
             x: 140,
             y: 105
@@ -205,6 +206,7 @@ export class StratPickup extends Pickup {
             this._applyGlobalStyling(componentNode);
             parentNode.add(componentNode);
             this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
+            return Promise.resolve();
         });
     }
 }

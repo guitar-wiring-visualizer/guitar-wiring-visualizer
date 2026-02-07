@@ -125,7 +125,7 @@ class DPDTSwitch extends Switch {
         }
     }
 
-    _drawChildNodes(parentNode) {
+    async _drawChildNodes(parentNode) {
 
         this.pin1.draw(parentNode);
         this.pin2.draw(parentNode);
@@ -140,6 +140,7 @@ class DPDTSwitch extends Switch {
             this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
             this._drawActuator(parentNode);
             this._drawPinConnections(parentNode);
+            return Promise.resolve();
         });
     }
 

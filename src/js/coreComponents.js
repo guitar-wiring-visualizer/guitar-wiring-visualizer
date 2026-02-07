@@ -76,6 +76,22 @@ export class Component extends EventEmitter {
         return true;
     }
 
+    get label() {
+        return this.state.label ?? "";
+    }
+
+    updateLabel(val, containerNode) {
+        console.assert(containerNode, "containerNode is required");
+
+        const newVal = val || "";
+
+        if (newVal !== this.state.label) {
+            this.state.label = newVal;
+            const rootNode = this.findNode(containerNode);
+            this._drawLabel(rootNode);
+        }
+    }
+
     can(action) {
         return typeof this[action] === "function";
     }
@@ -101,15 +117,17 @@ export class Component extends EventEmitter {
      * From the app perspective, the container will typically be a Konva.Layer.
      * @param {Konva.Node} containerNode 
      */
-    draw(containerNode) {
+    async draw(containerNode) {
         console.assert(containerNode, "containerNode is required");
 
         const rootNode = this._createRootNode();
         containerNode.add(rootNode);
-        this._drawChildNodes(rootNode);
+        await this._drawChildNodes(rootNode);
 
         if (DiagramState.instance.debugMode)
             this._drawIDLabel(rootNode);
+
+        this._drawLabel(rootNode);
 
         this.nodeAttrs = rootNode.attrs;
         this._subscribeToEvents(rootNode);
@@ -151,17 +169,57 @@ export class Component extends EventEmitter {
         }
     }
 
+    _drawLabel(rootNode) {
+
+        if (rootNode.getClassName() === "Group") {
+            const existingText = rootNode.findOne(".component-label");
+            if (existingText)
+                existingText.destroy();
+        }
+
+        if (!this.label)
+            return;
+
+        const yOffset = -20;
+
+        const textNode = new Konva.Text({
+            name: "component-label",
+            text: this.label,
+            fill: 'black',
+            x: 0,
+            y: yOffset
+        });
+
+        if (rootNode.getClassName() === "Group") {
+            rootNode.add(textNode);
+        } else if (rootNode.getClassName() === "Line") {
+            // no labels on lines yet...
+            // textNode.x(rootNode.points().at(2));
+            // textNode.y(rootNode.points().at(3));
+            // rootNode.getLayer().add(textNode);
+        }
+    }
+
     /**
      * Render this component in the container, replacing the existing node.
-     * Usually not necessary.
      * This is to be used after changing the state of a component and you want to force re-render.
      * Delegates to the normal draw method after destroying any existing node.
      * @param {Konva.Node} containerNode 
      */
-    reDraw(containerNode) {
+    async reDraw(containerNode) {
         console.assert(containerNode, "containerNode is required");
+        console.debug(`redrawing ${this.fullName}`);
+        const originalZIndex = this._getZIndex(containerNode);
         this._unDrawIfNeeded(containerNode);
-        this.draw(containerNode);
+        await this.draw(containerNode);
+        this.findNode(containerNode).zIndex(originalZIndex);
+    }
+
+    _getZIndex(containerNode) {
+        const node = this.findNode(containerNode);
+        if (node)
+            return node.zIndex();
+        return 0;
     }
 
     _unDrawIfNeeded(containerNode) {
@@ -266,7 +324,7 @@ export class Component extends EventEmitter {
      * @param {Konva.Node} parentNode.
      * @virtual
      */
-    _drawChildNodes(parentNode) {
+    async _drawChildNodes(parentNode) {
     }
 
     /**
@@ -388,7 +446,7 @@ export class Pin extends Component {
         this._setVoltage(0);
     }
 
-    _drawChildNodes(parentNode) {
+    async _drawChildNodes(parentNode) {
         const pinShape = new Konva.Circle({
             radius: 6,
             stroke: "red",
@@ -396,6 +454,7 @@ export class Pin extends Component {
             strokeWidth: 2
         });
         parentNode.add(pinShape);
+        return Promise.resolve();
     }
 
     _applyGlobalStyling(node) {
@@ -437,6 +496,10 @@ export class Pin extends Component {
     hasVoltage() {
         console.debug(`checking voltage on pin ${this.id}: ${this.voltage}`);
         return this.voltage !== 0;
+    }
+
+    _drawLabel() {
+        // noop - we don't draw pin labels
     }
 }
 
@@ -648,13 +711,14 @@ export class TwoPinComponenet extends Component {
         this.pinIds.push(pin2.id);
     }
 
-    _drawChildNodes(parentNode) {
+    async _drawChildNodes(parentNode) {
         this.pin1.draw(parentNode);
         this.pin2.draw(parentNode);
         Konva.Image.fromURL(this.constructor.ImageURL, (componentNode) => {
             this._applyGlobalStyling(componentNode);
             parentNode.add(componentNode);
             this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
+            return Promise.resolve();
         });
     }
 

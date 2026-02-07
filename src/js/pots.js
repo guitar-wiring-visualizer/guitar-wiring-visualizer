@@ -93,7 +93,7 @@ export class Potentiometer extends Component {
 
     }
 
-    _drawChildNodes(parentNode) {
+    async _drawChildNodes(parentNode) {
         this.pin1.draw(parentNode);
         this.pin3.draw(parentNode);
         this.wiperPin.draw(parentNode);
@@ -103,6 +103,7 @@ export class Potentiometer extends Component {
             parentNode.add(componentNode);
             this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
             this._drawPinConnections(parentNode);
+            return Promise.resolve();
         });
     }
 

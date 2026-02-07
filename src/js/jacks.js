@@ -60,7 +60,7 @@ export class MonoJack extends Jack {
         this.pinIds.push(tipPin.id, sleevePin.id);
     }
 
-    _drawChildNodes(parentNode) {
+    async _drawChildNodes(parentNode) {
         this.tipPin.moveTo({
             x: 47,
             y: 10
@@ -77,6 +77,7 @@ export class MonoJack extends Jack {
             this._applyGlobalStyling(componentNode);
             parentNode.add(componentNode);
             this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
+            return Promise.resolve();
         });
     }
 }

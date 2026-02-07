@@ -174,20 +174,32 @@ function enablePropertiesButton(transformer) {
     const propertiesOffCanvas = new bootstrap.Offcanvas("#properties");
 
     propertiesButton.addEventListener("click", (e) => {
-        if (transformer.nodes().length === 0)
+        const component = getSelectedComponent(transformer);
+        if (!component)
             return;
-        const selectedNode = transformer.nodes().at(0);
-        const component = DiagramState.instance.getComponent(selectedNode.id());
 
-        //document.getElementById("input-component-id").value = component.id.toString();
+        document.getElementById("input-component-id").value = component.id.toString();
         document.getElementById("input-component-type").value = component.constructor.name;
+        document.getElementById("input-component-label").value = component.label;
+
         propertiesOffCanvas.show();
     });
 
-    propertiesPanel.addEventListener('hidden.bs.offcanvas', () => {
-        //todo update component with values from form
+    propertiesPanel.addEventListener('hidden.bs.offcanvas', async () => {
+        const component = getSelectedComponent(transformer);
+        if (component) {
+            component.updateLabel(document.getElementById("input-component-label").value.trim(), transformer.getLayer());
+        }
         transformer.getStage().container().focus({ preventScroll: true });
     });
+}
+
+function getSelectedComponent(transformer) {
+    if (transformer.nodes().length === 0)
+        return null;
+    const selectedNode = transformer.nodes().at(0);
+    const component = DiagramState.instance.getComponent(selectedNode.id());
+    return component;
 }
 
 function openPropertiesPanel() {
@@ -553,6 +565,7 @@ function handleGlobalKeyCode(e) {
 }
 
 function handleSelectionKeyCode(transformer, code) {
+
     if (transformer.nodes().length === 0)
         return;
 
