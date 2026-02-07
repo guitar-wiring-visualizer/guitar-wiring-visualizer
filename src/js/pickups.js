@@ -155,6 +155,10 @@ export class Humbucker extends Pickup {
             return Promise.resolve();
         });
     }
+
+    _calculateLabelDrawPosition(rootNode) {
+        return { x: 40, y: -20 };
+    }
 }
 
 export class StratPickup extends Pickup {

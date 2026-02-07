@@ -302,7 +302,7 @@ const testDrawAll = (diagramLayer) => {
         if (kind === "Wire" || kind === "Pin")
             return;
 
-        const component = new componentClassMap[kind]();
+        const component = new componentClassMap[kind]({ label: kind });
         component.moveTo({ x, y });
         component.draw(diagramLayer);
 

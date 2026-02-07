@@ -101,6 +101,10 @@ class DPDTSwitch extends Switch {
         return 9;
     }
 
+    _calculateLabelDrawPosition(rootNode){
+        return {x: 50, y: 20};
+    }
+
     get pin6() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
     get pin3() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
     get pin5() { return DiagramState.instance.getComponent(this.pinIds.at(2)); }

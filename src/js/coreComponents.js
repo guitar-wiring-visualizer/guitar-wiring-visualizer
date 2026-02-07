@@ -169,6 +169,10 @@ export class Component extends EventEmitter {
         }
     }
 
+    _calculateLabelDrawPosition(rootNode){
+        return {x: 0, y: -20};
+    }
+
     _drawLabel(rootNode) {
 
         if (rootNode.getClassName() === "Group") {
@@ -180,14 +184,15 @@ export class Component extends EventEmitter {
         if (!this.label)
             return;
 
-        const yOffset = -20;
+        const postition = this._calculateLabelDrawPosition(rootNode);
 
         const textNode = new Konva.Text({
+            id: "label-for." + this.id.toString(),
             name: "component-label",
             text: this.label,
             fill: 'black',
-            x: 0,
-            y: yOffset
+            x: postition.x,
+            y: postition.y
         });
 
         if (rootNode.getClassName() === "Group") {
