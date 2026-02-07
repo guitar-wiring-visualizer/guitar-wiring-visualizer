@@ -6,70 +6,75 @@
 
 ### Keyboard Commands
 
- - `Ctrl+Enter` Start/Stop visualizer
- - `W` Activate "Add Wire" tool
- - `S` Activate "Select/Move" tool
- - `C` Cycle through color swatches. If a wire is selected the color of just that wire will be changed.
- - `F` Flip selected switch.
- - `R` Rotate selected potentiometer.
+- `Ctrl+Enter` Start/Stop visualizer
+- `W` Activate "Add Wire" tool
+- `S` Activate "Select/Move" tool
+- `C` Cycle through color swatches. If a wire is selected the color of just that wire will be changed.
+- `F` Flip selected switch
+- `R` Rotate selected potentiometer
 
 ### Adding Components
 
- - Drag a component from the Library Pane on the left onto the Diagram surface.
+- Drag a component from the Library Pane on the left onto the Diagram surface.
 
 ### Selecting Items
   
 Each item (any component or wire) on the diagram can be selected.
 
- - Activate the "Select/Move" tool.
- - Click on an item to select it.
- - Click in an empty space on the diagram to un-select.
+- Activate the "Select/Move" tool.
+- Click on an item to select it.
+- Click in an empty space on the diagram to un-select.
 
 
 ### Arranging Components
 
- - Selected component can be moved, rotated, or scaled.
- - **Note:** Selected wires can only have their color changed.  Wires are moved along with the components they are connected to.
+- Selected component can be moved, rotated, or scaled.
+- **Note:** Selected wires can only have their color changed.  Wires are moved along with the components they are connected to.
 
 ### Remove Components and Wires
 
- - Use `Delete` or `Backspace` button to delete selected component.
+- Use `Delete` or `Backspace` button to delete selected component.
 
 ### Clear Diagram
 
- - Click the "Clear Diagram" button to delete everything.  This can't be undone!  (In fact, nothing can be undone at the moment. Please see Issues for feature requests.)
+- Click the "Clear Diagram" button to delete everything.  This can't be undone!  (In fact, nothing can be undone at the moment. Please see Issues for feature requests.)
 
 ### Wires
 
- - Activate the "Add Wire" toool.
- - Optionally click a color-swatch from toolbar for new wire color.
- - Draw line from component Pin to component Pin.
- - **Note: Wire must start and end on a Pin, or it will not be added.**
- - Turn on "Show Pins" to see where Pins are.
+- Activate the "Add Wire" toool.
+- Optionally click a color-swatch from toolbar for new wire color.
+- Draw line from component Pin to component Pin.
+- **Note: Wire must start and end on a Pin, or it will not be added.**
+- Turn on "Show Pins" to see where Pins are.
+
+> Tip: After adding a wire, the Move/Select tool is automatically re-enabled.  To quickly add more wires, use the `W` keyboard command to re-activate the "Add Wire" tool.
+
 
 ### Change Wire Color
 
- - Activate the "Select/Move" tool.
- - Select a Wire
- - Click the the desired color-swatch from toolbar.
+- Activate the "Select/Move" tool.
+- Select a Wire
+- Click the the desired color-swatch from toolbar.
+
+> Tip: Use the `C` keyboard command to quickly change the color of a selected wire.
 
 ### Flipping Switches
 
 Flipping a switch moves it's actuator through the available positions.  This will move the internal connections within the switch to alter signal flow between pins.
 
- - Select a switch
- - Hit `F` or click the "Flip Switch" button.
+- Select a switch
+- Hit `F` or click the "Flip Switch" button.
 
 ### Rotating Pots
 
-In the visualizer, pots behave similar to switches and have two states:
+In the visualizer pots behave similarly to switches and have two states:
 
- 1. Rotated all the way clockwise.
- 1. Rotated all the way counterclockwise.
+1. Rotated fully clockwise
+1. Rotated fully counterclockwise
 
-When rotated all the way clockwise, the wiper pin (`2`) has zero resistance to pin (`3`).
+When rotated fully clockwise, the wiper pin (`2`) has zero resistance to pin (`3`).
 
-When rotated all the way counterclockwise, the wiper pin (`2`) has zero resistance to pin (`1`).
+When rotated fully counterclockwise, the wiper pin (`2`) has zero resistance to pin (`1`).
 
 For the purposes of signal flow visualization, zero resistance equates to a pin-to-pin connection.
 
@@ -81,8 +86,8 @@ For the purposes of signal flow visualization, zero resistance equates to a pin-
 
 ### Visualizer
 
-  - Start: Click "Start Visualizer" button or use `Ctrl-Enter`.
-  - Stop: Click "Stop Visualizer" button or use `Ctrl-Enter`.
+- Start: Click the "Start Visualizer" button or use `Ctrl+Enter`.
+- Stop: Click the "Stop Visualizer" button or use `Ctrl+Enter`.
 
 ### Saving
 
@@ -95,7 +100,6 @@ Turn on "Copy to clipboard on Save" to automatically copy the link to your clipb
 #### Load
 
 To view a previously saved diagram, simply navigate to the saved link.
-
 
 ## Concepts
 
@@ -116,3 +120,5 @@ The app shows the flow of signal from pickups, through components, and (hopefull
 If a wire is carrying any voltage, it will pulsate.  If the wire is also carrying "signal" (i.e. "positive" voltage), it will be animated as pulsating with moving dots showing the flow of signal.  A wire coming from "ground" (i.e. carrying "negative" voltage) will only show as pulsating.
 
 For signal flow to occur, there must be a circuit formed by at least one Jack and one Pickup, where the ground lug of the Jack (the shield pin `S`) is passing negative voltage to one end of the pickup, and the opposite end of the pickup is passing positive signal voltage to the tip lug of the jack (the `T` pin).
+
+> The Guitar Wiring Visualizer uses a simplified model of voltage that may resemble a DC circuit.  In reality guitar pickups produce AC current, and the actual voltage and electron activity in the wires and components is not truly unidirectional.  The simplified model is for the purposes of visualizing signal flow intuitively and to make circuit design accessible to the layperson.
