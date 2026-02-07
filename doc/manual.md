@@ -11,6 +11,7 @@
  - `S` Activate "Select/Move" tool
  - `C` Cycle through color swatches. If a wire is selected the color of just that wire will be changed.
  - `F` Flip selected switch.
+ - `R` Rotate selected potentiometer.
 
 ### Adding Components
 
@@ -57,7 +58,26 @@ Each item (any component or wire) on the diagram can be selected.
 Flipping a switch moves it's actuator through the available positions.  This will move the internal connections within the switch to alter signal flow between pins.
 
  - Select a switch
- - Hit `F` or click "Flip Switch" button.
+ - Hit `F` or click the "Flip Switch" button.
+
+### Rotating Pots
+
+In the visualizer, pots behave similar to switches and have two states:
+
+ 1. Rotated all the way clockwise.
+ 1. Rotated all the way counterclockwise.
+
+When rotated all the way clockwise, the wiper pin (`2`) has zero resistance to pin (`3`).
+
+When rotated all the way counterclockwise, the wiper pin (`2`) has zero resistance to pin (`1`).
+
+For the purposes of signal flow visualization, zero resistance equates to a pin-to-pin connection.
+
+#### To alternate between rotational positions:
+
+- Select a pot
+- Hit `R` or click the "Rotate Pot" button.
+
 
 ### Visualizer
 
@@ -91,4 +111,8 @@ Pins must be connected to each other using Wires.  This applies to components th
 
 ### Visualization
 
-The app shows the flow of signal from pickups, through components, and (hopefully) to an output jack.  Note that if the signal goes through a switch, the position of the switch's actuator will route the signal through it's pins accordingly. 
+The app shows the flow of signal from pickups, through components, and (hopefully) to an output jack.  Note that if the signal goes through a switch, the position of the switch's actuator will route the signal through it's pins accordingly.  Likewise, if the signal goes through a pot, the rotation of the pot will determine the routing of signal through it's lugs.
+
+If a wire is carrying any voltage, it will pulsate.  If the wire is also carrying "signal" (i.e. "positive" voltage), it will be animated as pulsating with moving dots showing the flow of signal.  A wire coming from "ground" (i.e. carrying "negative" voltage) will only show as pulsating.
+
+For signal flow to occur, there must be a circuit formed by at least one Jack and one Pickup, where the ground lug of the Jack (the shield pin `S`) is passing negative voltage to one end of the pickup, and the opposite end of the pickup is passing positive signal voltage to the tip lug of the jack (the `T` pin).
