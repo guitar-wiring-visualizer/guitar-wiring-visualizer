@@ -51,9 +51,12 @@ const setupApp = async () => {
     enableDrawWire(diagramLayer);
     enableFlipSwitchButton(transformer);
     enableRotatePotButton(transformer);
+    enablePropertiesButton(transformer);
+
     enableVisualizerButton();
 
     enableSave();
+
 
     await enableImportFromURL(diagramLayer);
 
@@ -163,6 +166,32 @@ function enableRotatePotButton(transformer) {
         const selectedNode = transformer.nodes().at(0);
         rotateSelectedPot(selectedNode);
     });
+}
+
+function enablePropertiesButton(transformer) {
+    const propertiesButton = document.getElementById("properties-button");
+    const propertiesPanel = document.getElementById("properties")
+    const propertiesOffCanvas = new bootstrap.Offcanvas("#properties");
+
+    propertiesButton.addEventListener("click", (e) => {
+        if (transformer.nodes().length === 0)
+            return;
+        const selectedNode = transformer.nodes().at(0);
+        const component = DiagramState.instance.getComponent(selectedNode.id());
+
+        //document.getElementById("input-component-id").value = component.id.toString();
+        document.getElementById("input-component-type").value = component.constructor.name;
+        propertiesOffCanvas.show();
+    });
+
+    propertiesPanel.addEventListener('hidden.bs.offcanvas', () => {
+        //todo update component with values from form
+        transformer.getStage().container().focus({ preventScroll: true });
+    });
+}
+
+function openPropertiesPanel() {
+    document.getElementById("properties-button").click();
 }
 
 
@@ -496,6 +525,7 @@ function enableSelectComponent(transformer) {
         else if (component.can("rotate")) {
             document.getElementById("rotate-button").disabled = false;
         }
+        document.getElementById("properties-button").disabled = false;
 
         console.debug("selected component", transformer.nodes()[0].id(), transformer.nodes()[0].name(), transformer.nodes()[0]);
     });
@@ -534,6 +564,8 @@ function handleSelectionKeyCode(transformer, code) {
         flipSelectedSwitch(selectedNode);
     } else if (code === "KeyR") {
         rotateSelectedPot(selectedNode);
+    } else if (code === "KeyP") {
+        openPropertiesPanel();
     } else if (code === "Escape") {
         clearSelection(transformer);
     } else if (code === "KeyC") {
@@ -579,6 +611,7 @@ function changeColor(selectedNode) {
 function clearSelection(transformer) {
     document.getElementById("flip-button").disabled = true;
     document.getElementById("rotate-button").disabled = true;
+    document.getElementById("properties-button").disabled = true;
     transformer.nodes([]);
 }
 
