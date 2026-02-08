@@ -235,6 +235,7 @@ export class Visualizer {
                 shadowColor: shadow,
                 shadowBlur: 10,
                 shadowOffset: { x: -5, y: 0 },
+                perfectDrawEnable: false,
                 shadowOpacity: 1,
             });
             this._visLayer.add(electron);

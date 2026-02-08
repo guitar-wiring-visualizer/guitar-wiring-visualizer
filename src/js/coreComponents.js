@@ -319,6 +319,7 @@ export class Component extends EventEmitter {
             skewX: this.nodeAttrs.skewX,
             skewY: this.nodeAttrs.skewY,
             draggable: this.constructor.IsDraggable,
+            perfectDrawEnabled: this.nodeAttrs.perfectDrawEnabled || false,
             name: this.constructor.name,
             id: this.id.toString()
         });
@@ -343,6 +344,7 @@ export class Component extends EventEmitter {
         node.shadowBlur(6);
         node.shadowOffset({ x: 3, y: 3 });
         node.shadowOpacity(0.4);
+        node.perfectDrawEnabled(false);
     }
 
     _moveAttachedWires(node) {
@@ -456,6 +458,7 @@ export class Pin extends Component {
             radius: 6,
             stroke: "red",
             opacity: DiagramState.instance.showConnectors ? 1 : 0,
+            perfectDrawEnabled: false,
             strokeWidth: 2
         });
         parentNode.add(pinShape);
@@ -656,12 +659,13 @@ export class Wire extends Component {
 
         const wirePoints = [...this.startPoint, ...this.midPoint, ...this.endPoint];
 
-        console.debug("wire creating", this.id, wirePoints);
+        console.debug("wire node creating", this.id, wirePoints);
 
         const line = new Konva.Line({
             points: wirePoints,
             stroke: this.color,
-            strokeWidth: 5,
+            strokeWidth: 2,
+            strokeHitWidth: 10,
             lineCap: 'butt',
             lineJoin: 'round',
             draggable: Wire.IsDraggable,

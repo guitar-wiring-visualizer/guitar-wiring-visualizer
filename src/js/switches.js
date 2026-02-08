@@ -231,6 +231,7 @@ export class ThreeWayToggle extends Switch {
                     strokeWidth: 2,
                     stroke: "#a6a6a6",
                     draggable: false,
+                    perfectDrawEnable: false,
                     points: [pinPos.x, pinPos.y, otherPinPos.x, otherPinPos.y],
                 });
                 parentNode.add(connector);
@@ -339,6 +340,7 @@ class DPDTSwitch extends Switch {
                     strokeWidth: 5,
                     stroke: "#696969",
                     draggable: false,
+                    perfectDrawEnable: false,
                     points: [pinPos.x, pinPos.y, otherPinPos.x, otherPinPos.y],
                 });
                 parentNode.add(connector);

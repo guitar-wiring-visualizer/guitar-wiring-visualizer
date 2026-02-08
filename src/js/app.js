@@ -312,7 +312,7 @@ function enableDrawWire(layer) {
 
         lastLine = new Konva.Line({
             stroke: DiagramState.instance.wireToolColor,
-            strokeWidth: 5,
+            strokeWidth: 2,
             globalCompositeOperation: 'source-over',
             lineCap: 'round',
             lineJoin: 'round',

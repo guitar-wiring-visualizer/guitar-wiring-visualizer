@@ -144,6 +144,7 @@ export class Potentiometer extends Component {
             stroke: "#939393",
             lineJoin: 'round',
             lineCap: 'round',
+            perfectDrawEnable: false,
             points: linePoints
         });
 
