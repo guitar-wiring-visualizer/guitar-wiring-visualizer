@@ -294,7 +294,7 @@ class App {
                     return;
 
                 const selectedNode = this.transformer.nodes()[0];
-                changeColor(selectedNode);
+                this.changeColor(selectedNode);
             });
         });
 
