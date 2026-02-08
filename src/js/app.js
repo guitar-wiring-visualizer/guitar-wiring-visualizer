@@ -43,6 +43,7 @@ class App {
     }
 
     async setupApp() {
+        this.initDomElements();
         this.initDiagramState();
         this.initComponentLibrary();
         this.initDiagramLayer();
@@ -62,6 +63,35 @@ class App {
         this.enableSave();
         await this.tryImportFromURL();
         await this.tryLoadTestScript();
+    }
+
+    initDomElements() {
+
+        const getElem = (id) => {
+            const elem = this.document.getElementById(id);
+            if (!elem)
+                throw new Error(`Element by id '${id}' null`);
+            return elem;
+        }
+
+        this.elements = {
+            libraryItems: getElem("library-items"),
+            flipButton: getElem("flip-button"),
+            rotateButton: getElem("rotate-button"),
+            propertiesButton: getElem("properties-button"),
+            propertiesPanel: getElem("properties"),
+            clearButton: getElem("clear-button"),
+            visButton: getElem("vis-button"),
+            checkShowConnectors: getElem("check-show-connectors"),
+            diagramContainer: getElem("diagram"),
+            selectToolButton: getElem("select-tool"),
+            wireToolButton: getElem("wire-tool"),
+            inputComponentId: getElem("input-component-id"),
+            inputComponentType: getElem("input-component-type"),
+            inputComponentLabel: getElem("input-component-label"),
+            saveButton: getElem("save-url"),
+            checkCopyClip: getElem("check-copy-to-clipboard"),
+        };
     }
 
     initDiagramState() {
@@ -87,7 +117,7 @@ class App {
 
     initDiagramLayer() {
         const containerElementId = "diagram";
-        const diagramContainer = this.document.getElementById(containerElementId);
+        const diagramContainer = this.elements.diagramContainer;
 
         this.stage = new Konva.Stage({
             container: containerElementId,
@@ -103,8 +133,7 @@ class App {
     enableDragDropFromLibrary() {
         let componentClassName = "";
 
-        document
-            .getElementById("library-items")
+        this.elements.libraryItems
             .addEventListener("dragstart", (e) => {
                 componentClassName = e.target.dataset.componentClass;
             });
@@ -177,14 +206,14 @@ class App {
 
             const component = DiagramState.instance.getComponent(selectableNode.id());
 
-            this.document.getElementById("flip-button").disabled = true;
-            this.document.getElementById("rotate-button").disabled = true;
+            this.elements.flipButton.disabled = true;
+            this.elements.rotateButton.disabled = true;
             if (component.can("flip"))
-                this.document.getElementById("flip-button").disabled = false;
+                this.elements.flipButton.disabled = false;
             else if (component.can("rotate")) {
-                this.document.getElementById("rotate-button").disabled = false;
+                this.elements.rotateButton.disabled = false;
             }
-            this.document.getElementById("properties-button").disabled = false;
+            this.elements.propertiesButton.disabled = false;
 
             console.debug("selected component", this.transformer.nodes()[0].id(), this.transformer.nodes()[0].name(), this.transformer.nodes()[0]);
         });
@@ -203,7 +232,7 @@ class App {
     }
 
     enableClearDiagram() {
-        this.document.getElementById('clear-button').onclick = () => {
+        this.elements.clearButton.onclick = () => {
             if (confirm("Clear the diagram? Are you sure?  This cannot be undone!")) {
                 this.diagramLayer.getChildren()
                     .filter(child => child.getClassName() !== "Transformer")
@@ -213,7 +242,7 @@ class App {
                     });
 
                 if (Visualizer.instance.isActive)
-                    this.document.getElementById("vis-button").click();
+                    this.elements.visButton.click();
 
                 const url = new URL(this.window.location);
                 url.searchParams.delete(SERIALIZED_DIAGRAM_STATE_PARAM);
@@ -223,8 +252,7 @@ class App {
     }
 
     enableHideShowPins() {
-        const checkbox = this.document.getElementById('check-show-connectors');
-        checkbox.addEventListener('change', (event) => {
+        this.elements.checkShowConnectors.addEventListener('change', (event) => {
             DiagramState.instance.showConnectors = event.currentTarget.checked;
             var newOpacity = DiagramState.instance.showConnectors ? 1 : 0;
             //TODO: use name of pin nodes instead of Circle
@@ -238,19 +266,19 @@ class App {
 
         this.lastWireColor = 0;
 
-        const defaultCursor = this.document.getElementById("diagram").style.cursor;
+        const defaultCursor = this.elements.diagramContainer.style.cursor;
 
-        const selectButton = this.document.getElementById("select-tool");
-        const wireButton = this.document.getElementById("wire-tool");
+        const selectButton = this.elements.selectToolButton;
+        const wireButton = this.elements.wireToolButton;
 
         selectButton.addEventListener("click", (e) => {
             DiagramState.instance.toolMode = TOOL_MODE_SELECT;
-            this.document.getElementById("diagram").style.cursor = defaultCursor;
+            this.elements.diagramContainer.style.cursor = defaultCursor;
         });
 
         wireButton.addEventListener("click", (e) => {
             DiagramState.instance.toolMode = TOOL_MODE_WIRE;
-            this.document.getElementById("diagram").style.cursor = "crosshair";
+            this.elements.diagramContainer.style.cursor = "crosshair";
             this.clearSelection();
         });
 
@@ -425,8 +453,7 @@ class App {
     }
 
     enableFlipSwitchButton() {
-        const flipButton = this.document.getElementById("flip-button");
-        flipButton.addEventListener("click", (e) => {
+        this.elements.flipButton.addEventListener("click", (e) => {
             e.preventDefault();
             if (this.transformer.nodes().length === 0)
                 return;
@@ -437,8 +464,7 @@ class App {
     }
 
     enableRotatePotButton() {
-        const rotateButton = this.document.getElementById("rotate-button");
-        rotateButton.addEventListener("click", (e) => {
+        this.elements.rotateButton.addEventListener("click", (e) => {
             e.preventDefault();
             if (this.transformer.nodes().length === 0)
                 return;
@@ -449,18 +475,18 @@ class App {
     }
 
     enablePropertiesButton() {
-        const propertiesButton = this.document.getElementById("properties-button");
-        const propertiesPanel = this.document.getElementById("properties")
+        
+        const propertiesPanel = this.elements.propertiesPanel;
         const propertiesOffCanvas = new bootstrap.Offcanvas("#properties");
 
-        propertiesButton.addEventListener("click", (e) => {
+        this.elements.propertiesButton.addEventListener("click", (e) => {
             const component = this.getSelectedComponent();
             if (!component)
                 return;
 
-            this.document.getElementById("input-component-id").value = component.id.toString();
-            this.document.getElementById("input-component-type").value = component.constructor.name;
-            this.document.getElementById("input-component-label").value = component.label;
+            this.elements.inputComponentId.value = component.id.toString();
+            this.elements.inputComponentType.value = component.constructor.name;
+            this.elements.inputComponentLabel.value = component.label;
 
             // why doesn't this work?
             //document.getElementById("input-component-label").focus();
@@ -471,14 +497,14 @@ class App {
         propertiesPanel.addEventListener('hidden.bs.offcanvas', async () => {
             const component = this.getSelectedComponent();
             if (component) {
-                component.updateLabel(this.document.getElementById("input-component-label").value.trim(), this.diagramLayer);
+                component.updateLabel(this.elements.inputComponentLabel.value.trim(), this.diagramLayer);
             }
             this.stage.container().focus({ preventScroll: true });
         });
     }
 
     enableVisualizerButton() {
-        const visButton = this.document.getElementById("vis-button");
+        const visButton = this.elements.visButton;
         const originalText = visButton.textContent;
 
         visButton.addEventListener("click", e => {
@@ -497,10 +523,10 @@ class App {
     }
 
     enableSave() {
-        this.document.getElementById("save-url").addEventListener("click", async (e) => {
+        this.elements.saveButton.addEventListener("click", async (e) => {
             const url = await this.saveStateToURL();
             if (url) {
-                if (this.document.getElementById("check-copy-to-clipboard").checked) {
+                if (this.elements.checkCopyClip.checked) {
                     await this.copyToClipboard(url);
                 }
             }
@@ -563,15 +589,15 @@ class App {
     }
 
     openPropertiesPanel() {
-        this.document.getElementById("properties-button").click();
+        this.elements.propertiesButton.click();
     }
 
     enterSelectMode() {
-        this.document.getElementById("select-tool").click();
+        this.elements.selectToolButton.click();
     }
 
     enterWireMode() {
-        this.document.getElementById("wire-tool").click();
+        this.elements.wireToolButton.click();
     }
 
     findPinsInRect(targetRect) {
@@ -591,7 +617,7 @@ class App {
 
     handleGlobalKeyCode(e) {
         if (e.ctrlKey && e.key === 'Enter') {
-            this.document.getElementById("vis-button").click();
+            this.elements.visButton.click();
             e.preventDefault();
         }
     }
@@ -652,9 +678,9 @@ class App {
     }
 
     clearSelection() {
-        this.document.getElementById("flip-button").disabled = true;
-        this.document.getElementById("rotate-button").disabled = true;
-        this.document.getElementById("properties-button").disabled = true;
+        this.elements.flipButton.disabled = true;
+        this.elements.rotateButton.disabled = true;
+        this.elements.propertiesButton.disabled = true;
         this.transformer.nodes([]);
     }
 
@@ -682,4 +708,4 @@ class App {
 
 // Create app instance.
 // Add to window so it can be inspected through the console.
-window.GuitarWireVisualizer = new App(window);
+window.GuitarWiringVisualizer = new App(window);
