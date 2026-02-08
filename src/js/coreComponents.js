@@ -766,7 +766,7 @@ export class TwoPinPositivePassThroughComponent extends TwoPinComponenet {
             console.info(`${this.fullName} received voltageChanged event with value ${value} from ${this.pin2.fullName}`);
             if (value > 0) {
                 if (!this.pin1.hasVoltage())
-                    this.pin1.receiveVoltage({ fromWireId: null, value, fromPinId: this.pin2.id });
+                    this.pin1.receiveVoltage({ value, fromPinId: this.pin2.id });
             }
         });
     }

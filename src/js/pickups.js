@@ -45,14 +45,14 @@ class InductionCoil {
         this._startPinListenerOff = this._startPin.on("voltageChanged", (_) => {
             if (this._startPin.hasVoltage() && !this._endPin.hasVoltage()) {
                 console.info(`${this._name} start pin has voltage, sending to end pin`);
-                this._endPin.receiveVoltage({ value: 1, fromPinId: this._startPin.id, fromWireId: null });
+                this._endPin.receiveVoltage({ value: 1, fromPinId: this._startPin.id });
             }
         });
 
         this._endPinListenerOff = this._endPin.on("voltageChanged", (_) => {
             if (this._endPin.hasVoltage() && !this._startPin.hasVoltage()) {
                 console.info(`${this._name} end pin has voltage, sending to start pin`);
-                this._startPin.receiveVoltage({ value: 1, fromPinId: this._endPin.id, fromWireId: null, });
+                this._startPin.receiveVoltage({ value: 1, fromPinId: this._endPin.id });
             }
         });
     }
