@@ -21,7 +21,7 @@ class Jack extends Component {
     jackIn() {
         if (!this.sleevePin.hasVoltage()) {
             console.debug(`${this.fullName} connecting to ground.`);
-            this.sleevePin.receiveVoltage(null, -1, null);
+            this.sleevePin.receiveVoltage({ value: -1, fromWireId: null, fromPinId: null });
         }
 
         this._unsubscribeToPinEvents();

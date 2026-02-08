@@ -169,8 +169,8 @@ export class Component extends EventEmitter {
         }
     }
 
-    _calculateLabelDrawPosition(rootNode){
-        return {x: 0, y: -20};
+    _calculateLabelDrawPosition(rootNode) {
+        return { x: 0, y: -20 };
     }
 
     _drawLabel(rootNode) {
@@ -469,7 +469,13 @@ export class Pin extends Component {
         //noop
     }
 
-    receiveVoltage(fromWireId, value, fromPinId = null) {
+    receiveVoltage(voltageMessage) {
+        console.assert(typeof voltageMessage === "object");
+        console.debug(voltageMessage);
+        const fromWireId = voltageMessage.fromWireId ?? null;
+        const fromPinId = voltageMessage.fromPinId ?? null;
+        const value = voltageMessage.value;
+
         console.info(`${this.fullName} received voltage ${value} from wire ${DiagramState.instance.getComponent(fromWireId)?.fullName}, from pin ${DiagramState.instance.getComponent(fromPinId)?.fullName}`);
 
         if (this.voltage === value) {
@@ -495,7 +501,7 @@ export class Pin extends Component {
         if (this.connectedPinId !== null && fromPinId !== this.connectedPinId) {
             console.debug("send to connected pin", this.connectedPinId);
             const connectedPin = DiagramState.instance.getComponent(this.connectedPinId);
-            connectedPin.receiveVoltage(fromWireId, value, this.id);
+            connectedPin.receiveVoltage({ fromWireId, value, fromPinId: this.id });
         }
 
         this._emit("voltageChanged", this.voltage);
@@ -638,7 +644,7 @@ export class Wire extends Component {
         this._pinVoltageIsFrom = DiagramState.instance.getComponent(fromId);
         const targetPinId = this.startPinId === fromId ? this.endPinId : this.startPinId;
         const targetPin = DiagramState.instance.getComponent(targetPinId);
-        targetPin.receiveVoltage(this.id, value, fromId);
+        targetPin.receiveVoltage({ fromWireId: this.id, value, fromPinId: fromId });
     }
 
     get pinVoltageIsFrom() {
@@ -749,18 +755,18 @@ export class TwoPinPositivePassThroughComponent extends TwoPinComponenet {
     }
 
     _setupPinConnections() {
-        this.pin1.on("voltageChanged", (val) => {
-            console.info(`${this.fullName} received voltageChanged event with value ${val} from ${this.pin1.fullName}`);
-            if (val > 0) {
+        this.pin1.on("voltageChanged", (value) => {
+            console.info(`${this.fullName} received voltageChanged event with value ${value} from ${this.pin1.fullName}`);
+            if (value > 0) {
                 if (!this.pin2.hasVoltage())
-                    this.pin2.receiveVoltage(null, val, this.pin1.id);
+                    this.pin2.receiveVoltage({ fromWireId: null, value, fromPinId: this.pin1.id });
             }
         });
-        this.pin2.on("voltageChanged", (val) => {
-            console.info(`${this.fullName} received voltageChanged event with value ${val} from ${this.pin2.fullName}`);
-            if (val > 0) {
+        this.pin2.on("voltageChanged", (value) => {
+            console.info(`${this.fullName} received voltageChanged event with value ${value} from ${this.pin2.fullName}`);
+            if (value > 0) {
                 if (!this.pin1.hasVoltage())
-                    this.pin1.receiveVoltage(null, val, this.pin2.id);
+                    this.pin1.receiveVoltage({ fromWireId: null, value, fromPinId: this.pin2.id });
             }
         });
     }
