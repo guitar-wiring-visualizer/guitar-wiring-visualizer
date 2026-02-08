@@ -18,23 +18,23 @@ import { componentClassMap, Wire } from "./components.js";
 import { Visualizer, VISUALIZER_WIRE_LINE_NAME, VISUALIZER_SIGNAL_PATH_NAME } from "./visualizer.js";
 import Geometry from "./geometry.js";
 
-const wireColors = [
-    WIRE_COLOR_BLACK,
-    WIRE_COLOR_RED,
-    WIRE_COLOR_YELLOW,
-    WIRE_COLOR_GREEN,
-    WIRE_COLOR_BLUE,
-];
-
-const SERIALIZED_DIAGRAM_STATE_PARAM = "d";
-const DEBUG_MODE_PARAM = "debug";
-
 class App {
 
     constructor(theWindow) {
         console.assert(typeof theWindow === 'object', "the window is required");
         this.window = theWindow;
         this.document = theWindow.document;
+
+        this.wireColors = [
+            WIRE_COLOR_BLACK,
+            WIRE_COLOR_RED,
+            WIRE_COLOR_YELLOW,
+            WIRE_COLOR_GREEN,
+            WIRE_COLOR_BLUE,
+        ];
+
+        this.serializedDiagramStateParam = "d";
+        this.debugModeParam = "debug";
 
         this.document.addEventListener("DOMContentLoaded", async () => {
             this.document.getElementById("loader").hidden = true;
@@ -98,8 +98,8 @@ class App {
         const diagramOptions = {};
 
         const params = new URLSearchParams(this.window.location.search);
-        if (params.has(DEBUG_MODE_PARAM))
-            diagramOptions.debugMode = params.get(DEBUG_MODE_PARAM).toLowerCase() === 'true';
+        if (params.has(this.debugModeParam))
+            diagramOptions.debugMode = params.get(this.debugModeParam).toLowerCase() === 'true';
 
         this.diagramState = new DiagramState(diagramOptions);
     }
@@ -245,7 +245,7 @@ class App {
                     this.elements.visButton.click();
 
                 const url = new URL(this.window.location);
-                url.searchParams.delete(SERIALIZED_DIAGRAM_STATE_PARAM);
+                url.searchParams.delete(this.serializedDiagramStateParam);
                 this.window.history.replaceState({}, '', url);
             }
         };
@@ -282,7 +282,7 @@ class App {
             this.clearSelection();
         });
 
-        wireColors.forEach(color => {
+        this.wireColors.forEach(color => {
             const colorButton = this.document.getElementById("wire-color-" + color);
             colorButton.addEventListener("click", (e) => {
                 DiagramState.instance.wireToolColor = color;
@@ -475,7 +475,7 @@ class App {
     }
 
     enablePropertiesButton() {
-        
+
         const propertiesPanel = this.elements.propertiesPanel;
         const propertiesOffCanvas = new bootstrap.Offcanvas("#properties");
 
@@ -547,7 +547,7 @@ class App {
         }
 
         const url = new URL(this.window.location);
-        url.searchParams.set(SERIALIZED_DIAGRAM_STATE_PARAM, serializedState);
+        url.searchParams.set(this.serializedDiagramStateParam, serializedState);
         this.window.history.replaceState({}, '', url);
         return url;
     }
@@ -558,8 +558,8 @@ class App {
 
     async tryImportFromURL() {
         const params = new URLSearchParams(this.window.location.search);
-        if (params.has(SERIALIZED_DIAGRAM_STATE_PARAM)) {
-            const serializedState = params.get(SERIALIZED_DIAGRAM_STATE_PARAM);
+        if (params.has(this.serializedDiagramStateParam)) {
+            const serializedState = params.get(this.serializedDiagramStateParam);
             await DiagramState.instance.loadState(serializedState);
             DiagramState.instance.drawAll(this.diagramLayer);
         }
@@ -660,10 +660,10 @@ class App {
 
     cycleWireColors() {
         this.lastWireColor++;
-        if (this.lastWireColor > wireColors.length - 1) {
+        if (this.lastWireColor > this.wireColors.length - 1) {
             this.lastWireColor = 0;
         }
-        const newColor = wireColors.at(this.lastWireColor);
+        const newColor = this.wireColors.at(this.lastWireColor);
         const colorButton = this.document.getElementById("wire-color-" + newColor);
         colorButton.click();
         console.debug("new color", DiagramState.instance.wireToolColor);
