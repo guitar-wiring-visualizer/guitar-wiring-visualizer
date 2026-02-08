@@ -470,8 +470,9 @@ export class Pin extends Component {
     }
 
     receiveVoltage(voltageMessage) {
-        console.assert(typeof voltageMessage === "object");
-        console.debug(voltageMessage);
+        console.assert(typeof voltageMessage === "object", "voltageMessage object is required");
+        console.assert(typeof voltageMessage.value === "number", "voltageMessage.value must be a number");
+
         const fromWireId = voltageMessage.fromWireId ?? null;
         const fromPinId = voltageMessage.fromPinId ?? null;
         const value = voltageMessage.value;
@@ -496,12 +497,12 @@ export class Pin extends Component {
                 && (wire.endPinId == this.id || wire.startPinId == this.id)
         });
         console.debug("send to connected wires", connectedWires);
-        connectedWires.forEach(wire => wire.receiveVoltage(this.id, value));
+        connectedWires.forEach(wire => wire.receiveVoltage({ value, fromPinId: this.id }));
 
         if (this.connectedPinId !== null && fromPinId !== this.connectedPinId) {
             console.debug("send to connected pin", this.connectedPinId);
             const connectedPin = DiagramState.instance.getComponent(this.connectedPinId);
-            connectedPin.receiveVoltage({ fromWireId, value, fromPinId: this.id });
+            connectedPin.receiveVoltage({ value, fromWireId, fromPinId: this.id });
         }
 
         this._emit("voltageChanged", this.voltage);
@@ -633,18 +634,25 @@ export class Wire extends Component {
         this._setVoltage(0);
     }
 
-    receiveVoltage(fromId, value) {
-        console.info(`${this.fullName} received voltage ${value} from pin ${DiagramState.instance.getComponent(fromId)?.fullName}`);
+    receiveVoltage(voltageMessage) {
+        console.assert(typeof voltageMessage === "object", "voltageMessage object is required");
+        console.assert(typeof voltageMessage.value === "number", "voltageMessage.value must be a number");
+
+        const fromPinId = voltageMessage.fromPinId ?? null;
+        const value = voltageMessage.value;
+
+        console.info(`${this.fullName} received voltage ${value} from pin ${DiagramState.instance.getComponent(fromPinId)?.fullName}`);
+
         if (this.voltage === value) {
             console.debug(`${this.fullName} already has voltage ${value}. not propagating`);
             return;
         }
 
         this._setVoltage(value);
-        this._pinVoltageIsFrom = DiagramState.instance.getComponent(fromId);
-        const targetPinId = this.startPinId === fromId ? this.endPinId : this.startPinId;
+        this._pinVoltageIsFrom = DiagramState.instance.getComponent(fromPinId);
+        const targetPinId = this.startPinId === fromPinId ? this.endPinId : this.startPinId;
         const targetPin = DiagramState.instance.getComponent(targetPinId);
-        targetPin.receiveVoltage({ fromWireId: this.id, value, fromPinId: fromId });
+        targetPin.receiveVoltage({ value, fromWireId: this.id, fromPinId });
     }
 
     get pinVoltageIsFrom() {
