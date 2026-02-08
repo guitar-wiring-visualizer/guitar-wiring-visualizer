@@ -159,6 +159,7 @@ class App {
             const component = new componentClassMap[componentClassName]();
             component.moveTo(creationPosition);
             component.draw(this.diagramLayer);
+            this.focusStage();
         });
     }
 
@@ -221,7 +222,7 @@ class App {
 
     enableKeyboardCommands() {
         this.stage.container().tabIndex = 1;
-        this.stage.container().focus({ preventScroll: true });
+        this.focusStage();
 
         this.stage.container().addEventListener("keydown", (e) => {
             console.debug(e.code);
@@ -274,12 +275,14 @@ class App {
         selectButton.addEventListener("click", (e) => {
             DiagramState.instance.toolMode = TOOL_MODE_SELECT;
             this.elements.diagramContainer.style.cursor = defaultCursor;
+            this.focusStage();
         });
 
         wireButton.addEventListener("click", (e) => {
             DiagramState.instance.toolMode = TOOL_MODE_WIRE;
             this.elements.diagramContainer.style.cursor = "crosshair";
             this.clearSelection();
+            this.focusStage();
         });
 
         this.wireColors.forEach(color => {
@@ -459,7 +462,7 @@ class App {
                 return;
             const selectedNode = this.transformer.nodes().at(0);
             this.flipSelectedSwitch(selectedNode);
-            this.stage.container().focus({ preventScroll: true });
+            this.focusStage();
         });
     }
 
@@ -470,7 +473,7 @@ class App {
                 return;
             const selectedNode = this.transformer.nodes().at(0);
             this.rotateSelectedPot(selectedNode);
-            this.stage.container().focus({ preventScroll: true });
+            this.focusStage();
         });
     }
 
@@ -499,7 +502,7 @@ class App {
             if (component) {
                 component.updateLabel(this.elements.inputComponentLabel.value.trim(), this.diagramLayer);
             }
-            this.stage.container().focus({ preventScroll: true });
+            this.focusStage();
         });
     }
 
@@ -518,7 +521,7 @@ class App {
                 Visualizer.instance.start();
             }
             console.debug("visualizer", Visualizer.instance.isActive);
-            this.stage.container().focus({ preventScroll: true });
+            this.focusStage();
         });
     }
 
@@ -703,6 +706,10 @@ class App {
             component.removeFromDiagram(layer);
             this.clearSelection();
         }
+    }
+
+    focusStage() {
+        this.stage.container().focus({ preventScroll: true });
     }
 }
 
