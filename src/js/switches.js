@@ -168,15 +168,6 @@ export class ThreeWayToggle extends Switch {
         }
     }
 
-    _drawActuator(parentNode) {
-        Konva.Image.fromURL(this._getActuatorImageURLForState(), (actuatorNode) => {
-            actuatorNode.position({ x: 0, y: -35 });
-            actuatorNode.name(Switch.actuatorNodeName);
-            this._applyGlobalStyling(actuatorNode);
-            parentNode.add(actuatorNode);
-        });
-    }
-
     _getActuatorImageURLForState() {
         if (this.actuatorState === -1)
             return "/img/bat-small-left.svg"
@@ -209,6 +200,7 @@ export class ThreeWayToggle extends Switch {
         Konva.Image.fromURL(this._getActuatorImageURLForState(), (actuatorNode) => {
             actuatorNode.position({ x: 43, y: -35 });
             actuatorNode.name(Switch.actuatorNodeName);
+            actuatorNode.opacity(DiagramState.instance.showActuators ? 1 : 0);
             this._applyGlobalStyling(actuatorNode);
             parentNode.add(actuatorNode);
         });
@@ -319,6 +311,7 @@ class DPDTSwitch extends Switch {
         Konva.Image.fromURL(this._getActuatorImageURLForState(), (actuatorNode) => {
             actuatorNode.position({ x: 0, y: -35 });
             actuatorNode.name(Switch.actuatorNodeName);
+            actuatorNode.opacity(DiagramState.instance.showActuators ? 1 : 0);
             this._applyGlobalStyling(actuatorNode);
             parentNode.add(actuatorNode);
         });
