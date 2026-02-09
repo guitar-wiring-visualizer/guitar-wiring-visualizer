@@ -1,6 +1,0 @@
-/**
- * @license AGPLv3
- * SPDX-License-Identifier: AGPLv3
- * SPDX-FileCopyrightText: Copyright (c) 2026 The Guitar Wiring Visualizer Authors
- */
-import{Pin,Wire}from"./coreComponents.js";import{StratPickup,Humbucker}from"./pickups.js";import{MonoJack}from"./jacks.js";import{ThreeWayToggle,DPDTOnOn,DPDTOnOnOn,DPDTOnOffOn}from"./switches.js";import{Potentiometer}from"./pots.js";import{BumbleBeeCap,CeramicDiscCap,ChicletCap,MalloryMustardCap,OrangeDropCap,PolystyreneBlueCap,PolystyreneRedCap,VitaminQCap}from"./caps.js";import{CarbonResistor,MetalResistor}from"./resistors.js";export*from"./coreComponents.js";export*from"./pickups.js";export*from"./jacks.js";export*from"./switches.js";export*from"./pots.js";export*from"./caps.js";export*from"./resistors.js";export const componentClassMap={BumbleBeeCap:BumbleBeeCap,OrangeDropCap:OrangeDropCap,CeramicDiscCap:CeramicDiscCap,ChicletCap:ChicletCap,MalloryMustardCap:MalloryMustardCap,PolystyreneBlueCap:PolystyreneBlueCap,PolystyreneRedCap:PolystyreneRedCap,VitaminQCap:VitaminQCap,CarbonResistor:CarbonResistor,MetalResistor:MetalResistor,Potentiometer:Potentiometer,ThreeWayToggle:ThreeWayToggle,DPDTOnOn:DPDTOnOn,DPDTOnOffOn:DPDTOnOffOn,DPDTOnOnOn:DPDTOnOnOn,Humbucker:Humbucker,StratPickup:StratPickup,MonoJack:MonoJack,Wire:Wire,Pin:Pin};
