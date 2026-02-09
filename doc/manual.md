@@ -46,7 +46,7 @@ Each item (any component or wire) on the diagram can be selected.
 - Optionally click a color-swatch from toolbar for new wire color.
 - Draw line from component Pin to component Pin.
 - **Note: Wire must start and end on a Pin, or it will not be added.**
-- Turn on "Show Pins" to see where Pins are.
+- Turn on "Pins Hints" to see where Pins are.
 
 > Tip: After adding a wire, the Move/Select tool is automatically re-enabled.  To quickly add more wires, use the `W` keyboard command to re-activate the "Add Wire" tool.
 
@@ -66,6 +66,8 @@ Flipping a switch moves it's actuator through the available positions.  This wil
 - Select a switch
 - Hit `F` or click the "Flip Switch" button.
 
+> Tip: Keep the "Internals" visibility toggle enabled to see visual representations of the internal connections between pins based on the actuator position.
+
 ### Rotating Pots
 
 In the visualizer pots behave similarly to switches and have two states:
@@ -84,6 +86,7 @@ For the purposes of signal flow visualization, zero resistance equates to a pin-
 - Select a pot
 - Hit `R` or click the "Rotate Pot" button
 
+> Tip: Keep the "Internals" visibility toggle enabled to see how the pots lugs are connected depending on rotation.
 
 ### Properties
 
@@ -101,17 +104,29 @@ To close the Properties drawer, click out of it, click the "X", or hit `Escape`.
 - Start: Click the "Start Visualizer" button or use `Ctrl+Enter`.
 - Stop: Click the "Stop Visualizer" button or use `Ctrl+Enter`.
 
+> Note: You can add, remove, or make changes to any component while the visualizer is running and the signal flow will re-adjust.
+
 ### Saving
 
 #### Save
 
 To save a link to the the diagram, click the "Save" button.  This will update the URL of the browser with the state of the diagram.  You may copy the current window URL and send to a friend!
 
-Turn on "Copy to clipboard on Save" to automatically copy the link to your clipboard when saving.
+Click the "Copy URL" button to easliy copy the link to the currently saved diagram to your clipboard.
 
 #### Load
 
 To view a previously saved diagram, simply navigate to the saved link.
+
+### Visibility Toggles
+
+Use the visibility toggles to show or hide component elements.
+
+- **Pin Hints** shows or hides the pin connection hints.
+- **Actuators** shows or hides the virtual actuators of switches.
+- **Internals** shows or hides the internal pin-to-pin connections in switches and pots.
+- **Labels** shows or hides the label text of components.
+
 
 ## Concepts
 
@@ -133,4 +148,4 @@ If a wire is carrying any voltage, it will pulsate.  If the wire is also carryin
 
 For signal flow to occur, there must be a circuit formed by at least one Jack and one Pickup, where the ground lug of the Jack (the shield pin `S`) is passing negative voltage to one end of the pickup, and the opposite end of the pickup is passing positive signal voltage to the tip lug of the jack (the `T` pin).
 
-> The Guitar Wiring Visualizer uses a simplified model of voltage that may resemble a DC circuit.  In reality guitar pickups produce AC current, and the actual voltage and electron activity in the wires and components is not truly unidirectional.  The simplified model is for the purposes of visualizing signal flow intuitively and to make circuit design accessible to the layperson.
+> The Guitar Wiring Visualizer uses a simplified model of voltage that may resemble a DC circuit.  In reality guitar pickups produce AC, and the actual voltage and electron activity in the wires and components is not truly unidirectional.  The simplified model is for the purposes of visualizing signal flow intuitively and to make guitar circuit design accessible to the layperson.
