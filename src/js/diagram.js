@@ -34,6 +34,9 @@ export class DiagramState extends EventEmitter {
         this._componenetMap = {};
 
         this.showConnectors = false;
+        this.showActuators = true;
+        this.showInternals = true;
+        this.showLabels = true;
         this.toolMode = TOOL_MODE_SELECT;
         this.wireToolColor = WIRE_COLOR_DEFAULT;
         this.debugMode = options.debugMode || false;

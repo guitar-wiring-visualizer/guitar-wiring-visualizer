@@ -168,15 +168,6 @@ export class ThreeWayToggle extends Switch {
         }
     }
 
-    _drawActuator(parentNode) {
-        Konva.Image.fromURL(this._getActuatorImageURLForState(), (actuatorNode) => {
-            actuatorNode.position({ x: 0, y: -35 });
-            actuatorNode.name(Switch.actuatorNodeName);
-            this._applyGlobalStyling(actuatorNode);
-            parentNode.add(actuatorNode);
-        });
-    }
-
     _getActuatorImageURLForState() {
         if (this.actuatorState === -1)
             return "/img/bat-small-left.svg"
@@ -209,6 +200,7 @@ export class ThreeWayToggle extends Switch {
         Konva.Image.fromURL(this._getActuatorImageURLForState(), (actuatorNode) => {
             actuatorNode.position({ x: 43, y: -35 });
             actuatorNode.name(Switch.actuatorNodeName);
+            actuatorNode.opacity(DiagramState.instance.showActuators ? 1 : 0);
             this._applyGlobalStyling(actuatorNode);
             parentNode.add(actuatorNode);
         });
@@ -228,6 +220,7 @@ export class ThreeWayToggle extends Switch {
                 const otherPinPos = otherPinNode.position();
                 const connector = new Konva.Line({
                     name: Switch.pinConnectionNodeName,
+                    opacity: DiagramState.instance.showInternals ? 1 : 0,
                     strokeWidth: 2,
                     stroke: "#a6a6a6",
                     draggable: false,
@@ -318,6 +311,7 @@ class DPDTSwitch extends Switch {
         Konva.Image.fromURL(this._getActuatorImageURLForState(), (actuatorNode) => {
             actuatorNode.position({ x: 0, y: -35 });
             actuatorNode.name(Switch.actuatorNodeName);
+            actuatorNode.opacity(DiagramState.instance.showActuators ? 1 : 0);
             this._applyGlobalStyling(actuatorNode);
             parentNode.add(actuatorNode);
         });
@@ -337,6 +331,7 @@ class DPDTSwitch extends Switch {
                 const otherPinPos = otherPinNode.position();
                 const connector = new Konva.Line({
                     name: Switch.pinConnectionNodeName,
+                    opacity: DiagramState.instance.showInternals ? 1 : 0,
                     strokeWidth: 5,
                     stroke: "#696969",
                     draggable: false,

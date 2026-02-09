@@ -76,6 +76,10 @@ export class Component extends EventEmitter {
         return true;
     }
 
+    static get labelNodeName() {
+        return "component-label";
+    }
+
     get label() {
         return this.state.label ?? "";
     }
@@ -188,7 +192,8 @@ export class Component extends EventEmitter {
 
         const textNode = new Konva.Text({
             id: "label-for." + this.id.toString(),
-            name: "component-label",
+            opacity: DiagramState.instance.showLabels ? 1 : 0,
+            name: Component.labelNodeName,
             text: this.label,
             fill: 'black',
             x: postition.x,
@@ -407,6 +412,8 @@ export class Pin extends Component {
 
     static get IsDraggable() { return false; }
 
+    static get pinCircleNodeName() { return "pin-circle"; }
+
     get connectedPinId() {
         return this.state.connectedPinId;
     }
@@ -455,6 +462,7 @@ export class Pin extends Component {
 
     async _drawChildNodes(parentNode) {
         const pinShape = new Konva.Circle({
+            name: Pin.pinCircleNodeName,
             radius: 6,
             stroke: "red",
             opacity: DiagramState.instance.showConnectors ? 1 : 0,
