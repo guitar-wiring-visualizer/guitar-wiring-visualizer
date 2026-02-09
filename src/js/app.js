@@ -60,7 +60,8 @@ class App {
         this.enableRotatePotButton();
         this.enablePropertiesButton();
         this.enableVisualizerButton();
-        this.enableSave();
+        this.enableSaveButton();
+        this.enableCopyUrlButton();
         await this.tryImportFromURL();
         await this.tryLoadTestScript();
     }
@@ -84,13 +85,13 @@ class App {
             visButton: getElem("vis-button"),
             checkShowConnectors: getElem("check-show-connectors"),
             diagramContainer: getElem("diagram"),
-            selectToolButton: getElem("select-tool"),
-            wireToolButton: getElem("wire-tool"),
+            selectToolButton: getElem("select-tool-button"),
+            wireToolButton: getElem("wire-tool-button"),
             inputComponentId: getElem("input-component-id"),
             inputComponentType: getElem("input-component-type"),
             inputComponentLabel: getElem("input-component-label"),
-            saveButton: getElem("save-url"),
-            checkCopyClip: getElem("check-copy-to-clipboard"),
+            saveButton: getElem("save-button"),
+            copyUrlButton: getElem("copy-url-button")
         };
     }
 
@@ -525,14 +526,9 @@ class App {
         });
     }
 
-    enableSave() {
+    enableSaveButton() {
         this.elements.saveButton.addEventListener("click", async (e) => {
-            const url = await this.saveStateToURL();
-            if (url) {
-                if (this.elements.checkCopyClip.checked) {
-                    await this.copyToClipboard(url);
-                }
-            }
+            await this.saveStateToURL();
         });
     }
 
@@ -552,11 +548,13 @@ class App {
         const url = new URL(this.window.location);
         url.searchParams.set(this.serializedDiagramStateParam, serializedState);
         this.window.history.replaceState({}, '', url);
-        return url;
     }
 
-    async copyToClipboard(str) {
-        await this.window.navigator.clipboard.writeText(str);
+    enableCopyUrlButton() {
+        this.elements.copyUrlButton.addEventListener("click", async (e) => {
+            await this.window.navigator.clipboard.writeText(this.window.location);
+            console.debug("copied url to clipboard");
+        });
     }
 
     async tryImportFromURL() {

@@ -45,15 +45,17 @@
                         <button type="button" class="btn btn-success" id="vis-button">Start Visualizer</button>
                     </div>
                     <div class="btn-group me-2" role="group">
-                        <button type="button" class="btn btn-outline-secondary" id="save-url">Save</button>
+                        <button type="button" class="btn btn-outline-secondary" id="save-button">Save</button>
+                        <button type="button" class="btn btn-outline-secondary" id="copy-url-button">Copy URL</button>
                     </div>
                     <div class="btn-group me-2" role="group">
-                        <input type="radio" class="btn-check" name="options-tool" id="select-tool" autocomplete="off"
+                        <input type="radio" class="btn-check" name="options-tool" id="select-tool-button" autocomplete="off"
                             checked>
                         <label class="btn btn-outline-primary" for="select-tool">Select/Move</label>
 
-                        <input type="radio" class="btn-check" name="options-tool" id="wire-tool" autocomplete="off">
+                        <input type="radio" class="btn-check" name="options-tool" id="wire-tool-button" autocomplete="off">
                         <label class="btn btn-outline-primary" for="wire-tool">Add Wire</label>
+
                         <input type="radio" class="btn-check" name="options-wire-color" id="wire-color-black"
                             autocomplete="off" checked>
                         <label class="btn btn-outline-secondary" for="wire-color-black">
@@ -111,16 +113,33 @@
                 <div class="btn-group me-2 mt-2" role="group">
                     <div class="form-check form-switch me-4"">
                         <input class=" form-check-input" type="checkbox" role="switch" value=""
-                        id="check-copy-to-clipboard">
-                        <label class="form-check-label" for="check-copy-to-clipboard">
-                            Copy to clipboard on Save
+                        id="check-show-connectors">
+                        <label class="form-check-label" for="check-show-connectors">
+                            Connection Hints
                         </label>
                     </div>
+
+                    <div class="form-check form-switch me-4"">
+                        <input class=" form-check-input" type="checkbox" role="switch" value=""
+                        id="check-show-actuators" checked>
+                        <label class="form-check-label" for="check-show-actuators">
+                            Actuators
+                        </label>
+                    </div>
+
+                    <div class="form-check form-switch me-4">
+                        <input class="form-check-input" type="checkbox" role="switch" value="" id="check-show-internals"
+                            checked>
+                        <label class="form-check-label" for="check-show-internals">
+                            Internals
+                        </label>
+                    </div>
+
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" value=""
-                            id="check-show-connectors">
-                        <label class="form-check-label" for="check-show-connectors">
-                            Show Pins
+                        <input class="form-check-input" type="checkbox" role="switch" value="" id="check-show-labels"
+                            checked>
+                        <label class="form-check-label" for="check-show-labels">
+                            Labels
                         </label>
                     </div>
 
@@ -197,7 +216,7 @@
                         </h2>
                         <div id="switches-section" class="accordion-collapse collapse" data-bs-parent="#library-items">
                             <div class="accordion-body">
-                                 <div>
+                                <div>
                                     <img data-component-class="ThreeWayToggle" src="" draggable="true">
                                     <p>Three-Way Toggle</p>
                                 </div>
@@ -317,7 +336,7 @@
                 <label for="input-component-type" class="form-label">Type</label>
                 <input type="text" class="form-control" id="input-component-type" disabled>
             </div>
-             <div class="mb-3">
+            <div class="mb-3">
                 <label for="input-component-label" class="form-label">Label</label>
                 <input type="text" class="form-control" id="input-component-label">
             </div>
