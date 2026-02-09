@@ -14,7 +14,7 @@ import {
     WIRE_COLOR_RED,
     WIRE_COLOR_BLUE
 } from "./diagram.js"
-import { componentClassMap, Wire } from "./components.js";
+import { componentClassMap, Wire, Pin, ThreeWayToggle, Potentiometer } from "./components.js";
 import { Visualizer, VISUALIZER_WIRE_LINE_NAME, VISUALIZER_SIGNAL_PATH_NAME } from "./visualizer.js";
 import Geometry from "./geometry.js";
 
@@ -54,6 +54,9 @@ class App {
         this.enableKeyboardCommands();
         this.enableClearDiagram();
         this.enableHideShowPins();
+        this.enableHideShowActuators();
+        this.enableHideShowInternals();
+        this.enableHideShowLabels();
         this.enableToolbar();
         this.enableDrawWire();
         this.enableFlipSwitchButton();
@@ -84,6 +87,9 @@ class App {
             clearButton: getElem("clear-button"),
             visButton: getElem("vis-button"),
             checkShowConnectors: getElem("check-show-connectors"),
+            cheeckShowActuators: getElem("check-show-actuators"),
+            checkShowInternals: getElem("check-show-internals"),
+            checkShowLabels: getElem("check-show-labels"),
             diagramContainer: getElem("diagram"),
             selectToolButton: getElem("select-tool-button"),
             wireToolButton: getElem("wire-tool-button"),
@@ -254,13 +260,53 @@ class App {
     }
 
     enableHideShowPins() {
+        const targetNodesName = '.' + Pin.pinCircleNodeName;
         this.elements.checkShowConnectors.addEventListener('change', (event) => {
             DiagramState.instance.showConnectors = event.currentTarget.checked;
             var newOpacity = DiagramState.instance.showConnectors ? 1 : 0;
-            //TODO: use name of pin nodes instead of Circle
-            this.diagramLayer.find('Circle').forEach((node) => {
+            this.diagramLayer.find(targetNodesName).forEach((node) => {
                 node.opacity(newOpacity);
             });
+            this.focusStage();
+        });
+    }
+
+    enableHideShowActuators() {
+        // use actuator node name from any switch class
+        const targetNodesName = '.' + ThreeWayToggle.actuatorNodeName;
+        this.elements.cheeckShowActuators.addEventListener('change', (event) => {
+            DiagramState.instance.showActuators = event.currentTarget.checked;
+            var newOpacity = DiagramState.instance.showActuators ? 1 : 0;
+            this.diagramLayer.find(targetNodesName).forEach((node) => {
+                node.opacity(newOpacity);
+            });
+            this.focusStage();
+        });
+    }
+
+    enableHideShowInternals() {
+        // select internal connector nodes for both both switches and pots
+        const targetNodesName = '.' + ThreeWayToggle.pinConnectionNodeName + ', .' + Potentiometer.pinConnectionNodeName;
+        this.elements.checkShowInternals.addEventListener('change', (event) => {
+            DiagramState.instance.showInternals = event.currentTarget.checked;
+            var newOpacity = DiagramState.instance.showInternals ? 1 : 0;
+            this.diagramLayer.find(targetNodesName).forEach((node) => {
+                node.opacity(newOpacity);
+            });
+            this.focusStage();
+        });
+    }
+
+    enableHideShowLabels() {
+        // use label node name from any component
+        const targetNodesName = '.' + Wire.labelNodeName;
+        this.elements.checkShowLabels.addEventListener('change', (event) => {
+            DiagramState.instance.showLabels = event.currentTarget.checked;
+            var newOpacity = DiagramState.instance.showLabels ? 1 : 0;
+            this.diagramLayer.find(targetNodesName).forEach((node) => {
+                node.opacity(newOpacity);
+            });
+            this.focusStage();
         });
     }
 

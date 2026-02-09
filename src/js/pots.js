@@ -140,6 +140,7 @@ export class Potentiometer extends Component {
 
         const connector = new Konva.Line({
             name: Potentiometer.pinConnectionNodeName,
+            opacity: DiagramState.instance.showInternals ? 1 : 0,
             strokeWidth: 5,
             stroke: "#939393",
             lineJoin: 'round',

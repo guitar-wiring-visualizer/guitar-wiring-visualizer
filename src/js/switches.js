@@ -228,6 +228,7 @@ export class ThreeWayToggle extends Switch {
                 const otherPinPos = otherPinNode.position();
                 const connector = new Konva.Line({
                     name: Switch.pinConnectionNodeName,
+                    opacity: DiagramState.instance.showInternals ? 1 : 0,
                     strokeWidth: 2,
                     stroke: "#a6a6a6",
                     draggable: false,
@@ -337,6 +338,7 @@ class DPDTSwitch extends Switch {
                 const otherPinPos = otherPinNode.position();
                 const connector = new Konva.Line({
                     name: Switch.pinConnectionNodeName,
+                    opacity: DiagramState.instance.showInternals ? 1 : 0,
                     strokeWidth: 5,
                     stroke: "#696969",
                     draggable: false,
