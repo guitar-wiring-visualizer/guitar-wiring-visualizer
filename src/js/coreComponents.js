@@ -542,6 +542,8 @@ export class Wire extends Component {
 
     static get IsDraggable() { return false; }
 
+    static get strokeWidth() { return 3; }
+
     get startPinId() {
         return this.state.startPinId;
     }
@@ -686,8 +688,7 @@ export class Wire extends Component {
         const line = new Konva.Line({
             points: wirePoints,
             stroke: this.color,
-            strokeWidth: 2,
-            strokeHitWidth: 10,
+            strokeWidth: Wire.strokeWidth,
             lineCap: 'butt',
             lineJoin: 'round',
             draggable: Wire.IsDraggable,

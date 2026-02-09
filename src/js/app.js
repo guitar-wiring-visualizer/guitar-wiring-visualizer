@@ -395,7 +395,7 @@ class App {
 
             lastLine = new Konva.Line({
                 stroke: DiagramState.instance.wireToolColor,
-                strokeWidth: 2,
+                strokeWidth: Wire.strokeWidth,
                 globalCompositeOperation: 'source-over',
                 lineCap: 'round',
                 lineJoin: 'round',
