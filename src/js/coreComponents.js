@@ -689,6 +689,7 @@ export class Wire extends Component {
             points: wirePoints,
             stroke: this.color,
             strokeWidth: Wire.strokeWidth,
+            hitStrokeWidth: 15, // help clicking on wire
             lineCap: 'butt',
             lineJoin: 'round',
             draggable: Wire.IsDraggable,
