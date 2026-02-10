@@ -6,7 +6,7 @@
 
 import { componentClassMap } from "./components.js";
 import EventEmitter from "./eventEmitter.js";
-import getCompressor from "./compression.js";
+import { CompressionType, getCompressor } from "./compression.js";
 
 export const TOOL_MODE_SELECT = "select";
 export const TOOL_MODE_WIRE = "wire";
@@ -110,7 +110,7 @@ export class DiagramState extends EventEmitter {
         this._emit("allComponentsRemoved");
     }
 
-    async serializeState(options) {
+    async serializeState() {
         if (this._allComponentInstances().length === 0) {
             return "";
         }
@@ -121,7 +121,7 @@ export class DiagramState extends EventEmitter {
         }
         console.debug({ data: diagramState });
 
-        const compressor = await getCompressor(options.compressionType);
+        const compressor = await getCompressor(CompressionType.BROTLI);
 
         const encoded = await compressor.compress(JSON.stringify(diagramState));
         console.debug({ encoded });
@@ -129,18 +129,25 @@ export class DiagramState extends EventEmitter {
         return encoded;
     }
 
-    async loadState(encodedDataString, options) {
+    async loadState(encodedDataString) {
         console.debug({ data: encodedDataString });
 
-        const compressor = await getCompressor(options.compressionType);
+        let compressor = await getCompressor(CompressionType.BROTLI);
 
-        const decodedDataString = await compressor.decompress(encodedDataString);
+        let decodedDataString;
+        try {
+            decodedDataString = await compressor.decompress(encodedDataString);
+        } catch (err) {
+            console.warn("brotli decompression failed, trying gzip.", err);
+            compressor = await getCompressor(CompressionType.GZIP);
+            decodedDataString = await compressor.decompress(encodedDataString);
+        }
         console.debug({ decoded: decodedDataString });
 
         const deserializedState = JSON.parse(decodedDataString);
         console.debug({ deserializedState: deserializedState });
 
-        // keep track if ids
+        // keep track of ids
         const idsDeserialized = []
 
         // do all the pins first, since other components depend on them

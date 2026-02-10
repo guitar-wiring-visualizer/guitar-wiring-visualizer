@@ -4,19 +4,24 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 The Guitar Wiring Visualizer Authors
  */
 
-export default async function getCompressor(name) {
-    if (typeof name !== "string" || !name)
-        throw new Error("compressor name is required");
+export const CompressionType = Object.freeze(
+    {
+        BROTLI: 0,
+        GZIP: 1
+    }
+);
 
-    if (name === "brotli") {
+export async function getCompressor(type) {
+    if (isNaN(type) || !Object.values(CompressionType).includes(type))
+        throw new Error("compression type is required");
+
+    if (type === CompressionType.BROTLI) {
         const compressor = new BrotliCompressor();
         await compressor.initialize();
         return compressor;
-    } else if (name === "gzip") {
+    } else if (type === CompressionType.GZIP) {
         return Promise.resolve(new GZipCompressor());
     }
-
-    throw new Error(`${name} unknown`);
 }
 
 class BrotliCompressor {
@@ -25,6 +30,9 @@ class BrotliCompressor {
         if (BrotliCompressor.instance)
             return BrotliCompressor.instance;
 
+        this.base64Options = { alphabet: "base64url" };
+        this.brotliWasmUrl = "https://unpkg.com/brotli-wasm@3.0.0/index.web.js?module";
+
         BrotliCompressor.instance = this;
     }
 
@@ -32,7 +40,7 @@ class BrotliCompressor {
         if (this.brotli)
             return Promise.resolve();
 
-        const brotli = await import("https://unpkg.com/brotli-wasm@3.0.0/index.web.js?module").then(m => m.default);
+        const brotli = await import(this.brotliWasmUrl).then(m => m.default);
         this.brotli = brotli;
     }
 
@@ -42,12 +50,12 @@ class BrotliCompressor {
 
         const compressedData = this.brotli.compress(uncompressedData);
 
-        const compressedString = compressedData.toBase64();
+        const compressedString = compressedData.toBase64(this.base64Options);
         return Promise.resolve(compressedString);
     }
 
     decompress(input) {
-        const compressedData = Uint8Array.fromBase64(input);
+        const compressedData = Uint8Array.fromBase64(input, this.base64Options);
 
         const decompressedData = this.brotli.decompress(compressedData);
 
@@ -55,7 +63,6 @@ class BrotliCompressor {
         const decompressedString = textDecoder.decode(decompressedData);
         return Promise.resolve(decompressedString);
     }
-
 }
 
 class GZipCompressor {

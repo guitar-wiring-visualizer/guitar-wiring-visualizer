@@ -34,7 +34,6 @@ class App {
         ];
 
         this.serializedDiagramStateParam = "d";
-        this.compressionTypeParam = "c";
         this.debugModeParam = "debug";
 
         this.document.addEventListener("DOMContentLoaded", async () => {
@@ -318,16 +317,13 @@ class App {
 
         const defaultCursor = this.elements.diagramContainer.style.cursor;
 
-        const selectButton = this.elements.selectToolButton;
-        const wireButton = this.elements.wireToolButton;
-
-        selectButton.addEventListener("click", (e) => {
+        this.elements.selectToolButton.addEventListener("click", (e) => {
             DiagramState.instance.toolMode = TOOL_MODE_SELECT;
             this.elements.diagramContainer.style.cursor = defaultCursor;
             this.focusStage();
         });
 
-        wireButton.addEventListener("click", (e) => {
+        this.elements.wireToolButton.addEventListener("click", (e) => {
             DiagramState.instance.toolMode = TOOL_MODE_WIRE;
             this.elements.diagramContainer.style.cursor = "crosshair";
             this.clearSelection();
@@ -586,10 +582,7 @@ class App {
     }
 
     async saveStateToURL() {
-        const params = new URLSearchParams(this.window.location.search);
-        const compressionType = this.getCompressionTypeFromUrlParams(params);
-
-        const serializedState = await DiagramState.instance.serializeState({ compressionType: compressionType });
+        const serializedState = await DiagramState.instance.serializeState();
         if (serializedState === "") {
             console.warn("no state to save");
             return "";
@@ -598,11 +591,10 @@ class App {
         const practicalSizeLimit = 2000;
 
         if (serializedState.length > practicalSizeLimit) {
-            this.window.alert("Uh Oh! This diagram may be too large to be saved. The link generated may not work in all browsers. Consider removing some components. The practical limit is around 40 items, including wires. Please submit an issue if this limits your ability to use the app.  You might want to take a screenshot of the diagram.")
+            this.window.alert("Saved successfully, but the link generated is long and may not work in all browsers.")
         }
 
         const url = new URL(this.window.location);
-        url.searchParams.set(this.compressionTypeParam, this.getCompressionTypeCode(compressionType).toString());
         url.searchParams.set(this.serializedDiagramStateParam, serializedState);
         this.window.history.replaceState({}, '', url);
     }
@@ -618,27 +610,10 @@ class App {
         const params = new URLSearchParams(this.window.location.search);
         if (params.has(this.serializedDiagramStateParam)) {
             const serializedState = params.get(this.serializedDiagramStateParam);
-            const compressionType = this.getCompressionTypeFromUrlParams(params);
-            await DiagramState.instance.loadState(serializedState, { compressionType: compressionType });
+            await DiagramState.instance.loadState(serializedState);
             DiagramState.instance.drawAll(this.diagramLayer);
         }
         return Promise.resolve();
-    }
-
-    getCompressionTypeFromUrlParams(params) {
-        let compressionType = 'brotli';
-        if (params.has(this.compressionTypeParam)) {
-            const typeCode = params.get(this.compressionTypeParam);
-            if (!isNaN(typeCode)) {
-                const typeInt = parseInt(typeCode, 10);
-                compressionType = typeInt === 0 ? 'brotli' : 'gzip';
-            }
-        }
-        return compressionType;
-    }
-
-    getCompressionTypeCode(compressionType) {
-        return compressionType === "brotli" ? 0 : 1;
     }
 
     async tryLoadTestScript() {
