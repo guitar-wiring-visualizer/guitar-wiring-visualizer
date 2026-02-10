@@ -574,7 +574,12 @@ class App {
 
     enableSaveButton() {
         this.elements.saveButton.addEventListener("click", async (e) => {
+            const originalText = this.elements.saveButton.textContent;
+            this.elements.saveButton.textContent = "Saving...";
+            this.elements.saveButton.disabled = true;
             await this.saveStateToURL();
+            this.elements.saveButton.textContent = originalText;
+            this.elements.saveButton.disabled = false;
         });
     }
 
