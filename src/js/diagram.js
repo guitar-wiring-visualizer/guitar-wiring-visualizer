@@ -6,6 +6,7 @@
 
 import { componentClassMap } from "./components.js";
 import EventEmitter from "./eventEmitter.js";
+import { CompressionType, getCompressor } from "./compression.js";
 
 export const TOOL_MODE_SELECT = "select";
 export const TOOL_MODE_WIRE = "wire";
@@ -120,7 +121,9 @@ export class DiagramState extends EventEmitter {
         }
         console.debug({ data: diagramState });
 
-        const encoded = await Compressor.compress(JSON.stringify(diagramState));
+        const compressor = await getCompressor(CompressionType.BROTLI);
+
+        const encoded = await compressor.compress(JSON.stringify(diagramState));
         console.debug({ encoded });
 
         return encoded;
@@ -129,13 +132,22 @@ export class DiagramState extends EventEmitter {
     async loadState(encodedDataString) {
         console.debug({ data: encodedDataString });
 
-        const decodedDataString = await Compressor.decompress(encodedDataString);
+        let compressor = await getCompressor(CompressionType.BROTLI);
+
+        let decodedDataString;
+        try {
+            decodedDataString = await compressor.decompress(encodedDataString);
+        } catch (err) {
+            console.warn("brotli decompression failed, trying gzip.", err);
+            compressor = await getCompressor(CompressionType.GZIP);
+            decodedDataString = await compressor.decompress(encodedDataString);
+        }
         console.debug({ decoded: decodedDataString });
 
         const deserializedState = JSON.parse(decodedDataString);
         console.debug({ deserializedState: deserializedState });
 
-        // keep track if ids
+        // keep track of ids
         const idsDeserialized = []
 
         // do all the pins first, since other components depend on them
@@ -207,30 +219,3 @@ export class DiagramState extends EventEmitter {
     }
 }
 
-class Compressor {
-
-    static async compress(string) {
-        const blobToBase64 = blob => new Promise((resolve, _) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result.split(',')[1]);
-            reader.readAsDataURL(blob);
-        });
-        const byteArray = new TextEncoder().encode(string);
-        const cs = new CompressionStream('gzip');
-        const writer = cs.writable.getWriter();
-        writer.write(byteArray);
-        writer.close();
-        const blob = await new Response(cs.readable).blob();
-        return blobToBase64(blob);
-    }
-
-    static async decompress(base64string) {
-        const bytes = Uint8Array.from(atob(base64string), c => c.charCodeAt(0));
-        const cs = new DecompressionStream('gzip');
-        const writer = cs.writable.getWriter();
-        writer.write(bytes);
-        writer.close();
-        const arrayBuffer = await new Response(cs.readable).arrayBuffer();
-        return new TextDecoder().decode(arrayBuffer);
-    }
-}

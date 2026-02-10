@@ -254,6 +254,7 @@ class App {
 
                 const url = new URL(this.window.location);
                 url.searchParams.delete(this.serializedDiagramStateParam);
+                url.searchParams.delete(this.compressionTypeParam);
                 this.window.history.replaceState({}, '', url);
             }
         };
@@ -316,16 +317,13 @@ class App {
 
         const defaultCursor = this.elements.diagramContainer.style.cursor;
 
-        const selectButton = this.elements.selectToolButton;
-        const wireButton = this.elements.wireToolButton;
-
-        selectButton.addEventListener("click", (e) => {
+        this.elements.selectToolButton.addEventListener("click", (e) => {
             DiagramState.instance.toolMode = TOOL_MODE_SELECT;
             this.elements.diagramContainer.style.cursor = defaultCursor;
             this.focusStage();
         });
 
-        wireButton.addEventListener("click", (e) => {
+        this.elements.wireToolButton.addEventListener("click", (e) => {
             DiagramState.instance.toolMode = TOOL_MODE_WIRE;
             this.elements.diagramContainer.style.cursor = "crosshair";
             this.clearSelection();
@@ -574,7 +572,12 @@ class App {
 
     enableSaveButton() {
         this.elements.saveButton.addEventListener("click", async (e) => {
+            const originalText = this.elements.saveButton.textContent;
+            this.elements.saveButton.textContent = "Saving...";
+            this.elements.saveButton.disabled = true;
             await this.saveStateToURL();
+            this.elements.saveButton.textContent = originalText;
+            this.elements.saveButton.disabled = false;
         });
     }
 
@@ -588,7 +591,7 @@ class App {
         const practicalSizeLimit = 2000;
 
         if (serializedState.length > practicalSizeLimit) {
-            this.window.alert("Uh Oh! This diagram may be too large to be saved. The link generated may not work in all browsers. Consider removing some components. The practical limit is around 40 items, including wires. Please submit an issue if this limits your ability to use the app.  You might want to take a screenshot of the diagram.")
+            this.window.alert("Saved successfully, but the link generated is long and may not work in all browsers.")
         }
 
         const url = new URL(this.window.location);
