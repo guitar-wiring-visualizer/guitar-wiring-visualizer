@@ -34,6 +34,7 @@ class App {
         ];
 
         this.serializedDiagramStateParam = "d";
+        this.compressionTypeParam = "c";
         this.debugModeParam = "debug";
 
         this.document.addEventListener("DOMContentLoaded", async () => {
@@ -254,6 +255,7 @@ class App {
 
                 const url = new URL(this.window.location);
                 url.searchParams.delete(this.serializedDiagramStateParam);
+                url.searchParams.delete(this.compressionTypeParam);
                 this.window.history.replaceState({}, '', url);
             }
         };
@@ -584,7 +586,10 @@ class App {
     }
 
     async saveStateToURL() {
-        const serializedState = await DiagramState.instance.serializeState({ compressionType: "brotli" });
+        const params = new URLSearchParams(this.window.location.search);
+        const compressionType = this.getCompressionTypeFromUrlParams(params);
+
+        const serializedState = await DiagramState.instance.serializeState({ compressionType: compressionType });
         if (serializedState === "") {
             console.warn("no state to save");
             return "";
@@ -597,6 +602,7 @@ class App {
         }
 
         const url = new URL(this.window.location);
+        url.searchParams.set(this.compressionTypeParam, this.getCompressionTypeCode(compressionType).toString());
         url.searchParams.set(this.serializedDiagramStateParam, serializedState);
         this.window.history.replaceState({}, '', url);
     }
@@ -612,10 +618,27 @@ class App {
         const params = new URLSearchParams(this.window.location.search);
         if (params.has(this.serializedDiagramStateParam)) {
             const serializedState = params.get(this.serializedDiagramStateParam);
-            await DiagramState.instance.loadState(serializedState, { compressionType: "brotli" });
+            const compressionType = this.getCompressionTypeFromUrlParams(params);
+            await DiagramState.instance.loadState(serializedState, { compressionType: compressionType });
             DiagramState.instance.drawAll(this.diagramLayer);
         }
         return Promise.resolve();
+    }
+
+    getCompressionTypeFromUrlParams(params) {
+        let compressionType = 'brotli';
+        if (params.has(this.compressionTypeParam)) {
+            const typeCode = params.get(this.compressionTypeParam);
+            if (!isNaN(typeCode)) {
+                const typeInt = parseInt(typeCode, 10);
+                compressionType = typeInt === 0 ? 'brotli' : 'gzip';
+            }
+        }
+        return compressionType;
+    }
+
+    getCompressionTypeCode(compressionType) {
+        return compressionType === "brotli" ? 0 : 1;
     }
 
     async tryLoadTestScript() {
