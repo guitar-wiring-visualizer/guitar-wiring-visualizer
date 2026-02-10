@@ -584,7 +584,7 @@ class App {
     }
 
     async saveStateToURL() {
-        const serializedState = await DiagramState.instance.serializeState();
+        const serializedState = await DiagramState.instance.serializeState({ compressionType: "brotli" });
         if (serializedState === "") {
             console.warn("no state to save");
             return "";
@@ -612,7 +612,7 @@ class App {
         const params = new URLSearchParams(this.window.location.search);
         if (params.has(this.serializedDiagramStateParam)) {
             const serializedState = params.get(this.serializedDiagramStateParam);
-            await DiagramState.instance.loadState(serializedState);
+            await DiagramState.instance.loadState(serializedState, { compressionType: "brotli" });
             DiagramState.instance.drawAll(this.diagramLayer);
         }
         return Promise.resolve();

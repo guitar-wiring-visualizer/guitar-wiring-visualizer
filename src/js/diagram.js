@@ -6,6 +6,7 @@
 
 import { componentClassMap } from "./components.js";
 import EventEmitter from "./eventEmitter.js";
+import getCompressor from "./compression.js";
 
 export const TOOL_MODE_SELECT = "select";
 export const TOOL_MODE_WIRE = "wire";
@@ -109,7 +110,7 @@ export class DiagramState extends EventEmitter {
         this._emit("allComponentsRemoved");
     }
 
-    async serializeState() {
+    async serializeState(options) {
         if (this._allComponentInstances().length === 0) {
             return "";
         }
@@ -120,8 +121,7 @@ export class DiagramState extends EventEmitter {
         }
         console.debug({ data: diagramState });
 
-        const compressor = new Compressor();
-        await compressor.initialize();
+        const compressor = await getCompressor(options.compressionType);
 
         const encoded = await compressor.compress(JSON.stringify(diagramState));
         console.debug({ encoded });
@@ -129,11 +129,10 @@ export class DiagramState extends EventEmitter {
         return encoded;
     }
 
-    async loadState(encodedDataString) {
+    async loadState(encodedDataString, options) {
         console.debug({ data: encodedDataString });
 
-        const compressor = new Compressor();
-        await compressor.initialize();
+        const compressor = await getCompressor(options.compressionType);
 
         const decodedDataString = await compressor.decompress(encodedDataString);
         console.debug({ decoded: decodedDataString });
@@ -213,41 +212,3 @@ export class DiagramState extends EventEmitter {
     }
 }
 
-class Compressor {
-
-    constructor() {
-        if (Compressor.instance)
-            return Compressor.instance;
-
-        Compressor.instance = this;
-    }
-
-    async initialize() {
-        if (this.brotli)
-            return Promise.resolve();
-
-        const brotli = await import("https://unpkg.com/brotli-wasm@3.0.0/index.web.js?module").then(m => m.default);
-        this.brotli = brotli;
-    }
-
-    compress(input) {
-        const textEncoder = new TextEncoder();
-        const uncompressedData = textEncoder.encode(input);
-
-        const compressedData = this.brotli.compress(uncompressedData);
-
-        const compressedString = compressedData.toBase64();
-        return Promise.resolve(compressedString);
-    }
-
-    decompress(input) {
-        const compressedData = Uint8Array.fromBase64(input);
-
-        const decompressedData = this.brotli.decompress(compressedData);
-
-        const textDecoder = new TextDecoder();
-        const decompressedString = textDecoder.decode(decompressedData);
-        return Promise.resolve(decompressedString);
-    }
-
-}
