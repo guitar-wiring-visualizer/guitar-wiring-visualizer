@@ -120,7 +120,10 @@ export class DiagramState extends EventEmitter {
         }
         console.debug({ data: diagramState });
 
-        const encoded = await Compressor.compress(JSON.stringify(diagramState));
+        const compressor = new Compressor();
+        await compressor.initialize();
+
+        const encoded = await compressor.compress(JSON.stringify(diagramState));
         console.debug({ encoded });
 
         return encoded;
@@ -129,7 +132,10 @@ export class DiagramState extends EventEmitter {
     async loadState(encodedDataString) {
         console.debug({ data: encodedDataString });
 
-        const decodedDataString = await Compressor.decompress(encodedDataString);
+        const compressor = new Compressor();
+        await compressor.initialize();
+
+        const decodedDataString = await compressor.decompress(encodedDataString);
         console.debug({ decoded: decodedDataString });
 
         const deserializedState = JSON.parse(decodedDataString);
@@ -209,28 +215,39 @@ export class DiagramState extends EventEmitter {
 
 class Compressor {
 
-    static async compress(string) {
-        const blobToBase64 = blob => new Promise((resolve, _) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result.split(',')[1]);
-            reader.readAsDataURL(blob);
-        });
-        const byteArray = new TextEncoder().encode(string);
-        const cs = new CompressionStream('gzip');
-        const writer = cs.writable.getWriter();
-        writer.write(byteArray);
-        writer.close();
-        const blob = await new Response(cs.readable).blob();
-        return blobToBase64(blob);
+    constructor() {
+        if (Compressor.instance)
+            return Compressor.instance;
+
+        Compressor.instance = this;
     }
 
-    static async decompress(base64string) {
-        const bytes = Uint8Array.from(atob(base64string), c => c.charCodeAt(0));
-        const cs = new DecompressionStream('gzip');
-        const writer = cs.writable.getWriter();
-        writer.write(bytes);
-        writer.close();
-        const arrayBuffer = await new Response(cs.readable).arrayBuffer();
-        return new TextDecoder().decode(arrayBuffer);
+    async initialize() {
+        if (this.brotli)
+            return Promise.resolve();
+
+        const brotli = await import("https://unpkg.com/brotli-wasm@3.0.0/index.web.js?module").then(m => m.default);
+        this.brotli = brotli;
     }
+
+    compress(input) {
+        const textEncoder = new TextEncoder();
+        const uncompressedData = textEncoder.encode(input);
+
+        const compressedData = this.brotli.compress(uncompressedData);
+
+        const compressedString = compressedData.toBase64();
+        return Promise.resolve(compressedString);
+    }
+
+    decompress(input) {
+        const compressedData = Uint8Array.fromBase64(input);
+
+        const decompressedData = this.brotli.decompress(compressedData);
+
+        const textDecoder = new TextDecoder();
+        const decompressedString = textDecoder.decode(decompressedData);
+        return Promise.resolve(decompressedString);
+    }
+
 }
