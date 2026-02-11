@@ -6,6 +6,7 @@
 
 import { DiagramState } from "./diagram.js";
 import { Component, Pin } from "./coreComponents.js";
+import { Events } from "./events.js";
 
 /**
  * Base class for jacks.
@@ -29,7 +30,7 @@ class Jack extends Component {
     }
 
     _subscribeToPinEvents() {
-        this._tipPinListenerOff = this.tipPin.on("voltageChanged", (val) => {
+        this._tipPinListenerOff = this.tipPin.on(Events.VoltageChanged, (val) => {
             console.info(`**** ${this.fullName} received voltage ${val} on tip pin ****`);
         });
     }

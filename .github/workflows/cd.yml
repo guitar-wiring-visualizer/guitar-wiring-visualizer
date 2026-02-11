@@ -40,7 +40,7 @@ jobs:
           chmod +x ./build_dist.sh
           ./build_dist.sh
 
-      # create the docs from markdown
+      # create the manual from markdown
       - name: MakeDocs
         uses: jaywcjlove/markdown-to-html-cli@v5.0.3
         with:
@@ -48,6 +48,7 @@ jobs:
           output: dist/manual/index.html
           github-corners: false
           dark-mode: false
+          title: "User Manual"
 
       # create the samples page from markdown
       - name: MakeDocs
@@ -57,6 +58,7 @@ jobs:
           output: dist/samples/index.html
           github-corners: false
           dark-mode: false
+          title: "Sample Diagrams"
 
       - name: CommitDist
         uses: stefanzweifel/git-auto-commit-action@v7

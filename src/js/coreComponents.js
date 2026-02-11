@@ -4,7 +4,7 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 The Guitar Wiring Visualizer Authors
  */
 
-import EventEmitter from "./eventEmitter.js";
+import { EventEmitter, EventDispatcher, Events } from "./events.js";
 import { DiagramState, TOOL_MODE_WIRE } from "./diagram.js";
 import Geometry from "./geometry.js";
 
@@ -32,6 +32,8 @@ export class Component extends EventEmitter {
             state.pinIds = state.pinIds || [];
 
             this._createChildComponents();
+
+            EventDispatcher.instance.dispatch(Events.ComponentAdded, this._createBaseEventArgs());
         }
 
         function isNewComponent() {
@@ -135,7 +137,10 @@ export class Component extends EventEmitter {
 
         this.nodeAttrs = rootNode.attrs;
         this._subscribeToEvents(rootNode);
-        DiagramState.instance.notifyNodeChanged(rootNode);
+
+        const drawEventType = this._wasRedraw ? Events.ComponentRedrawn: Events.ComponentDrawn;
+        EventDispatcher.instance.dispatch(drawEventType, this._createBaseEventArgs());
+        this._wasRedraw = false;
     }
 
     _drawIDLabel(rootNode) {
@@ -221,6 +226,7 @@ export class Component extends EventEmitter {
         console.debug(`redrawing ${this.fullName}`);
         const originalZIndex = this._getZIndex(containerNode);
         this._unDrawIfNeeded(containerNode);
+        this._wasRedraw = true;
         await this.draw(containerNode);
         this.findNode(containerNode).zIndex(originalZIndex);
     }
@@ -256,6 +262,8 @@ export class Component extends EventEmitter {
         node.destroy();
 
         DiagramState.instance.removeComponentById(this.id);
+
+        EventDispatcher.instance.dispatch(Events.ComponentRemoved, this._createBaseEventArgs());
     }
 
     /**
@@ -289,6 +297,7 @@ export class Component extends EventEmitter {
             }
             this.state.nodeAttrs = e.target.attrs;
             this._moveAttachedWires(componentNode);
+            EventDispatcher.instance.dispatch(Events.ComponentMoved, this._createBaseEventArgs());
         });
 
         componentNode.on("dragstart", (e) => {
@@ -392,6 +401,10 @@ export class Component extends EventEmitter {
                 wire.removeFromDiagram(layer);
             });
         });
+    }
+
+    _createBaseEventArgs() {
+        return { componentId: this.id, kind: this.constructor.name };
     }
 }
 
@@ -513,7 +526,7 @@ export class Pin extends Component {
             connectedPin.receiveVoltage({ value, fromWireId, fromPinId: this.id });
         }
 
-        this._emit("voltageChanged", this.voltage);
+        this._emit(Events.VoltageChanged, this.voltage);
     }
 
     hasVoltage() {
@@ -714,7 +727,7 @@ export class Wire extends Component {
     changeColor(node, color) {
         this.state.color = color;
         node.stroke(color);
-        DiagramState.instance.notifyNodeChanged(node);
+        EventDispatcher.instance.dispatch(Events.WireColorChanged, this._createBaseEventArgs());
     }
 }
 
@@ -773,14 +786,14 @@ export class TwoPinPositivePassThroughComponent extends TwoPinComponenet {
     }
 
     _setupPinConnections() {
-        this.pin1.on("voltageChanged", (value) => {
+        this.pin1.on(Events.VoltageChanged, (value) => {
             console.info(`${this.fullName} received voltageChanged event with value ${value} from ${this.pin1.fullName}`);
             if (value > 0) {
                 if (!this.pin2.hasVoltage())
                     this.pin2.receiveVoltage({ fromWireId: null, value, fromPinId: this.pin1.id });
             }
         });
-        this.pin2.on("voltageChanged", (value) => {
+        this.pin2.on(Events.VoltageChanged, (value) => {
             console.info(`${this.fullName} received voltageChanged event with value ${value} from ${this.pin2.fullName}`);
             if (value > 0) {
                 if (!this.pin1.hasVoltage())

@@ -5,7 +5,7 @@
  */
 
 import { DiagramState } from "./diagram.js";
-
+import { EventDispatcher, Events } from "./events.js";
 import { Component, Pin } from "./coreComponents.js";
 
 /**
@@ -44,7 +44,7 @@ class Switch extends Component {
         this._reDrawActuator(componentNode);
         this._updatePinConnections();
         this._reDrawPinConnections(componentNode);
-        DiagramState.instance.notifyNodeChanged(componentNode);
+        EventDispatcher.instance.dispatch(Events.SwitchFlipped, this._createBaseEventArgs());
     }
 
     _flipActuatorAndSetState() {
@@ -80,6 +80,202 @@ class Switch extends Component {
         });
 
         this._drawPinConnections(componentNode);
+    }
+}
+/**
+ * Base class for 8-pin blade switches
+ * @abstract
+ */
+export class EightPinBladeSwitch extends Switch {
+    constructor(state = {}) {
+        super(state);
+    }
+
+    get pinA1() { return DiagramState.instance.getComponent(this.pinIds.at(0)); }
+    get pinA2() { return DiagramState.instance.getComponent(this.pinIds.at(1)); }
+    get pinA3() { return DiagramState.instance.getComponent(this.pinIds.at(2)); }
+    get pinA0() { return DiagramState.instance.getComponent(this.pinIds.at(3)); }
+    get pinB0() { return DiagramState.instance.getComponent(this.pinIds.at(4)); }
+    get pinB1() { return DiagramState.instance.getComponent(this.pinIds.at(5)); }
+    get pinB2() { return DiagramState.instance.getComponent(this.pinIds.at(6)); }
+    get pinB3() { return DiagramState.instance.getComponent(this.pinIds.at(7)); }
+
+    static get ImageURL() {
+        return "/img/blade-switch.svg";
+    }
+
+    _getAllPins() {
+        return [this.pinA0, this.pinA1, this.pinA2, this.pinA3, this.pinB0, this.pinB1, this.pinB2, this.pinB3];
+    }
+
+    _createChildComponents() {
+        const pina1 = new Pin();
+        this.pinIds.push(pina1.id);
+        pina1.moveTo({
+            x: 10, y: 30
+        });
+
+        const pina2 = new Pin();
+        this.pinIds.push(pina2.id);
+        pina2.moveTo({
+            x: 9, y: 70
+        });
+
+        const pina3 = new Pin();
+        this.pinIds.push(pina3.id);
+        pina3.moveTo({
+            x: 9, y: 110
+        });
+
+        const pina0 = new Pin();
+        this.pinIds.push(pina0.id);
+        pina0.moveTo({
+            x: 9, y: 149
+        });
+
+        const pinb0 = new Pin();
+        this.pinIds.push(pinb0.id);
+        pinb0.moveTo({
+            x: 49, y: 16
+        });
+
+        const pinb1 = new Pin();
+        this.pinIds.push(pinb1.id);
+        pinb1.moveTo({
+            x: 49, y: 56
+        });
+
+        const pinb2 = new Pin();
+        this.pinIds.push(pinb2.id);
+        pinb2.moveTo({
+            x: 49, y: 95
+        });
+
+        const pinb3 = new Pin();
+        this.pinIds.push(pinb3.id);
+        pinb3.moveTo({
+            x: 49, y: 134
+        });
+    }
+
+    async _drawChildNodes(parentNode) {
+        this.pinA0.draw(parentNode);
+        this.pinA1.draw(parentNode);
+        this.pinA2.draw(parentNode);
+        this.pinA3.draw(parentNode);
+        this.pinB0.draw(parentNode);
+        this.pinB1.draw(parentNode);
+        this.pinB2.draw(parentNode);
+        this.pinB3.draw(parentNode);
+
+        Konva.Image.fromURL(this.constructor.ImageURL, (componentNode) => {
+            this._applyGlobalStyling(componentNode);
+            parentNode.add(componentNode);
+            this._getPinNodes(parentNode).forEach(n => n.zIndex(componentNode.zIndex()));
+            this._drawActuator(parentNode);
+            this._drawPinConnections(parentNode);
+            return Promise.resolve();
+        });
+    }
+
+    _drawConnectedPinMarker(pinPosition, fill, parentNode) {
+        const marker = new Konva.Rect({
+            name: Switch.pinConnectionNodeName,
+            opacity: DiagramState.instance.showInternals ? .60 : 0,
+            width: 16,
+            height: 16,
+            x: pinPosition.x - 8,
+            y: pinPosition.y - 8,
+            fill: fill,
+            draggable: false,
+            perfectDrawEnable: false,
+        });
+        parentNode.add(marker);
+    }
+
+    _calculateLabelDrawPosition(rootNode) {
+        return { x: 0, y: -20 };
+    }
+}
+
+export class ThreeWayBlade extends EightPinBladeSwitch {
+    constructor(state = {}) {
+        super(state);
+    }
+
+    _getValidActuatorStates() {
+        return [-1, 0, 1];
+    }
+
+    _flipActuatorAndSetState() {
+        let nextState;
+
+        if (this.actuatorState === -1) {
+            nextState = 0;
+        } else if (this.actuatorState === 0) {
+            if (this._prevActuatorState === -1)
+                nextState = 1
+            else
+                nextState = -1
+        }
+        else if (this.actuatorState === 1) {
+            nextState = 0;
+        }
+
+        this._prevActuatorState = this.actuatorState;
+        this._setActuatorState(nextState);
+    }
+
+    _drawActuator(parentNode) {
+        Konva.Image.fromURL(this._getActuatorImageURLForState(), (actuatorNode) => {
+            actuatorNode.position({ x: 70, y: -30 });
+            actuatorNode.name(Switch.actuatorNodeName);
+            actuatorNode.opacity(DiagramState.instance.showActuators ? 1 : 0);
+            this._applyGlobalStyling(actuatorNode);
+            parentNode.add(actuatorNode);
+        });
+    }
+
+    _getActuatorImageURLForState() {
+        if (this.actuatorState === -1)
+            return "/img/blade-3-up.svg"
+        else if (this.actuatorState === 0)
+            return "/img/blade-3-center.svg"
+        else if (this.actuatorState === 1)
+            return "/img/blade-3-down.svg";
+    }
+
+    _updatePinConnections() {
+        this.pinA0.disconnectFromOtherPin();
+        this.pinB0.disconnectFromOtherPin();
+        if (this.actuatorState === -1) {
+            this.pinA0.connectToOtherPin(this.pinA3);
+            this.pinB0.connectToOtherPin(this.pinB3);
+        } else if (this.actuatorState === 0) {
+            this.pinA0.connectToOtherPin(this.pinA2);
+            this.pinB0.connectToOtherPin(this.pinB2);
+        } else if (this.actuatorState === 1) {
+            this.pinA0.connectToOtherPin(this.pinA1);
+            this.pinB0.connectToOtherPin(this.pinB1);
+        }
+    }
+
+    _drawPinConnections(parentNode) {
+        this._drawMakersForPin(this.pinA0, "#6d87ce", parentNode);
+        this._drawMakersForPin(this.pinB0, "#cbc25c", parentNode);
+    }
+
+    _drawMakersForPin(pin, fill, parentNode) {
+        if (pin.connectedPinId !== null) {
+            const pinShape = pin.findNode(parentNode);
+            const pinPos = pinShape.position();
+            this._drawConnectedPinMarker(pinPos, fill, parentNode);
+
+            const otherPin = DiagramState.instance.getComponent(pin.connectedPinId);
+            const otherPinNode = otherPin.findNode(parentNode);
+            const otherPinPos = otherPinNode.position();
+            this._drawConnectedPinMarker(otherPinPos, fill, parentNode);
+        }
     }
 }
 

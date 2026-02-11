@@ -5,7 +5,6 @@
  */
 
 import { componentClassMap } from "./components.js";
-import EventEmitter from "./eventEmitter.js";
 import { CompressionType, getCompressor } from "./compression.js";
 
 export const TOOL_MODE_SELECT = "select";
@@ -23,13 +22,13 @@ export const WIRE_COLOR_DEFAULT = WIRE_COLOR_BLACK;
  * Tracks all component instances on the diagram.
  * Can serialize and deserialize entire state of all components on the diagram.
  */
-export class DiagramState extends EventEmitter {
+export class DiagramState {
 
     constructor(options = {}) {
-        super()
         if (DiagramState.instance) {
             return DiagramState.instance;
         }
+
         this._lastIssuedId = 0;
 
         this._componenetMap = {};
@@ -51,20 +50,6 @@ export class DiagramState extends EventEmitter {
 
     registerComponent(componentInstance) {
         this._addToComponentMap(componentInstance.id, componentInstance);
-        this._emit("componentAdded", componentInstance.id);
-    }
-
-    notifyNodeChanged(node) {
-        console.debug("notifyNodeChanged", node.name())
-
-        if (node.name() === "Wire") {
-            this._emit("wireChanged", node);
-        }
-
-        //TOD0: refactor how events are bubbled out
-        if (["DPDTOnOn", "DPDTOnOffOn", "DPDTOnOnOn", "Potentiometer", "ThreeWayToggle"].includes(node.name())) {
-            this._emit("switchChanged", node);
-        }
     }
 
     getComponent(id) {
@@ -89,7 +74,6 @@ export class DiagramState extends EventEmitter {
 
     removeComponentById(componentId) {
         this._removeComponentInternal(componentId);
-        this._emit("componentRemoved", componentId);
     }
 
     _removeComponentInternal(componentId) {
@@ -107,7 +91,6 @@ export class DiagramState extends EventEmitter {
         allIds.forEach(componentId => {
             this._removeComponentInternal(componentId);
         });
-        this._emit("allComponentsRemoved");
     }
 
     async serializeState() {

@@ -17,6 +17,7 @@ import {
 import { componentClassMap, Wire, Pin, ThreeWayToggle, Potentiometer } from "./components.js";
 import { Visualizer, VISUALIZER_WIRE_LINE_NAME, VISUALIZER_SIGNAL_PATH_NAME } from "./visualizer.js";
 import Geometry from "./geometry.js";
+import { EventDispatcher } from "./events.js";
 
 class App {
 
@@ -37,12 +38,13 @@ class App {
         this.debugModeParam = "debug";
 
         this.document.addEventListener("DOMContentLoaded", async () => {
-            this.document.getElementById("loader").hidden = true;
             await this.setupApp();
+            this.document.getElementById("loader").hidden = true;
         });
     }
 
     async setupApp() {
+        this.eventDispatcher = new EventDispatcher();
         this.initDomElements();
         this.initDiagramState();
         this.initComponentLibrary();
@@ -242,16 +244,23 @@ class App {
     enableClearDiagram() {
         this.elements.clearButton.onclick = () => {
             if (confirm("Clear the diagram? Are you sure?  This cannot be undone!")) {
+
+                // manually remove all nodes
                 this.diagramLayer.getChildren()
                     .filter(child => child.getClassName() !== "Transformer")
                     .forEach(child => {
                         child.destroy();
-                        DiagramState.instance.removeAllComponents();
                     });
 
+                // let DiagramState handle removing all components
+                DiagramState.instance.removeAllComponents();
+
+
+                //stop the visualizer
                 if (Visualizer.instance.isActive)
                     this.elements.visButton.click();
 
+                // clear the state from the URL
                 const url = new URL(this.window.location);
                 url.searchParams.delete(this.serializedDiagramStateParam);
                 url.searchParams.delete(this.compressionTypeParam);
@@ -750,6 +759,7 @@ class App {
         if (confirm("Delete selected component?")) {
             const component = DiagramState.instance.getComponent(nodeToDelete.id());
             const layer = this.transformer.getLayer();
+            // component removes itself.  It will handle unregistering from diagram state and notifying visualizer.
             component.removeFromDiagram(layer);
             this.clearSelection();
         }

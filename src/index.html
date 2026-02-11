@@ -221,8 +221,12 @@
                         <div id="switches-section" class="accordion-collapse collapse" data-bs-parent="#library-items">
                             <div class="accordion-body">
                                 <div>
-                                    <img data-component-class="ThreeWayToggle" src="" draggable="true">
+                                    <img data-component-class="ThreeWayToggle" src="" draggable="true" height="40">
                                     <p>Three-Way Toggle</p>
+                                </div>
+                                <div>
+                                    <img data-component-class="ThreeWayBlade" src="" draggable="true" height="70">
+                                    <p>Three-Way Blade</p>
                                 </div>
                                 <div>
                                     <img data-component-class="DPDTOnOn" src="" draggable="true">
@@ -320,8 +324,11 @@
                     </div>
                 </div>
             </div>
-            <div class="col border p-0" style="overflow-x: auto">
-                <div id="loader">Loading...</div>
+            <div class="col border p-0" style="overflow-x: auto; position: relative;">
+                <div id="loader">
+                    <div class="spinner-border text-secondary" role="status">
+                    </div>
+                </div>
                 <div id="diagram" class="bg-secondary-subtle"></div>
             </div>
         </div>
