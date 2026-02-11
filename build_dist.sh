@@ -3,6 +3,7 @@
 # requires minify@15.0.1 and sponge
 
 mkdir -p dist/manual
+mkdir -p dist/samples
 
 cp -r src/* dist/
 
