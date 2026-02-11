@@ -46,6 +46,17 @@ jobs:
         with:
           source: doc/manual.md
           output: dist/manual/index.html
+          github-corners: false
+          dark-mode: false
+
+      # create the samples page from markdown
+      - name: MakeDocs
+        uses: jaywcjlove/markdown-to-html-cli@v5.0.3
+        with:
+          source: doc/samples.md
+          output: dist/samples/index.html
+          github-corners: false
+          dark-mode: false
 
       - name: CommitDist
         uses: stefanzweifel/git-auto-commit-action@v7
