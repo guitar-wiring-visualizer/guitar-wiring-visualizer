@@ -1,8 +1,6 @@
-# Guitar Wiring Visualizer User Manual
+# [Guitar Wiring Visualizer](/) 
 
-> Please note some of this may not work yet as the app is still in development.
-
-## Basic Usage
+## User Manual
 
 ### Keyboard Commands
 
