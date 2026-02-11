@@ -5,7 +5,7 @@
  */
 
 import { DiagramState } from "./diagram.js";
-
+import { EventDispatcher, Events } from "./events.js";
 import { Component, Pin } from "./coreComponents.js";
 
 /**
@@ -44,7 +44,7 @@ class Switch extends Component {
         this._reDrawActuator(componentNode);
         this._updatePinConnections();
         this._reDrawPinConnections(componentNode);
-        DiagramState.instance.notifyNodeChanged(componentNode);
+        EventDispatcher.instance.dispatch(Events.SwitchFlipped, this._createBaseEventArgs());
     }
 
     _flipActuatorAndSetState() {
@@ -265,7 +265,7 @@ export class ThreeWayBlade extends EightPinBladeSwitch {
         this._drawMakersForPin(this.pinB0, "#cbc25c", parentNode);
     }
 
-    _drawMakersForPin(pin, fill, parentNode){
+    _drawMakersForPin(pin, fill, parentNode) {
         if (pin.connectedPinId !== null) {
             const pinShape = pin.findNode(parentNode);
             const pinPos = pinShape.position();

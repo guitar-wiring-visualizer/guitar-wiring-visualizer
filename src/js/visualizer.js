@@ -5,6 +5,7 @@
  */
 
 import { DiagramState, WIRE_COLOR_BLACK, WIRE_COLOR_BLUE, WIRE_COLOR_GREEN, WIRE_COLOR_RED, WIRE_COLOR_YELLOW } from "./diagram.js";
+import { EventDispatcher, Events} from "./events.js";
 import { Wire } from './components.js';
 
 const RANGE_FOR_CLOSE_POINT_COMPARISON = 2.0;
@@ -33,8 +34,14 @@ export class Visualizer {
 
         this._createAllAnimations();
 
-        DiagramState.instance.on("wireChanged", (_) => {
-            console.debug("received wireChanged event");
+        this._subscribeToEvents();
+
+        Visualizer.instance = this;
+    }
+
+    _subscribeToEvents() {
+        EventDispatcher.instance.on(Events.WireColorChanged, (e) => {
+            console.debug("wire_color_changed event from dispatcher", e.componentId);
             //TODO: can we just use _restartAfterDiagramUpdate here, too?
 
             const wasActiveWhenEventReceived = this.isActive;
@@ -45,34 +52,45 @@ export class Visualizer {
                 this.start();
         });
 
-        DiagramState.instance.on("switchChanged", (_) => {
-            console.debug("received switchChanged event");
+        EventDispatcher.instance.on(Events.SwitchFlipped, (e) => {
+            console.debug("switch_flipped event from dispatcher", e.componentId, e.kind);
             this._restartAfterDiagramChange();
         });
 
-        DiagramState.instance.on("componentAdded", (_) => {
-            console.debug("received componentAdded event");
+        EventDispatcher.instance.on(Events.PotRotated, (e) => {
+            console.debug("pot_rotated event from dispatcher", e.componentId, e.kind);
+            this._restartAfterDiagramChange();
+        });
 
-            // delay to account for timing issue between new component being added (and firing event), and it getting drawn.
-            setTimeout(() => {
+        // EventDispatcher.instance.on("component_added", (e) => {
+        //     console.debug("component_added event from dispatcher", e.componentId, e.kind);
+        //     if (e.kind !== 'Pin')
+        //         this._restartAfterDiagramChange();
+        // });
+
+        EventDispatcher.instance.on(Events.ComponentDrawn, (e) => {
+            console.debug("component_drawn event from dispatcher", e.componentId, e.kind);
+            if (!["Pin"].includes(e.kind))
                 this._restartAfterDiagramChange();
-            }, 250);
         });
 
-        DiagramState.instance.on("componentRemoved", (_) => {
-            console.debug("received componentRemoved event");
+        EventDispatcher.instance.on(Events.ComponentRedrawn, (e) => {
+            console.debug("component_redrawn event from dispatcher", e.componentId, e.kind);
+        });
+
+        EventDispatcher.instance.on(Events.ComponentMoved, (e) => {
+            console.debug("component_moved event from dispatcher", e.componentId, e.kind);
             this._restartAfterDiagramChange();
         });
 
-        DiagramState.instance.on("allComponentsRemoved", (_) => {
-            console.debug("received allComponentsRemoved event");
-            // app handles stopping visualizer
+        EventDispatcher.instance.on(Events.ComponentRemoved, (e) => {
+            console.debug("component_removed event from dispatcher", e.componentId, e.kind);
+            this._restartAfterDiagramChange();
         });
-
-        Visualizer.instance = this;
     }
 
     _restartAfterDiagramChange() {
+        console.debug("restarting via dispatcher event");
         const wasActiveWhenEventReceived = this.isActive;
 
         this.stop();

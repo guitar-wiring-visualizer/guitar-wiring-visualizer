@@ -6,6 +6,7 @@
 
 import { DiagramState } from "./diagram.js";
 import { Component, Pin } from "./coreComponents.js";
+import { EventDispatcher , Events} from "./events.js";
 
 export class Potentiometer extends Component {
 
@@ -55,7 +56,7 @@ export class Potentiometer extends Component {
         console.debug(`${this.fullName} changed rotation to ${this.rotation}`);
         this._updatePinConnections();
         this._reDrawPinConnections(componentNode);
-        DiagramState.instance.notifyNodeChanged(componentNode);
+        EventDispatcher.instance.dispatch(Events.PotRotated, this._createBaseEventArgs());
     }
 
     _createChildComponents() {
