@@ -62,7 +62,7 @@ export class DiagramState extends EventEmitter {
         }
 
         //TOD0: refactor how events are bubbled out
-        if (["DPDTOnOn", "DPDTOnOffOn", "DPDTOnOnOn", "Potentiometer", "ThreeWayToggle"].includes(node.name())) {
+        if (["DPDTOnOn", "DPDTOnOffOn", "DPDTOnOnOn", "Potentiometer", "ThreeWayToggle", "ThreeWayBlade"].includes(node.name())) {
             this._emit("switchChanged", node);
         }
     }
