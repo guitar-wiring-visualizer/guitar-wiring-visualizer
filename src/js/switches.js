@@ -104,6 +104,10 @@ export class EightPinBladeSwitch extends Switch {
         return "/img/blade-switch.svg";
     }
 
+    _getAllPins() {
+        return [this.pinA0, this.pinA1, this.pinA2, this.pinA3, this.pinB0, this.pinB1, this.pinB2, this.pinB3];
+    }
+
     _createChildComponents() {
         const pina1 = new Pin();
         this.pinIds.push(pina1.id);
@@ -174,6 +178,21 @@ export class EightPinBladeSwitch extends Switch {
         });
     }
 
+    _drawConnectedPinMarker(pinPosition, fill, parentNode) {
+        const marker = new Konva.Rect({
+            name: Switch.pinConnectionNodeName,
+            opacity: DiagramState.instance.showInternals ? .60 : 0,
+            width: 16,
+            height: 16,
+            x: pinPosition.x - 8,
+            y: pinPosition.y - 8,
+            fill: fill,
+            draggable: false,
+            perfectDrawEnable: false,
+        });
+        parentNode.add(marker);
+    }
+
     _calculateLabelDrawPosition(rootNode) {
         return { x: 0, y: -20 };
     }
@@ -241,6 +260,23 @@ export class ThreeWayBlade extends EightPinBladeSwitch {
         }
     }
 
+    _drawPinConnections(parentNode) {
+        this._drawMakersForPin(this.pinA0, "#6d87ce", parentNode);
+        this._drawMakersForPin(this.pinB0, "#cbc25c", parentNode);
+    }
+
+    _drawMakersForPin(pin, fill, parentNode){
+        if (pin.connectedPinId !== null) {
+            const pinShape = pin.findNode(parentNode);
+            const pinPos = pinShape.position();
+            this._drawConnectedPinMarker(pinPos, fill, parentNode);
+
+            const otherPin = DiagramState.instance.getComponent(pin.connectedPinId);
+            const otherPinNode = otherPin.findNode(parentNode);
+            const otherPinPos = otherPinNode.position();
+            this._drawConnectedPinMarker(otherPinPos, fill, parentNode);
+        }
+    }
 }
 
 export class ThreeWayToggle extends Switch {
