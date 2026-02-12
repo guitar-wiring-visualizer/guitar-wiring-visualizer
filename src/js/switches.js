@@ -431,7 +431,88 @@ export class ThreeWayToggle extends Switch {
     _calculateLabelDrawPosition(rootNode) {
         return { x: 25, y: 70 };
     }
+}
 
+export class FiveWayBlade extends EightPinBladeSwitch {
+    constructor(state = {}) {
+        super(state);
+        this._disconnectFunctions = [];
+    }
+
+    _getValidActuatorStates() {
+        return [0, 1, 2, 3, 4];
+    }
+
+    _flipActuatorAndSetState() {
+        this._actuatorAsc = this._actuatorAsc ?? true;
+
+        let nextState = Math.min(4,
+            Math.max(0,
+                this._actuatorAsc ? this.actuatorState + 1 : this.actuatorState - 1
+            )
+        );
+        if (nextState === 0)
+            this._actuatorAsc = true;
+        if (nextState === 4)
+            this._actuatorAsc = false;
+
+        this._setActuatorState(nextState);
+    }
+
+    _getActuatorImageURLForState() {
+        return `/img/blade-5-${this.actuatorState}.svg"`;
+    }
+
+    _connectPinsByEvents(pin1, pin2) {
+        this._disconnectFunctions.push(pin1.on(Events.VoltageChanged, (value) => {
+            //TODO: do not propagate if it came from pin2...
+            pin2.receiveVoltage({ value, fromPinId: pin1.id });
+        }));
+        this._disconnectFunctions.push(pin2.on(Events.VoltageChanged, (value) => {
+            //TODO: do not propagate if it came from pin1...
+            pin1.receiveVoltage({ value, fromPinId: pin2.id });
+        }));
+    }
+
+    _disconnectPinsByEvents() {
+        this._disconnectFunctions.forEach(f => f());
+        this._disconnectFunctions = [];
+    }
+
+    _updatePinConnections() {
+
+        this._disconnectPinsByEvents();
+
+        switch (this.actuatorState) {
+            case 0:
+                //a0 <-> a3
+                this._connectPinsByEvents(this.pinA0, this.pinA3);
+                //b0 <-> b3
+                this._connectPinsByEvents(this.pinB0, this.pinb3);
+                break;
+            case 1:
+                //a0 <-> a2 <-> a3
+                this._connectPinsByEvents(this.pinA0, this.pinA2);
+                this._connectPinsByEvents(this.pinA0, this.pinA3);
+                //b0 <-> b2 <-> b3
+                this._connectPinsByEvents(this.pinB0, this.pinB2);
+                this._connectPinsByEvents(this.pinB0, this.pinB3);
+                break;
+            case 2:
+                //a0 <-> a2
+                //b0 <-> b2
+                break;
+            case 3:
+                //a0 <-> a2 <-> a1
+                //b0 <-> b1 <-> b2
+                break;
+            case 4:
+                //a0 <-> a1
+                //b0 <-> b1
+                break;
+
+        }
+    }
 }
 
 /**
