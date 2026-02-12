@@ -464,13 +464,13 @@ export class FiveWayBlade extends EightPinBladeSwitch {
     }
 
     _connectPinsByEvents(pin1, pin2) {
-        this._disconnectFunctions.push(pin1.on(Events.VoltageChanged, (value) => {
-            //TODO: do not propagate if it came from pin2...
-            pin2.receiveVoltage({ value, fromPinId: pin1.id });
+        this._disconnectFunctions.push(pin1.on(Events.VoltageChanged, (e) => {
+            if (e.source?.fromPinId !== pin2.id)
+                pin2.receiveVoltage({ value, fromPinId: pin1.id });
         }));
-        this._disconnectFunctions.push(pin2.on(Events.VoltageChanged, (value) => {
-            //TODO: do not propagate if it came from pin1...
-            pin1.receiveVoltage({ value, fromPinId: pin2.id });
+        this._disconnectFunctions.push(pin2.on(Events.VoltageChanged, (e) => {
+            if (e.source?.fromPinId !== pin1.id)
+                pin1.receiveVoltage({ value, fromPinId: pin2.id });
         }));
     }
 

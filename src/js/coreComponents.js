@@ -138,7 +138,7 @@ export class Component extends EventEmitter {
         this.nodeAttrs = rootNode.attrs;
         this._subscribeToEvents(rootNode);
 
-        const drawEventType = this._wasRedraw ? Events.ComponentRedrawn: Events.ComponentDrawn;
+        const drawEventType = this._wasRedraw ? Events.ComponentRedrawn : Events.ComponentDrawn;
         EventDispatcher.instance.dispatch(drawEventType, this._createBaseEventArgs());
         this._wasRedraw = false;
     }
@@ -526,7 +526,7 @@ export class Pin extends Component {
             connectedPin.receiveVoltage({ value, fromWireId, fromPinId: this.id });
         }
 
-        this._emit(Events.VoltageChanged, this.voltage);
+        this._emit(Events.VoltageChanged, { currentVoltage: this.voltage, source: voltageMessage });
     }
 
     hasVoltage() {
@@ -786,14 +786,16 @@ export class TwoPinPositivePassThroughComponent extends TwoPinComponenet {
     }
 
     _setupPinConnections() {
-        this.pin1.on(Events.VoltageChanged, (value) => {
+        this.pin1.on(Events.VoltageChanged, (e) => {
+            const value = e.currentVoltage;
             console.info(`${this.fullName} received voltageChanged event with value ${value} from ${this.pin1.fullName}`);
             if (value > 0) {
                 if (!this.pin2.hasVoltage())
                     this.pin2.receiveVoltage({ fromWireId: null, value, fromPinId: this.pin1.id });
             }
         });
-        this.pin2.on(Events.VoltageChanged, (value) => {
+        this.pin2.on(Events.VoltageChanged, (e) => {
+            const value = e.currentVoltage;
             console.info(`${this.fullName} received voltageChanged event with value ${value} from ${this.pin2.fullName}`);
             if (value > 0) {
                 if (!this.pin1.hasVoltage())
