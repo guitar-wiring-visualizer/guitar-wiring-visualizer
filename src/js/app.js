@@ -5,14 +5,7 @@
  */
 
 import {
-    DiagramState,
-    TOOL_MODE_SELECT,
-    TOOL_MODE_WIRE,
-    WIRE_COLOR_BLACK,
-    WIRE_COLOR_GREEN,
-    WIRE_COLOR_YELLOW,
-    WIRE_COLOR_RED,
-    WIRE_COLOR_BLUE
+    DiagramState, ToolMode, WireColors
 } from "./diagram.js"
 import { componentClassMap, Wire, Pin, ThreeWayToggle, Potentiometer } from "./components.js";
 import { Visualizer, VISUALIZER_WIRE_LINE_NAME, VISUALIZER_SIGNAL_PATH_NAME } from "./visualizer.js";
@@ -26,13 +19,7 @@ class App {
         this.window = theWindow;
         this.document = theWindow.document;
 
-        this.wireColors = [
-            WIRE_COLOR_BLACK,
-            WIRE_COLOR_RED,
-            WIRE_COLOR_YELLOW,
-            WIRE_COLOR_GREEN,
-            WIRE_COLOR_BLUE,
-        ];
+        this.wireColors = Object.values(WireColors).map(color => color);
 
         this.serializedDiagramStateParam = "d";
         this.debugModeParam = "debug";
@@ -181,7 +168,7 @@ class App {
         this.stage.on("click tap", (e) => {
             console.debug("onevent", e);
 
-            if (DiagramState.instance.toolMode === TOOL_MODE_WIRE) {
+            if (DiagramState.instance.toolMode === ToolMode.Wire) {
                 return;
             }
 
@@ -327,13 +314,13 @@ class App {
         const defaultCursor = this.elements.diagramContainer.style.cursor;
 
         this.elements.selectToolButton.addEventListener("click", (e) => {
-            DiagramState.instance.toolMode = TOOL_MODE_SELECT;
+            DiagramState.instance.toolMode = ToolMode.Select;
             this.elements.diagramContainer.style.cursor = defaultCursor;
             this.focusStage();
         });
 
         this.elements.wireToolButton.addEventListener("click", (e) => {
-            DiagramState.instance.toolMode = TOOL_MODE_WIRE;
+            DiagramState.instance.toolMode = ToolMode.Wire;
             this.elements.diagramContainer.style.cursor = "crosshair";
             this.clearSelection();
             this.focusStage();
@@ -365,7 +352,7 @@ class App {
          */
         this.stage.on("mousedown touchstart", (e) => {
             console.debug("onevent", e);
-            if (DiagramState.instance.toolMode === TOOL_MODE_SELECT) {
+            if (DiagramState.instance.toolMode === ToolMode.Select) {
                 isPaint = false;
                 return;
             }
@@ -413,7 +400,7 @@ class App {
             // while drawing line, add points
             this.stage.on('mousemove touchmove', (moveEvent) => {
                 console.debug("onevent", moveEvent);
-                if (DiagramState.instance.toolMode === TOOL_MODE_SELECT) {
+                if (DiagramState.instance.toolMode === ToolMode.Select) {
                     isPaint = false;
                     return;
                 }

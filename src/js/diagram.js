@@ -7,16 +7,20 @@
 import { componentClassMap } from "./components.js";
 import { CompressionType, getCompressor } from "./compression.js";
 
-export const TOOL_MODE_SELECT = "select";
-export const TOOL_MODE_WIRE = "wire";
+export const ToolMode = Object.freeze({
+    Select: 0,
+    Wire: 1
+});
 
-export const WIRE_COLOR_RED = "red";
-export const WIRE_COLOR_BLACK = "black";
-export const WIRE_COLOR_GREEN = "green";
-export const WIRE_COLOR_YELLOW = "yellow";
-export const WIRE_COLOR_BLUE = "blue";
+export const WireColors = Object.freeze({
+    Black: "black",
+    Red: "red",
+    Yellow: "yellow",
+    Green: "green",
+    Blue: "blue"
+});
 
-export const WIRE_COLOR_DEFAULT = WIRE_COLOR_BLACK;
+export const WIRE_COLOR_DEFAULT = WireColors.Black;
 
 /**
  * Tracks all component instances on the diagram.
@@ -37,7 +41,7 @@ export class DiagramState {
         this.showActuators = true;
         this.showInternals = true;
         this.showLabels = true;
-        this.toolMode = TOOL_MODE_SELECT;
+        this.toolMode = ToolMode.Select;
         this.wireToolColor = WIRE_COLOR_DEFAULT;
         this.debugMode = options.debugMode || false;
 

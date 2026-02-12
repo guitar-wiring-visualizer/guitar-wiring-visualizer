@@ -4,7 +4,7 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 The Guitar Wiring Visualizer Authors
  */
 
-import { DiagramState, WIRE_COLOR_BLACK, WIRE_COLOR_BLUE, WIRE_COLOR_GREEN, WIRE_COLOR_RED, WIRE_COLOR_YELLOW } from "./diagram.js";
+import { DiagramState, WireColors } from "./diagram.js";
 import { EventDispatcher, Events} from "./events.js";
 import { Wire } from './components.js';
 

@@ -5,7 +5,7 @@
  */
 
 import { EventEmitter, EventDispatcher, Events } from "./events.js";
-import { DiagramState, TOOL_MODE_WIRE } from "./diagram.js";
+import { DiagramState, ToolMode } from "./diagram.js";
 import Geometry from "./geometry.js";
 
 /**
@@ -292,7 +292,7 @@ export class Component extends EventEmitter {
     _subscribeToEvents(componentNode) {
         componentNode.on("dragend transformend", (e) => {
             console.debug("onevent", e);
-            if (DiagramState.instance.toolMode === TOOL_MODE_WIRE) {
+            if (DiagramState.instance.toolMode === ToolMode.Wire) {
                 return;
             }
             this.state.nodeAttrs = e.target.attrs;
@@ -302,7 +302,7 @@ export class Component extends EventEmitter {
 
         componentNode.on("dragstart", (e) => {
             console.debug("onevent", e);
-            if (DiagramState.instance.toolMode === TOOL_MODE_WIRE) {
+            if (DiagramState.instance.toolMode === ToolMode.Wire) {
                 componentNode.stopDrag();
             }
         });
