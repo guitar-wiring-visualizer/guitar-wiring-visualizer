@@ -7,7 +7,7 @@
 import { Pin, Wire } from "./coreComponents.js";
 import { StratPickup, Humbucker } from "./pickups.js";
 import { MonoJack } from "./jacks.js";
-import { ThreeWayToggle, ThreeWayBlade, DPDTOnOn, DPDTOnOnOn, DPDTOnOffOn } from "./switches.js";
+import { ThreeWayToggle, ThreeWayBlade, FiveWayBlade, DPDTOnOn, DPDTOnOnOn, DPDTOnOffOn } from "./switches.js";
 import { Potentiometer } from "./pots.js";
 import { BumbleBeeCap, CeramicDiscCap, ChicletCap, MalloryMustardCap, OrangeDropCap, PolystyreneBlueCap, PolystyreneRedCap, VitaminQCap } from "./caps.js";
 import { CarbonResistor, MetalResistor } from "./resistors.js";
@@ -38,6 +38,7 @@ export const componentClassMap = {
     Potentiometer,
     ThreeWayToggle,
     ThreeWayBlade,
+    FiveWayBlade,
     DPDTOnOn,
     DPDTOnOffOn,
     DPDTOnOnOn,

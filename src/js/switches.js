@@ -178,6 +178,16 @@ export class EightPinBladeSwitch extends Switch {
         });
     }
 
+    _drawActuator(parentNode) {
+        Konva.Image.fromURL(this._getActuatorImageURLForState(), (actuatorNode) => {
+            actuatorNode.position({ x: 70, y: -30 });
+            actuatorNode.name(Switch.actuatorNodeName);
+            actuatorNode.opacity(DiagramState.instance.showActuators ? 1 : 0);
+            this._applyGlobalStyling(actuatorNode);
+            parentNode.add(actuatorNode);
+        });
+    }
+
     _drawConnectedPinMarker(pinPosition, fill, parentNode) {
         const marker = new Konva.Rect({
             name: Switch.pinConnectionNodeName,
@@ -226,16 +236,6 @@ export class ThreeWayBlade extends EightPinBladeSwitch {
         this._setActuatorState(nextState);
     }
 
-    _drawActuator(parentNode) {
-        Konva.Image.fromURL(this._getActuatorImageURLForState(), (actuatorNode) => {
-            actuatorNode.position({ x: 70, y: -30 });
-            actuatorNode.name(Switch.actuatorNodeName);
-            actuatorNode.opacity(DiagramState.instance.showActuators ? 1 : 0);
-            this._applyGlobalStyling(actuatorNode);
-            parentNode.add(actuatorNode);
-        });
-    }
-
     _getActuatorImageURLForState() {
         if (this.actuatorState === -1)
             return "/img/blade-3-up.svg"
@@ -275,6 +275,109 @@ export class ThreeWayBlade extends EightPinBladeSwitch {
             const otherPinNode = otherPin.findNode(parentNode);
             const otherPinPos = otherPinNode.position();
             this._drawConnectedPinMarker(otherPinPos, fill, parentNode);
+        }
+    }
+}
+
+export class FiveWayBlade extends EightPinBladeSwitch {
+    constructor(state = {}) {
+        super(state);
+    }
+
+    _getValidActuatorStates() {
+        return [0, 1, 2, 3, 4];
+    }
+
+    _flipActuatorAndSetState() {
+        this._actuatorAsc = this._actuatorAsc ?? true;
+
+        let nextState = Math.min(4,
+            Math.max(0,
+                this._actuatorAsc ? this.actuatorState + 1 : this.actuatorState - 1
+            )
+        );
+        if (nextState === 0)
+            this._actuatorAsc = true;
+        if (nextState === 4)
+            this._actuatorAsc = false;
+
+        this._setActuatorState(nextState);
+    }
+
+    _getActuatorImageURLForState() {
+        return `/img/blade-5-${this.actuatorState}.svg`;
+    }
+
+    _connectPinsByEvents(pin1, pin2) {
+        this._disconnectFunctions = this._disconnectFunctions ?? [];
+
+        const pin1Off = pin1.on(Events.VoltageChanged, (e) => {
+            if (e.source?.fromPinId !== pin2.id)
+                pin2.receiveVoltage({ value: e.currentVoltage, fromPinId: pin1.id });
+        });
+        this._disconnectFunctions.push(pin1Off);
+
+        const pin2Off = pin2.on(Events.VoltageChanged, (e) => {
+            if (e.source?.fromPinId !== pin1.id)
+                pin1.receiveVoltage({ value: e.currentVoltage, fromPinId: pin2.id });
+        });
+        this._disconnectFunctions.push(pin2Off);
+
+        console.debug("updated disconnect functions", this._disconnectFunctions);
+
+    }
+
+    _disconnectPinsByEvents() {
+        this._disconnectFunctions = this._disconnectFunctions ?? [];
+        console.debug("applying disconnect functions", this._disconnectFunctions);
+        this._disconnectFunctions.forEach((f, i) => {
+            console.debug("applying disconnect function", i);
+            f();
+        });
+        // clear out the list
+        this._disconnectFunctions = [];
+    }
+
+    _updatePinConnections() {
+
+        this._disconnectPinsByEvents();
+
+        switch (this.actuatorState) {
+            case 0:
+                //a0 <-> a3
+                this._connectPinsByEvents(this.pinA0, this.pinA3);
+                //b0 <-> b3
+                this._connectPinsByEvents(this.pinB0, this.pinB3);
+                break;
+            case 1:
+                //a0 <-> a2 <-> a3
+                this._connectPinsByEvents(this.pinA0, this.pinA2);
+                this._connectPinsByEvents(this.pinA2, this.pinA3);
+                //b0 <-> b2 <-> b3
+                this._connectPinsByEvents(this.pinB0, this.pinB2);
+                this._connectPinsByEvents(this.pinB2, this.pinB3);
+                break;
+            case 2:
+                //a0 <-> a2
+                this._connectPinsByEvents(this.pinA0, this.pinA2);
+                //b0 <-> b2
+                this._connectPinsByEvents(this.pinB0, this.pinB2);
+                break;
+            case 3:
+                //a0 <-> a2 <-> a1
+                this._connectPinsByEvents(this.pinA0, this.pinA2);
+                this._connectPinsByEvents(this.pinA2, this.pinA1);
+                //b0 <-> b1 <-> b2
+                this._connectPinsByEvents(this.pinB0, this.pinB1);
+                this._connectPinsByEvents(this.pinB1, this.pinB2);
+
+                break;
+            case 4:
+                //a0 <-> a1
+                this._connectPinsByEvents(this.pinA0, this.pinA1);
+                //b0 <-> b1
+                this._connectPinsByEvents(this.pinB0, this.pinB1);
+                break;
         }
     }
 }
@@ -430,88 +533,6 @@ export class ThreeWayToggle extends Switch {
 
     _calculateLabelDrawPosition(rootNode) {
         return { x: 25, y: 70 };
-    }
-}
-
-export class FiveWayBlade extends EightPinBladeSwitch {
-    constructor(state = {}) {
-        super(state);
-        this._disconnectFunctions = [];
-    }
-
-    _getValidActuatorStates() {
-        return [0, 1, 2, 3, 4];
-    }
-
-    _flipActuatorAndSetState() {
-        this._actuatorAsc = this._actuatorAsc ?? true;
-
-        let nextState = Math.min(4,
-            Math.max(0,
-                this._actuatorAsc ? this.actuatorState + 1 : this.actuatorState - 1
-            )
-        );
-        if (nextState === 0)
-            this._actuatorAsc = true;
-        if (nextState === 4)
-            this._actuatorAsc = false;
-
-        this._setActuatorState(nextState);
-    }
-
-    _getActuatorImageURLForState() {
-        return `/img/blade-5-${this.actuatorState}.svg"`;
-    }
-
-    _connectPinsByEvents(pin1, pin2) {
-        this._disconnectFunctions.push(pin1.on(Events.VoltageChanged, (e) => {
-            if (e.source?.fromPinId !== pin2.id)
-                pin2.receiveVoltage({ value, fromPinId: pin1.id });
-        }));
-        this._disconnectFunctions.push(pin2.on(Events.VoltageChanged, (e) => {
-            if (e.source?.fromPinId !== pin1.id)
-                pin1.receiveVoltage({ value, fromPinId: pin2.id });
-        }));
-    }
-
-    _disconnectPinsByEvents() {
-        this._disconnectFunctions.forEach(f => f());
-        this._disconnectFunctions = [];
-    }
-
-    _updatePinConnections() {
-
-        this._disconnectPinsByEvents();
-
-        switch (this.actuatorState) {
-            case 0:
-                //a0 <-> a3
-                this._connectPinsByEvents(this.pinA0, this.pinA3);
-                //b0 <-> b3
-                this._connectPinsByEvents(this.pinB0, this.pinb3);
-                break;
-            case 1:
-                //a0 <-> a2 <-> a3
-                this._connectPinsByEvents(this.pinA0, this.pinA2);
-                this._connectPinsByEvents(this.pinA0, this.pinA3);
-                //b0 <-> b2 <-> b3
-                this._connectPinsByEvents(this.pinB0, this.pinB2);
-                this._connectPinsByEvents(this.pinB0, this.pinB3);
-                break;
-            case 2:
-                //a0 <-> a2
-                //b0 <-> b2
-                break;
-            case 3:
-                //a0 <-> a2 <-> a1
-                //b0 <-> b1 <-> b2
-                break;
-            case 4:
-                //a0 <-> a1
-                //b0 <-> b1
-                break;
-
-        }
     }
 }
 
