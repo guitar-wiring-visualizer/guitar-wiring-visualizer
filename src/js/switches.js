@@ -104,6 +104,9 @@ export class EightPinBladeSwitch extends Switch {
         return "/img/blade-switch.svg";
     }
 
+    static get APinsMarkerColor() { return "#6d87ce"; }
+    static get BPinsMarkerColor() { return "#cbc25c"; }
+
     _getAllPins() {
         return [this.pinA0, this.pinA1, this.pinA2, this.pinA3, this.pinB0, this.pinB1, this.pinB2, this.pinB3];
     }
@@ -261,8 +264,8 @@ export class ThreeWayBlade extends EightPinBladeSwitch {
     }
 
     _drawPinConnections(parentNode) {
-        this._drawMakersForPin(this.pinA0, "#6d87ce", parentNode);
-        this._drawMakersForPin(this.pinB0, "#cbc25c", parentNode);
+        this._drawMakersForPin(this.pinA0, this.constructor.APinsMarkerColor, parentNode);
+        this._drawMakersForPin(this.pinB0, this.constructor.BPinsMarkerColor, parentNode);
     }
 
     _drawMakersForPin(pin, fill, parentNode) {
@@ -370,7 +373,6 @@ export class FiveWayBlade extends EightPinBladeSwitch {
                 //b0 <-> b1 <-> b2
                 this._connectPinsByEvents(this.pinB0, this.pinB1);
                 this._connectPinsByEvents(this.pinB1, this.pinB2);
-
                 break;
             case 4:
                 //a0 <-> a1
@@ -379,6 +381,58 @@ export class FiveWayBlade extends EightPinBladeSwitch {
                 this._connectPinsByEvents(this.pinB0, this.pinB1);
                 break;
         }
+    }
+
+    _drawPinConnections(parentNode) {
+
+        const aColor = this.constructor.APinsMarkerColor;
+        const bColor = this.constructor.BPinsMarkerColor;
+
+        this._draMarkerOnPin(this.pinA0, aColor, parentNode);
+        this._draMarkerOnPin(this.pinB0, bColor, parentNode);
+
+        switch (this.actuatorState) {
+            case 0:
+                //a0 <-> a3
+                //b0 <-> b3
+                this._draMarkerOnPin(this.pinA3, aColor, parentNode);
+                this._draMarkerOnPin(this.pinB3, bColor, parentNode);
+                break;
+            case 1:
+                //a0 <-> a2 <-> a3
+                //b0 <-> b2 <-> b3
+                this._draMarkerOnPin(this.pinA2, aColor, parentNode);
+                this._draMarkerOnPin(this.pinA3, aColor, parentNode);
+                this._draMarkerOnPin(this.pinB2, bColor, parentNode);
+                this._draMarkerOnPin(this.pinB3, bColor, parentNode);
+                break;
+            case 2:
+                //a0 <-> a2
+                //b0 <-> b2
+                this._draMarkerOnPin(this.pinA2, aColor, parentNode);
+                this._draMarkerOnPin(this.pinB2, bColor, parentNode);
+                break;
+            case 3:
+                //a0 <-> a2 <-> a1
+                //b0 <-> b1 <-> b2
+                this._draMarkerOnPin(this.pinA1, aColor, parentNode);
+                this._draMarkerOnPin(this.pinA2, aColor, parentNode);
+                this._draMarkerOnPin(this.pinB1, bColor, parentNode);
+                this._draMarkerOnPin(this.pinB2, bColor, parentNode);
+                break;
+            case 4:
+                //a0 <-> a1
+                //b0 <-> b1
+                this._draMarkerOnPin(this.pinA1, aColor, parentNode);
+                this._draMarkerOnPin(this.pinB1, bColor, parentNode);
+                break;
+        }
+    }
+
+    _draMarkerOnPin(pin, fill, parentNode) {
+        const pinShape = pin.findNode(parentNode);
+        const pinPos = pinShape.position();
+        this._drawConnectedPinMarker(pinPos, fill, parentNode);
     }
 }
 
