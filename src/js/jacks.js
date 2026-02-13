@@ -30,7 +30,8 @@ class Jack extends Component {
     }
 
     _subscribeToPinEvents() {
-        this._tipPinListenerOff = this.tipPin.on(Events.VoltageChanged, (val) => {
+        this._tipPinListenerOff = this.tipPin.on(Events.VoltageChanged, (e) => {
+            const val = e.currentVoltage;
             console.info(`**** ${this.fullName} received voltage ${val} on tip pin ****`);
         });
     }

@@ -104,6 +104,9 @@ export class EightPinBladeSwitch extends Switch {
         return "/img/blade-switch.svg";
     }
 
+    static get APinsMarkerColor() { return "#6d87ce"; }
+    static get BPinsMarkerColor() { return "#cbc25c"; }
+
     _getAllPins() {
         return [this.pinA0, this.pinA1, this.pinA2, this.pinA3, this.pinB0, this.pinB1, this.pinB2, this.pinB3];
     }
@@ -178,15 +181,27 @@ export class EightPinBladeSwitch extends Switch {
         });
     }
 
-    _drawConnectedPinMarker(pinPosition, fill, parentNode) {
+    _drawActuator(parentNode) {
+        Konva.Image.fromURL(this._getActuatorImageURLForState(), (actuatorNode) => {
+            actuatorNode.position({ x: 70, y: -30 });
+            actuatorNode.name(Switch.actuatorNodeName);
+            actuatorNode.opacity(DiagramState.instance.showActuators ? 1 : 0);
+            this._applyGlobalStyling(actuatorNode);
+            parentNode.add(actuatorNode);
+        });
+    }
+
+    _drawPinMarker(pin, fillColor, parentNode) {
+        const pinNode = pin.findNode(parentNode);
+        const pinPos = pinNode.position();
         const marker = new Konva.Rect({
             name: Switch.pinConnectionNodeName,
             opacity: DiagramState.instance.showInternals ? .60 : 0,
             width: 16,
             height: 16,
-            x: pinPosition.x - 8,
-            y: pinPosition.y - 8,
-            fill: fill,
+            x: pinPos.x - 8,
+            y: pinPos.y - 8,
+            fill: fillColor,
             draggable: false,
             perfectDrawEnable: false,
         });
@@ -226,16 +241,6 @@ export class ThreeWayBlade extends EightPinBladeSwitch {
         this._setActuatorState(nextState);
     }
 
-    _drawActuator(parentNode) {
-        Konva.Image.fromURL(this._getActuatorImageURLForState(), (actuatorNode) => {
-            actuatorNode.position({ x: 70, y: -30 });
-            actuatorNode.name(Switch.actuatorNodeName);
-            actuatorNode.opacity(DiagramState.instance.showActuators ? 1 : 0);
-            this._applyGlobalStyling(actuatorNode);
-            parentNode.add(actuatorNode);
-        });
-    }
-
     _getActuatorImageURLForState() {
         if (this.actuatorState === -1)
             return "/img/blade-3-up.svg"
@@ -261,20 +266,163 @@ export class ThreeWayBlade extends EightPinBladeSwitch {
     }
 
     _drawPinConnections(parentNode) {
-        this._drawMakersForPin(this.pinA0, "#6d87ce", parentNode);
-        this._drawMakersForPin(this.pinB0, "#cbc25c", parentNode);
+        this._drawConnectedPinMarkers(this.pinA0, this.constructor.APinsMarkerColor, parentNode);
+        this._drawConnectedPinMarkers(this.pinB0, this.constructor.BPinsMarkerColor, parentNode);
     }
 
-    _drawMakersForPin(pin, fill, parentNode) {
+    _drawConnectedPinMarkers(pin, fill, parentNode) {
         if (pin.connectedPinId !== null) {
-            const pinShape = pin.findNode(parentNode);
-            const pinPos = pinShape.position();
-            this._drawConnectedPinMarker(pinPos, fill, parentNode);
-
+            this._drawPinMarker(pin, fill, parentNode);
             const otherPin = DiagramState.instance.getComponent(pin.connectedPinId);
-            const otherPinNode = otherPin.findNode(parentNode);
-            const otherPinPos = otherPinNode.position();
-            this._drawConnectedPinMarker(otherPinPos, fill, parentNode);
+            this._drawPinMarker(otherPin, fill, parentNode);
+        }
+    }
+}
+
+export class FiveWayBlade extends EightPinBladeSwitch {
+    constructor(state = {}) {
+        super(state);
+    }
+
+    _getValidActuatorStates() {
+        return [0, 1, 2, 3, 4];
+    }
+
+    _flipActuatorAndSetState() {
+        this._actuatorAsc = this._actuatorAsc ?? true;
+
+        let nextState = Math.min(4,
+            Math.max(0,
+                this._actuatorAsc ? this.actuatorState + 1 : this.actuatorState - 1
+            )
+        );
+        if (nextState === 0)
+            this._actuatorAsc = true;
+        if (nextState === 4)
+            this._actuatorAsc = false;
+
+        this._setActuatorState(nextState);
+    }
+
+    _getActuatorImageURLForState() {
+        return `/img/blade-5-${this.actuatorState}.svg`;
+    }
+
+    _connectPinsByEvents(pin1, pin2) {
+        this._disconnectFunctions = this._disconnectFunctions ?? [];
+
+        const pin1Off = pin1.on(Events.VoltageChanged, (e) => {
+            if (e.source?.fromPinId !== pin2.id)
+                pin2.receiveVoltage({ value: e.currentVoltage, fromPinId: pin1.id });
+        });
+        this._disconnectFunctions.push(pin1Off);
+
+        const pin2Off = pin2.on(Events.VoltageChanged, (e) => {
+            if (e.source?.fromPinId !== pin1.id)
+                pin1.receiveVoltage({ value: e.currentVoltage, fromPinId: pin2.id });
+        });
+        this._disconnectFunctions.push(pin2Off);
+
+        console.debug("updated disconnect functions", this._disconnectFunctions);
+
+    }
+
+    _disconnectPinsByEvents() {
+        this._disconnectFunctions = this._disconnectFunctions ?? [];
+        console.debug("applying disconnect functions", this._disconnectFunctions);
+        this._disconnectFunctions.forEach((f, i) => {
+            console.debug("applying disconnect function", i);
+            f();
+        });
+        // clear out the list
+        this._disconnectFunctions = [];
+    }
+
+    _updatePinConnections() {
+
+        this._disconnectPinsByEvents();
+
+        switch (this.actuatorState) {
+            case 0:
+                //a0 <-> a3
+                this._connectPinsByEvents(this.pinA0, this.pinA3);
+                //b0 <-> b3
+                this._connectPinsByEvents(this.pinB0, this.pinB3);
+                break;
+            case 1:
+                //a0 <-> a2 <-> a3
+                this._connectPinsByEvents(this.pinA0, this.pinA2);
+                this._connectPinsByEvents(this.pinA2, this.pinA3);
+                //b0 <-> b2 <-> b3
+                this._connectPinsByEvents(this.pinB0, this.pinB2);
+                this._connectPinsByEvents(this.pinB2, this.pinB3);
+                break;
+            case 2:
+                //a0 <-> a2
+                this._connectPinsByEvents(this.pinA0, this.pinA2);
+                //b0 <-> b2
+                this._connectPinsByEvents(this.pinB0, this.pinB2);
+                break;
+            case 3:
+                //a0 <-> a2 <-> a1
+                this._connectPinsByEvents(this.pinA0, this.pinA2);
+                this._connectPinsByEvents(this.pinA2, this.pinA1);
+                //b0 <-> b1 <-> b2
+                this._connectPinsByEvents(this.pinB0, this.pinB1);
+                this._connectPinsByEvents(this.pinB1, this.pinB2);
+                break;
+            case 4:
+                //a0 <-> a1
+                this._connectPinsByEvents(this.pinA0, this.pinA1);
+                //b0 <-> b1
+                this._connectPinsByEvents(this.pinB0, this.pinB1);
+                break;
+        }
+    }
+
+    _drawPinConnections(parentNode) {
+
+        const aColor = this.constructor.APinsMarkerColor;
+        const bColor = this.constructor.BPinsMarkerColor;
+
+        this._drawPinMarker(this.pinA0, aColor, parentNode);
+        this._drawPinMarker(this.pinB0, bColor, parentNode);
+
+        switch (this.actuatorState) {
+            case 0:
+                //a0 <-> a3
+                //b0 <-> b3
+                this._drawPinMarker(this.pinA3, aColor, parentNode);
+                this._drawPinMarker(this.pinB3, bColor, parentNode);
+                break;
+            case 1:
+                //a0 <-> a2 <-> a3
+                //b0 <-> b2 <-> b3
+                this._drawPinMarker(this.pinA2, aColor, parentNode);
+                this._drawPinMarker(this.pinA3, aColor, parentNode);
+                this._drawPinMarker(this.pinB2, bColor, parentNode);
+                this._drawPinMarker(this.pinB3, bColor, parentNode);
+                break;
+            case 2:
+                //a0 <-> a2
+                //b0 <-> b2
+                this._drawPinMarker(this.pinA2, aColor, parentNode);
+                this._drawPinMarker(this.pinB2, bColor, parentNode);
+                break;
+            case 3:
+                //a0 <-> a2 <-> a1
+                //b0 <-> b1 <-> b2
+                this._drawPinMarker(this.pinA1, aColor, parentNode);
+                this._drawPinMarker(this.pinA2, aColor, parentNode);
+                this._drawPinMarker(this.pinB1, bColor, parentNode);
+                this._drawPinMarker(this.pinB2, bColor, parentNode);
+                break;
+            case 4:
+                //a0 <-> a1
+                //b0 <-> b1
+                this._drawPinMarker(this.pinA1, aColor, parentNode);
+                this._drawPinMarker(this.pinB1, bColor, parentNode);
+                break;
         }
     }
 }
@@ -431,7 +579,6 @@ export class ThreeWayToggle extends Switch {
     _calculateLabelDrawPosition(rootNode) {
         return { x: 25, y: 70 };
     }
-
 }
 
 /**
