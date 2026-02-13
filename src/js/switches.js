@@ -219,49 +219,49 @@ export class ThreeWayBlade extends EightPinBladeSwitch {
     }
 
     _getValidActuatorStates() {
-        return [-1, 0, 1];
+        return [0, 1, 2];
     }
 
     _flipActuatorAndSetState() {
         let nextState;
 
-        if (this.actuatorState === -1) {
-            nextState = 0;
-        } else if (this.actuatorState === 0) {
-            if (this._prevActuatorState === -1)
-                nextState = 1
+        if (this.actuatorState === 0) {
+            nextState = 1;
+        } else if (this.actuatorState === 1) {
+            if (this._prevActuatorState === 0)
+                nextState = 2
             else
-                nextState = -1
+                nextState = 0
         }
-        else if (this.actuatorState === 1) {
-            nextState = 0;
+        else if (this.actuatorState === 2) {
+            nextState = 1;
         }
 
         this._prevActuatorState = this.actuatorState;
         this._setActuatorState(nextState);
     }
 
+
     _getActuatorImageURLForState() {
-        if (this.actuatorState === -1)
-            return "/img/blade-3-up.svg"
-        else if (this.actuatorState === 0)
-            return "/img/blade-3-center.svg"
-        else if (this.actuatorState === 1)
-            return "/img/blade-3-down.svg";
+        return `/img/blade-3-${this.actuatorState}.svg`;
     }
 
     _updatePinConnections() {
         this.pinA0.disconnectFromOtherPin();
         this.pinB0.disconnectFromOtherPin();
-        if (this.actuatorState === -1) {
-            this.pinA0.connectToOtherPin(this.pinA3);
-            this.pinB0.connectToOtherPin(this.pinB3);
-        } else if (this.actuatorState === 0) {
-            this.pinA0.connectToOtherPin(this.pinA2);
-            this.pinB0.connectToOtherPin(this.pinB2);
-        } else if (this.actuatorState === 1) {
-            this.pinA0.connectToOtherPin(this.pinA1);
-            this.pinB0.connectToOtherPin(this.pinB1);
+        switch (this.actuatorState) {
+            case 0:
+                this.pinA0.connectToOtherPin(this.pinA3);
+                this.pinB0.connectToOtherPin(this.pinB3);
+                break;
+            case 1:
+                this.pinA0.connectToOtherPin(this.pinA2);
+                this.pinB0.connectToOtherPin(this.pinB2);
+                break;
+            case 2:
+                this.pinA0.connectToOtherPin(this.pinA1);
+                this.pinB0.connectToOtherPin(this.pinB1);
+                break;
         }
     }
 
@@ -324,7 +324,6 @@ export class FiveWayBlade extends EightPinBladeSwitch {
         this._disconnectFunctions.push(pin2Off);
 
         console.debug("updated disconnect functions", this._disconnectFunctions);
-
     }
 
     _disconnectPinsByEvents() {
