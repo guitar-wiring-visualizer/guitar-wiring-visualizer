@@ -191,15 +191,17 @@ export class EightPinBladeSwitch extends Switch {
         });
     }
 
-    _drawConnectedPinMarker(pinPosition, fill, parentNode) {
+    _drawPinMarker(pin, fillColor, parentNode) {
+        const pinNode = pin.findNode(parentNode);
+        const pinPos = pinNode.position();
         const marker = new Konva.Rect({
             name: Switch.pinConnectionNodeName,
             opacity: DiagramState.instance.showInternals ? .60 : 0,
             width: 16,
             height: 16,
-            x: pinPosition.x - 8,
-            y: pinPosition.y - 8,
-            fill: fill,
+            x: pinPos.x - 8,
+            y: pinPos.y - 8,
+            fill: fillColor,
             draggable: false,
             perfectDrawEnable: false,
         });
@@ -264,20 +266,15 @@ export class ThreeWayBlade extends EightPinBladeSwitch {
     }
 
     _drawPinConnections(parentNode) {
-        this._drawMakersForPin(this.pinA0, this.constructor.APinsMarkerColor, parentNode);
-        this._drawMakersForPin(this.pinB0, this.constructor.BPinsMarkerColor, parentNode);
+        this._drawConnectedPinMarkers(this.pinA0, this.constructor.APinsMarkerColor, parentNode);
+        this._drawConnectedPinMarkers(this.pinB0, this.constructor.BPinsMarkerColor, parentNode);
     }
 
-    _drawMakersForPin(pin, fill, parentNode) {
+    _drawConnectedPinMarkers(pin, fill, parentNode) {
         if (pin.connectedPinId !== null) {
-            const pinShape = pin.findNode(parentNode);
-            const pinPos = pinShape.position();
-            this._drawConnectedPinMarker(pinPos, fill, parentNode);
-
+            this._drawPinMarker(pin, fill, parentNode);
             const otherPin = DiagramState.instance.getComponent(pin.connectedPinId);
-            const otherPinNode = otherPin.findNode(parentNode);
-            const otherPinPos = otherPinNode.position();
-            this._drawConnectedPinMarker(otherPinPos, fill, parentNode);
+            this._drawPinMarker(otherPin, fill, parentNode);
         }
     }
 }
@@ -388,51 +385,45 @@ export class FiveWayBlade extends EightPinBladeSwitch {
         const aColor = this.constructor.APinsMarkerColor;
         const bColor = this.constructor.BPinsMarkerColor;
 
-        this._draMarkerOnPin(this.pinA0, aColor, parentNode);
-        this._draMarkerOnPin(this.pinB0, bColor, parentNode);
+        this._drawPinMarker(this.pinA0, aColor, parentNode);
+        this._drawPinMarker(this.pinB0, bColor, parentNode);
 
         switch (this.actuatorState) {
             case 0:
                 //a0 <-> a3
                 //b0 <-> b3
-                this._draMarkerOnPin(this.pinA3, aColor, parentNode);
-                this._draMarkerOnPin(this.pinB3, bColor, parentNode);
+                this._drawPinMarker(this.pinA3, aColor, parentNode);
+                this._drawPinMarker(this.pinB3, bColor, parentNode);
                 break;
             case 1:
                 //a0 <-> a2 <-> a3
                 //b0 <-> b2 <-> b3
-                this._draMarkerOnPin(this.pinA2, aColor, parentNode);
-                this._draMarkerOnPin(this.pinA3, aColor, parentNode);
-                this._draMarkerOnPin(this.pinB2, bColor, parentNode);
-                this._draMarkerOnPin(this.pinB3, bColor, parentNode);
+                this._drawPinMarker(this.pinA2, aColor, parentNode);
+                this._drawPinMarker(this.pinA3, aColor, parentNode);
+                this._drawPinMarker(this.pinB2, bColor, parentNode);
+                this._drawPinMarker(this.pinB3, bColor, parentNode);
                 break;
             case 2:
                 //a0 <-> a2
                 //b0 <-> b2
-                this._draMarkerOnPin(this.pinA2, aColor, parentNode);
-                this._draMarkerOnPin(this.pinB2, bColor, parentNode);
+                this._drawPinMarker(this.pinA2, aColor, parentNode);
+                this._drawPinMarker(this.pinB2, bColor, parentNode);
                 break;
             case 3:
                 //a0 <-> a2 <-> a1
                 //b0 <-> b1 <-> b2
-                this._draMarkerOnPin(this.pinA1, aColor, parentNode);
-                this._draMarkerOnPin(this.pinA2, aColor, parentNode);
-                this._draMarkerOnPin(this.pinB1, bColor, parentNode);
-                this._draMarkerOnPin(this.pinB2, bColor, parentNode);
+                this._drawPinMarker(this.pinA1, aColor, parentNode);
+                this._drawPinMarker(this.pinA2, aColor, parentNode);
+                this._drawPinMarker(this.pinB1, bColor, parentNode);
+                this._drawPinMarker(this.pinB2, bColor, parentNode);
                 break;
             case 4:
                 //a0 <-> a1
                 //b0 <-> b1
-                this._draMarkerOnPin(this.pinA1, aColor, parentNode);
-                this._draMarkerOnPin(this.pinB1, bColor, parentNode);
+                this._drawPinMarker(this.pinA1, aColor, parentNode);
+                this._drawPinMarker(this.pinB1, bColor, parentNode);
                 break;
         }
-    }
-
-    _draMarkerOnPin(pin, fill, parentNode) {
-        const pinShape = pin.findNode(parentNode);
-        const pinPos = pinShape.position();
-        this._drawConnectedPinMarker(pinPos, fill, parentNode);
     }
 }
 
