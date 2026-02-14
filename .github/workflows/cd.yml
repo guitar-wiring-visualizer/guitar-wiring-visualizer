@@ -48,7 +48,7 @@ jobs:
           output: dist/manual/index.html
           corners: false
           dark-mode: false
-          markdown-style-theme: light
+          markdown-style-theme: light-mode
           title: "User Manual"
 
       # create the samples page from markdown
@@ -59,7 +59,7 @@ jobs:
           output: dist/samples/index.html
           corners: false
           dark-mode: false
-          markdown-style-theme: light
+          markdown-style-theme: light-mode
           title: "Sample Diagrams"
 
       - name: CommitDist
