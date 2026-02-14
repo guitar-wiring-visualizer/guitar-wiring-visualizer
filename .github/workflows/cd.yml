@@ -46,8 +46,9 @@ jobs:
         with:
           source: doc/manual.md
           output: dist/manual/index.html
-          github-corners: false
+          corners: false
           dark-mode: false
+          markdown-style-theme: light
           title: "User Manual"
 
       # create the samples page from markdown
@@ -56,8 +57,9 @@ jobs:
         with:
           source: doc/samples.md
           output: dist/samples/index.html
-          github-corners: false
+          corners: false
           dark-mode: false
+          markdown-style-theme: light
           title: "Sample Diagrams"
 
       - name: CommitDist
