@@ -110,7 +110,7 @@ To close the Properties drawer, click out of it, click the "X", or hit `Escape`.
 
 To save a link to the the diagram, click the "Save" button.  This will update the URL of the browser with the state of the diagram.  You may copy the current window URL and send to a friend!
 
-Click the "Copy URL" button to easliy copy the link to the currently saved diagram to your clipboard.
+Click the "Copy URL" button to easily copy the link to the currently saved diagram to your clipboard.
 
 #### Load
 
@@ -133,9 +133,11 @@ Use the visibility toggles to show or hide component elements.
 This means any electrical component such as a guitar pickup, potentiometer (pot), switch, jack, capacitor, resistor, etc.
 
 ### Pins
+
 Every component has one or more Pins which are the points at which it can be connected to the circuit.  These represent the lugs of a pot, or the solder tabs on a jack, etc.
 
 ### Wires
+
 Pins must be connected to each other using Wires.  This applies to components that in real life have their own leads (e.g. resistors) that can be directly soldered to the lugs/pins of a component.  However, for consistency of function the app needs to use wires in place of leads.  (If this doesn't work for you, please submit an issue.)
 
 ### Visualization
